@@ -1,0 +1,25 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "Ninja",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "build/ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Ninja-Debug",
+            "configurePreset": "Ninja",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Ninja-Release",
+            "configurePreset": "Ninja",
+            "configuration": "Release"
+        }
+    ]
+}
