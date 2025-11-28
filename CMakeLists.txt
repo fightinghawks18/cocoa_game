@@ -7,14 +7,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
 include(FetchContent)
 
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git"
-    GIT_TAG release-3.2.26
-)
-FetchContent_MakeAvailable(SDL3)
-
 find_package(Vulkan REQUIRED)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+
+find_package(SDL3 CONFIG REQUIRED)
 
 add_executable(Cocoa
     main.cpp
@@ -22,5 +18,15 @@ add_executable(Cocoa
 
 target_link_libraries(Cocoa
     PRIVATE Vulkan::Vulkan
+    PRIVATE GPUOpen::VulkanMemoryAllocator
     PRIVATE SDL3::SDL3
 )
+
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+    add_custom_target(Copy_Compiled_Commands ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+        ${CMAKE_CURRENT_BINARY_DIR}/../compile_commands.json
+        COMMENT "Moving compiled commands from ${CMAKE_CURRENT_BINARY_DIR} to ${CMAKE_CURRENT_BINARY_DIR}/../"
+    )
+endif()
