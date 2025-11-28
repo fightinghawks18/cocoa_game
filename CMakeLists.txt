@@ -13,7 +13,13 @@ find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 
 add_executable(Cocoa
-    main.cpp
+    src/main.cpp
+    
+    src/vulkan/device.cpp
+    src/vulkan/encoder.cpp
+    src/vulkan/surface.cpp
+    src/vulkan/swapchain.cpp
+    src/vulkan/vma.cpp
 )
 
 target_link_libraries(Cocoa
