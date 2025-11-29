@@ -17,245 +17,238 @@
 #include "macros.h"
 
 int main() {
-    try {
-        if (!SDL_Init(SDL_INIT_VIDEO)) {
-            PANIC("Failed to start SDL3");
-        }
-
-        SDL_Window* window = SDL_CreateWindow("Cocoa", 800, 600, SDL_WINDOW_VULKAN);
-
-        Cocoa::Vulkan::DeviceDesc desc = {
-            .window = window,
-            .desiredQueues = {
-                Cocoa::Vulkan::GPUQueueType::Graphics,
-                Cocoa::Vulkan::GPUQueueType::Transfer,
-                Cocoa::Vulkan::GPUQueueType::Compute
-            },
-            .powerPreference = Cocoa::Vulkan::GPUPowerPreference::HighPerformance,
-        };
-
-        auto renderDevice = std::make_unique<Cocoa::Vulkan::Device>(desc);
-        auto surface = std::make_unique<Cocoa::Vulkan::Surface>(renderDevice.get(), window);
-
-        Cocoa::Vulkan::SwapchainDesc swapchainDesc = {
-            .surface = surface.get()
-        };
-        auto swapchain = std::make_unique<Cocoa::Vulkan::Swapchain>(renderDevice.get(), swapchainDesc);
-
-        auto swapchainFormat = swapchain->GetFormat();
-        vk::Format depthFormat = vk::Format::eD32Sfloat;
-
-        auto currentDirectory = std::filesystem::current_path();
-        auto vertexShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.vert.spv").string());
-        vk::ShaderModuleCreateInfo vertexShaderDescriptor;
-        vertexShaderDescriptor.setCode(vertexShaderCode);
-
-        auto vertexShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), vertexShaderDescriptor);
-
-        auto pixelShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.frag.spv").string());
-        vk::ShaderModuleCreateInfo pixelShaderDescriptor;
-        pixelShaderDescriptor.setCode(pixelShaderCode);
-        auto pixelShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), pixelShaderDescriptor);
-
-        vk::PipelineLayoutCreateInfo pipelineLayoutDescriptor;
-        pipelineLayoutDescriptor.setSetLayouts(nullptr)
-                    .setPushConstantRanges(nullptr);
-
-        auto pipelineLayout = std::make_unique<Cocoa::Vulkan::PipelineLayout>(renderDevice.get(), pipelineLayoutDescriptor);
-
-        std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
-            vk::PipelineShaderStageCreateInfo(
-                {},
-                vk::ShaderStageFlagBits::eVertex,
-                vertexShader->Get(),
-                "main"
-            ),
-            vk::PipelineShaderStageCreateInfo(
-                {},
-                vk::ShaderStageFlagBits::eFragment,
-                pixelShader->Get(),
-                "main"
-            )
-        };
-
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
-            {},
-            0, nullptr,
-            0, nullptr
-        );
-
-        vk::PipelineInputAssemblyStateCreateInfo inputAssembly(
-            {},
-            vk::PrimitiveTopology::eTriangleList,
-            VK_FALSE
-        );
-
-        vk::PipelineViewportStateCreateInfo viewportState(
-            {},
-            1, nullptr,
-            1, nullptr
-        );
-
-        vk::PipelineRasterizationStateCreateInfo rasterizer(
-            {},
-            VK_FALSE,  
-            VK_FALSE,
-            vk::PolygonMode::eFill,
-            vk::CullModeFlagBits::eNone,
-            vk::FrontFace::eCounterClockwise,
-            VK_FALSE,
-            0.0f, 0.0f, 0.0f,
-            1.0f  
-        );
-
-        vk::PipelineMultisampleStateCreateInfo multisampling(
-            {},
-            vk::SampleCountFlagBits::e1,
-            VK_FALSE,
-            1.0f,
-            nullptr,
-            VK_FALSE,
-            VK_FALSE
-        );
-
-        vk::PipelineColorBlendAttachmentState colorBlendAttachment(
-            VK_FALSE,
-            vk::BlendFactor::eOne,
-            vk::BlendFactor::eZero,
-            vk::BlendOp::eAdd,
-            vk::BlendFactor::eOne,
-            vk::BlendFactor::eZero,
-            vk::BlendOp::eAdd,
-            vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | 
-            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
-        );
-
-        vk::PipelineColorBlendStateCreateInfo colorBlending(
-            {},
-            VK_FALSE,
-            vk::LogicOp::eCopy,
-            1, &colorBlendAttachment,
-            {0.0f, 0.0f, 0.0f, 0.0f} 
-        );
-
-        std::vector<vk::DynamicState> dynamicStates = {
-            vk::DynamicState::eViewport,
-            vk::DynamicState::eScissor
-        };
-
-        vk::PipelineDynamicStateCreateInfo dynamicState(
-            {},
-            dynamicStates.size(),
-            dynamicStates.data()
-        );
-
-        vk::PipelineDepthStencilStateCreateInfo depthStencil(
-            {},
-            VK_TRUE,
-            VK_TRUE,
-            vk::CompareOp::eLess,
-            VK_FALSE,
-            VK_FALSE,
-            {},
-            {},
-            0.0f, 1.0f
-        );
-
-
-        vk::PipelineRenderingCreateInfo pipelineRenderingInfo(
-            0,
-            1,
-            &swapchainFormat,
-            depthFormat,
-            vk::Format::eUndefined
-        );
-
-        vk::GraphicsPipelineCreateInfo renderPipelineDescriptor{};
-        renderPipelineDescriptor.setStages(shaderStages)
-                    .setPNext(&pipelineRenderingInfo)
-                    .setPVertexInputState(&vertexInputInfo)
-                    .setPInputAssemblyState(&inputAssembly)
-                    .setPTessellationState(nullptr)
-                    .setPViewportState(&viewportState)
-                    .setPRasterizationState(&rasterizer)
-                    .setPMultisampleState(&multisampling)
-                    .setPDepthStencilState(&depthStencil)
-                    .setPColorBlendState(&colorBlending)
-                    .setPDynamicState(&dynamicState)
-                    .setLayout(pipelineLayout->Get())
-                    .setRenderPass(nullptr)
-                    .setSubpass(0);
-
-        auto renderPipeline = std::make_unique<Cocoa::Vulkan::RenderPipeline>(renderDevice.get(), renderPipelineDescriptor);
-
-        bool gameRun = true;
-        while (gameRun) {
-            SDL_Event e;
-            while (SDL_PollEvent(&e)) {
-                if (e.type == SDL_EVENT_QUIT) {
-                    gameRun = false;
-                    break;
-                }
-            }
-
-            auto encoder = renderDevice->Encode(swapchain.get());
-
-             vk::ClearColorValue clearColor;
-            clearColor.setFloat32({0.6f, 0.21f, 0.36f, 1.0f});
-
-            vk::RenderingAttachmentInfo renderingAttachmentDescriptor;
-            renderingAttachmentDescriptor.setClearValue(clearColor)
-                        .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-                        .setLoadOp(vk::AttachmentLoadOp::eClear)
-                        .setStoreOp(vk::AttachmentStoreOp::eStore)
-                        .setImageView(swapchain->GetCurrentBackBuffer().imageView);
-
-            vk::RenderingInfo renderingDescriptor;
-            renderingDescriptor.setColorAttachments(renderingAttachmentDescriptor)
-                        .setRenderArea({{0, 0}, {800, 600}})
-                        .setViewMask(0)
-                        .setLayerCount(1);
-
-            vk::Extent2D extent;
-            extent.setWidth(800)
-                    .setHeight(600);
-
-            vk::Rect2D scissor;
-            scissor.setOffset({0, 0})
-                    .setExtent(extent);
-            vk::Viewport viewport;
-            viewport.setWidth(extent.width)
-                    .setHeight(extent.height)
-                    .setMaxDepth(1)
-                    .setMinDepth(0)
-                    .setX(0)
-                    .setY(0);
-
-            encoder->StartRendering(renderingDescriptor);
-            encoder->SetRenderPipeline(renderPipeline.get());
-            encoder->SetViewport(viewport);
-            encoder->SetScissor(scissor);
-            encoder->Draw(3, 1, 0, 0);
-            encoder->EndRendering();
-
-            renderDevice->EndEncoding(std::move(encoder));
-        }
-
-        std::cout << "Hello World!" << std::endl;
-
-        renderPipeline.reset();
-        pipelineLayout.reset();
-
-        vertexShader.reset();
-        pixelShader.reset();
-
-        swapchain.reset();
-        surface.reset();
-        renderDevice.reset();
-        SDL_Quit();
-        return 0;
-    } catch (std::exception& e) {
-        std::cerr << "Caught std::exception! " << e.what() << std::endl;
-        return -1;
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        PANIC("Failed to start SDL3");
     }
+
+    SDL_Window* window = SDL_CreateWindow("Cocoa", 800, 600, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+
+    Cocoa::Vulkan::DeviceDesc desc = {
+        .window = window,
+        .desiredQueues = {
+            Cocoa::Vulkan::GPUQueueType::Graphics,
+            Cocoa::Vulkan::GPUQueueType::Transfer,
+            Cocoa::Vulkan::GPUQueueType::Compute
+        },
+        .powerPreference = Cocoa::Vulkan::GPUPowerPreference::HighPerformance,
+    };
+    
+    auto renderDevice = std::make_unique<Cocoa::Vulkan::Device>(desc);
+    auto surface = std::make_unique<Cocoa::Vulkan::Surface>(renderDevice.get(), window);
+    
+    Cocoa::Vulkan::SwapchainDesc swapchainDesc = {
+        .surface = surface.get()
+    };
+    auto swapchain = std::make_unique<Cocoa::Vulkan::Swapchain>(renderDevice.get(), swapchainDesc);
+
+    auto swapchainFormat = swapchain->GetFormat();
+    vk::Format depthFormat = vk::Format::eD32Sfloat;
+
+    auto currentDirectory = std::filesystem::current_path();
+    auto vertexShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.vert.spv").string());
+    vk::ShaderModuleCreateInfo vertexShaderDescriptor;
+    vertexShaderDescriptor.setCode(vertexShaderCode);
+
+    auto vertexShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), vertexShaderDescriptor);
+
+    auto pixelShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.frag.spv").string());
+    vk::ShaderModuleCreateInfo pixelShaderDescriptor;
+    pixelShaderDescriptor.setCode(pixelShaderCode);
+    auto pixelShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), pixelShaderDescriptor);
+
+    vk::PipelineLayoutCreateInfo pipelineLayoutDescriptor;
+    pipelineLayoutDescriptor.setSetLayouts(nullptr)
+                .setPushConstantRanges(nullptr);
+
+    auto pipelineLayout = std::make_unique<Cocoa::Vulkan::PipelineLayout>(renderDevice.get(), pipelineLayoutDescriptor);
+
+    std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
+        vk::PipelineShaderStageCreateInfo(
+            {},
+            vk::ShaderStageFlagBits::eVertex,
+            vertexShader->Get(),
+            "main"
+        ),
+        vk::PipelineShaderStageCreateInfo(
+            {},
+            vk::ShaderStageFlagBits::eFragment,
+            pixelShader->Get(),
+            "main"
+        )
+    };
+
+    vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
+        {},
+        0, nullptr,
+        0, nullptr
+    );
+
+    vk::PipelineInputAssemblyStateCreateInfo inputAssembly(
+        {},
+        vk::PrimitiveTopology::eTriangleList,
+        VK_FALSE
+    );
+
+    vk::PipelineViewportStateCreateInfo viewportState(
+        {},
+        1, nullptr,
+        1, nullptr
+    );
+
+    vk::PipelineRasterizationStateCreateInfo rasterizer(
+        {},
+        VK_FALSE,  
+        VK_FALSE,
+        vk::PolygonMode::eFill,
+        vk::CullModeFlagBits::eNone,
+        vk::FrontFace::eCounterClockwise,
+        VK_FALSE,
+        0.0f, 0.0f, 0.0f,
+        1.0f  
+    );
+
+    vk::PipelineMultisampleStateCreateInfo multisampling(
+        {},
+        vk::SampleCountFlagBits::e1,
+        VK_FALSE,
+        1.0f,
+        nullptr,
+        VK_FALSE,
+        VK_FALSE
+    );
+
+    vk::PipelineColorBlendAttachmentState colorBlendAttachment(
+        VK_FALSE,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | 
+        vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+    );
+
+    vk::PipelineColorBlendStateCreateInfo colorBlending(
+        {},
+        VK_FALSE,
+        vk::LogicOp::eCopy,
+        1, &colorBlendAttachment,
+        {0.0f, 0.0f, 0.0f, 0.0f} 
+    );
+
+    std::vector<vk::DynamicState> dynamicStates = {
+        vk::DynamicState::eViewport,
+        vk::DynamicState::eScissor
+    };
+
+    vk::PipelineDynamicStateCreateInfo dynamicState(
+        {},
+        dynamicStates.size(),
+        dynamicStates.data()
+    );
+
+    vk::PipelineDepthStencilStateCreateInfo depthStencil(
+        {},
+        VK_TRUE,
+        VK_TRUE,
+        vk::CompareOp::eLess,
+        VK_FALSE,
+        VK_FALSE,
+        {},
+        {},
+        0.0f, 1.0f
+    );
+
+
+    vk::PipelineRenderingCreateInfo pipelineRenderingInfo(
+        0,
+        1,
+        &swapchainFormat,
+        depthFormat,
+        vk::Format::eUndefined
+    );
+
+    vk::GraphicsPipelineCreateInfo renderPipelineDescriptor{};
+    renderPipelineDescriptor.setStages(shaderStages)
+                .setPNext(&pipelineRenderingInfo)
+                .setPVertexInputState(&vertexInputInfo)
+                .setPInputAssemblyState(&inputAssembly)
+                .setPTessellationState(nullptr)
+                .setPViewportState(&viewportState)
+                .setPRasterizationState(&rasterizer)
+                .setPMultisampleState(&multisampling)
+                .setPDepthStencilState(&depthStencil)
+                .setPColorBlendState(&colorBlending)
+                .setPDynamicState(&dynamicState)
+                .setLayout(pipelineLayout->Get())
+                .setRenderPass(nullptr)
+                .setSubpass(0);
+
+    auto renderPipeline = std::make_unique<Cocoa::Vulkan::RenderPipeline>(renderDevice.get(), renderPipelineDescriptor);
+
+    bool gameRun = true;
+    while (gameRun) {
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_EVENT_QUIT) {
+                gameRun = false;
+                break;
+            }
+        }
+
+        auto encoder = renderDevice->Encode(swapchain.get());
+
+         vk::ClearColorValue clearColor;
+        clearColor.setFloat32({0.6f, 0.21f, 0.36f, 1.0f});
+
+        vk::RenderingAttachmentInfo renderingAttachmentDescriptor;
+        renderingAttachmentDescriptor.setClearValue(clearColor)
+                    .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
+                    .setLoadOp(vk::AttachmentLoadOp::eClear)
+                    .setStoreOp(vk::AttachmentStoreOp::eStore)
+                    .setImageView(swapchain->GetCurrentBackBuffer().imageView);
+        
+        auto swapchainExtent = swapchain->GetExtent();
+        
+        vk::RenderingInfo renderingDescriptor;
+        renderingDescriptor.setColorAttachments(renderingAttachmentDescriptor)
+                    .setRenderArea({{0, 0}, swapchainExtent})
+                    .setViewMask(0)
+                    .setLayerCount(1);
+
+        vk::Rect2D scissor;
+        scissor.setOffset({0, 0})
+                .setExtent(swapchainExtent);
+        vk::Viewport viewport;
+        viewport.setWidth(swapchainExtent.width)
+                .setHeight(swapchainExtent.height)
+                .setMaxDepth(1)
+                .setMinDepth(0)
+                .setX(0)
+                .setY(0);
+
+        encoder->StartRendering(renderingDescriptor);
+        encoder->SetRenderPipeline(renderPipeline.get());
+        encoder->SetViewport(viewport);
+        encoder->SetScissor(scissor);
+        encoder->Draw(3, 1, 0, 0);
+        encoder->EndRendering();
+
+        renderDevice->EndEncoding(std::move(encoder));
+    }
+
+    std::cout << "Hello World!" << std::endl;
+    
+    renderPipeline.reset();
+    pipelineLayout.reset();
+
+    vertexShader.reset();
+    pixelShader.reset();
+
+    swapchain.reset();
+    surface.reset();
+    renderDevice.reset();
+    SDL_Quit();
+    return 0;
 }

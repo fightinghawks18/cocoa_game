@@ -18,6 +18,7 @@ namespace Cocoa::Vulkan {
 
         _renderSemaphores.clear();
         _imageSemaphores.clear();
+        _fences.clear();
 
         _swapchainImageViews.clear();
         _swapchain.reset();
@@ -49,7 +50,10 @@ namespace Cocoa::Vulkan {
                     .setSwapchains({_swapchain.get()})
                     .setWaitSemaphores({_renderSemaphores[_frame].get()});
         vk::Result presentResult = _device->GetQueue(GPUQueueType::Graphics)->queue.presentKHR(presentDescriptor);
-        if (presentResult != vk::Result::eSuccess) {
+        if (presentResult == vk::Result::eSuboptimalKHR || presentResult == vk::Result::eErrorOutOfDateKHR) {
+            Resize();
+            return;
+        } else if (presentResult != vk::Result::eSuccess) {
             PANIC("Failed to present!");
         }
 
@@ -64,7 +68,10 @@ namespace Cocoa::Vulkan {
         _device->GetDevice().resetFences(_fences[_frame].get());
 
         vk::Result getNextSwapchainImageIndex = _device->GetDevice().acquireNextImageKHR(_swapchain.get(), UINT64_MAX, _imageSemaphores[_frame].get(), nullptr, &_imageIndex);
-        if (getNextSwapchainImageIndex != vk::Result::eSuccess) {
+        if (getNextSwapchainImageIndex == vk::Result::eSuboptimalKHR || getNextSwapchainImageIndex == vk::Result::eErrorOutOfDateKHR) {
+            Resize();
+            return GetNextBackBuffer();
+        } else if (getNextSwapchainImageIndex != vk::Result::eSuccess) {
             PANIC("Failed to get next swapchain image index!");
         }
         
@@ -93,9 +100,15 @@ namespace Cocoa::Vulkan {
             }
         }
 
+        auto capabilities = _device->GetGPU().getSurfaceCapabilitiesKHR(_surface->Get());
+        vk::Extent2D extent = {
+            capabilities.currentExtent.width, 
+            capabilities.currentExtent.height
+        };
+
         vk::SwapchainCreateInfoKHR swapchainDescriptor{};
         swapchainDescriptor.setClipped(true)
-                        .setImageExtent({800, 600})
+                        .setImageExtent(extent)
                         .setImageFormat(chosenFormat.format)
                         .setImageColorSpace(chosenFormat.colorSpace)
                         .setImageSharingMode(vk::SharingMode::eExclusive)
@@ -114,6 +127,8 @@ namespace Cocoa::Vulkan {
 
         _swapchain = _device->GetDevice().createSwapchainKHRUnique(swapchainDescriptor);
         _swapchainFormat = chosenFormat.format;
+        _swapchainExtent = extent;
+
         oldSwapchain.reset();
 
         _swapchainImages = _device->GetDevice().getSwapchainImagesKHR(_swapchain.get());
@@ -157,5 +172,20 @@ namespace Cocoa::Vulkan {
             _imageSemaphores.push_back(_device->GetDevice().createSemaphoreUnique(semaphoreDescriptor));
             _renderSemaphores.push_back(_device->GetDevice().createSemaphoreUnique(semaphoreDescriptor));
         }
+    }
+
+    void Swapchain::Resize() {
+        _device->GetDevice().waitIdle();
+
+        _renderSemaphores.clear();
+        _imageSemaphores.clear();
+        _fences.clear();
+        _swapchainImageViews.clear();
+
+        CreateSwapchain();
+        CreateSemaphores();
+        CreateFences();
+
+        PUSH_INFO("Resized swapchain!");
     }
 }
