@@ -17,8 +17,25 @@
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
 
                 "CMAKE_CXX_FLAGS": "-Wshadow -Wpedantic -Wall",
-                "CMAKE_CXX_FLAGS_DEBUG": "-g3",
-                "CMAKE_CXX_FLAGS_RELEASE": "-O3"
+                "CMAKE_CXX_FLAGS_DEBUG": "-g3 -DDEBUG",
+                "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+                "CMAKE_EXE_LINKER_FLAGS": "-static-libgcc -static-libstdc++ -Wl,--allow-multiple-definition"
+            }
+        },
+
+        {
+            "name": "VS17",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "build/vs17",
+            "cacheVariables": {
+                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "OFF",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_CXX_FLAGS": "/Zc:preprocessor",
+                "CMAKE_CXX_FLAGS_DEBUG": "/RTC1 /W4"
             }
         }
     ],
@@ -31,6 +48,17 @@
         {
             "name": "Ninja-Release",
             "configurePreset": "Ninja",
+            "configuration": "Release"
+        },
+
+        {
+            "name": "VS17-Debug",
+            "configurePreset": "VS17",
+            "configuration": "Debug"
+        },
+        {
+            "name": "VS17-Release",
+            "configurePreset": "VS17",
             "configuration": "Release"
         }
     ]

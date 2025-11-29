@@ -24,12 +24,14 @@ namespace Cocoa::Vulkan {
 
         [[nodiscard]] SwapchainBackBuffer GetNextBackBuffer();
         [[nodiscard]] SwapchainBackBuffer GetCurrentBackBuffer();
+        [[nodiscard]] vk::Format GetFormat() { return _swapchainFormat; }
         [[nodiscard]] vk::SwapchainKHR Get() { return _swapchain.get(); }
     private:
         Device* _device;
         Surface* _surface;
 
         vk::UniqueSwapchainKHR _swapchain;
+        vk::Format _swapchainFormat;
         std::vector<vk::Image> _swapchainImages;
         std::vector<vk::UniqueImageView> _swapchainImageViews;
         uint32_t _imageIndex;

@@ -7,6 +7,7 @@
 
 #include <SDL3/SDL_vulkan.h>
 
+#include "../macros.h"
 namespace Cocoa::Vulkan {
     Device::Device(DeviceDesc desc) {
         CreateInstance();
@@ -41,13 +42,13 @@ namespace Cocoa::Vulkan {
         };
         auto encoder = std::make_unique<Encoder>(desc);
 
-        vk::ImageSubresourceRange toColorSubresourceRange;
+        vk::ImageSubresourceRange toColorSubresourceRange{};
         toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
                     .setBaseArrayLayer(0)
                     .setLayerCount(1)
                     .setBaseMipLevel(0)
                     .setLevelCount(1);
-        vk::ImageMemoryBarrier2 toColor;
+        vk::ImageMemoryBarrier2 toColor{};
         toColor.setImage(backBuffer.image)
                     .setSrcStageMask(vk::PipelineStageFlagBits2::eNone)
                     .setSrcAccessMask(vk::AccessFlagBits2::eNone)
@@ -56,7 +57,7 @@ namespace Cocoa::Vulkan {
                     .setOldLayout(vk::ImageLayout::eUndefined)
                     .setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
                     .setSubresourceRange(toColorSubresourceRange);
-        vk::DependencyInfo dependencyDescriptor;
+        vk::DependencyInfo dependencyDescriptor{};
         dependencyDescriptor.setImageMemoryBarriers(toColor);
         encoder->GetCommandBuffer().pipelineBarrier2(dependencyDescriptor);
 
@@ -68,13 +69,13 @@ namespace Cocoa::Vulkan {
         auto commandBuffer = encoder->GetCommandBuffer();
         auto backBuffer = swapchain->GetCurrentBackBuffer();
 
-        vk::ImageSubresourceRange toColorSubresourceRange;
+        vk::ImageSubresourceRange toColorSubresourceRange{};
         toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
                     .setBaseArrayLayer(0)
                     .setLayerCount(1)
                     .setBaseMipLevel(0)
                     .setLevelCount(1);
-        vk::ImageMemoryBarrier2 toPresent;
+        vk::ImageMemoryBarrier2 toPresent{};
         toPresent.setImage(backBuffer.image)
                     .setSrcStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
                     .setSrcAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
@@ -101,7 +102,7 @@ namespace Cocoa::Vulkan {
     } 
 
     void Device::CreateInstance() {
-        vk::ApplicationInfo appDescriptor;
+        vk::ApplicationInfo appDescriptor{};
         appDescriptor.setApplicationVersion(VK_MAKE_API_VERSION(0, 1, 0, 0))
                     .setPApplicationName("Cocoa")
                     .setEngineVersion(VK_MAKE_API_VERSION(0, 1, 0, 0))
@@ -126,7 +127,7 @@ namespace Cocoa::Vulkan {
             "VK_LAYER_KHRONOS_validation",
         };
 
-        vk::InstanceCreateInfo instanceDescriptor;
+        vk::InstanceCreateInfo instanceDescriptor{};
         instanceDescriptor.setPApplicationInfo(&appDescriptor)
                         .setPEnabledExtensionNames(extensions)
                         .setPEnabledLayerNames(layers)
@@ -286,11 +287,11 @@ namespace Cocoa::Vulkan {
             "VK_KHR_synchronization2"
         };
 
-        vk::PhysicalDeviceVulkan13Features vulkan13Features;
+        vk::PhysicalDeviceVulkan13Features vulkan13Features{};
         vulkan13Features.setDynamicRendering(true)
                         .setSynchronization2(true);
 
-        vk::DeviceCreateInfo deviceDescriptor;
+        vk::DeviceCreateInfo deviceDescriptor{};
         deviceDescriptor.setPNext(&vulkan13Features)
                         .setPEnabledExtensionNames(deviceExtensions)
                         .setQueueCreateInfos(deviceQueueDescriptors);
@@ -318,19 +319,19 @@ namespace Cocoa::Vulkan {
 
         VkResult createAllocator = vmaCreateAllocator(&vmaAllocatorDescriptor, &_allocator);
         if (createAllocator != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create allocator");
+            PANIC("Failed to create device");
         }
     }
 
     void Device::CreateCommandPool() {
-        vk::CommandPoolCreateInfo commandPoolDescriptor;
+        vk::CommandPoolCreateInfo commandPoolDescriptor{};
         commandPoolDescriptor.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
                         .setQueueFamilyIndex(_queues[GPUQueueType::Graphics].family);
         _commandPool = _device->createCommandPoolUnique(commandPoolDescriptor);
     }
 
     void Device::CreateCommandBuffers() {
-        vk::CommandBufferAllocateInfo commandBufferDescriptor;
+        vk::CommandBufferAllocateInfo commandBufferDescriptor{};
             commandBufferDescriptor.setCommandBufferCount(2)
                         .setCommandPool(_commandPool.get())
                         .setLevel(vk::CommandBufferLevel::ePrimary);

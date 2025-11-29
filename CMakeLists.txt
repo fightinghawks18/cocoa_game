@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
-include(FetchContent)
+include(cmake/shaders.cmake)
 
 find_package(Vulkan REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
@@ -20,6 +20,13 @@ add_executable(Cocoa
     src/vulkan/surface.cpp
     src/vulkan/swapchain.cpp
     src/vulkan/vma.cpp
+
+    src/vulkan/resources/buffer.cpp
+    src/vulkan/resources/sampler.cpp
+    src/vulkan/resources/shader_module.cpp
+    src/vulkan/resources/render_pipeline.cpp
+    src/vulkan/resources/pipeline_layout.cpp
+    src/vulkan/resources/texture.cpp
 )
 
 target_link_libraries(Cocoa
@@ -27,6 +34,8 @@ target_link_libraries(Cocoa
     PRIVATE GPUOpen::VulkanMemoryAllocator
     PRIVATE SDL3::SDL3
 )
+
+compile_glsl_dir_to_spirv(content content)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
     add_custom_target(Copy_Compiled_Commands ALL

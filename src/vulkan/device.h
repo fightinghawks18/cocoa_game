@@ -31,6 +31,7 @@ namespace Cocoa::Vulkan {
         [[nodiscard]] vk::Instance GetInstance() { return _instance.get(); }
         [[nodiscard]] vk::PhysicalDevice GetGPU() { return _gpu; }
         [[nodiscard]] vk::Device GetDevice() { return _device.get(); }
+        [[nodiscard]] VmaAllocator GetAllocator() { return _allocator; }
     private:
         vk::UniqueInstance _instance;
         vk::PhysicalDevice _gpu;
