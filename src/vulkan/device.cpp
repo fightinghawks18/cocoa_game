@@ -119,7 +119,9 @@ namespace Cocoa::Vulkan {
         #endif
 
         std::vector<const char*> extensions = {
-            "VK_EXT_debug_utils"
+            #ifdef DEBUG
+                "VK_EXT_debug_utils"
+            #endif
         };
 
         uint32_t sdlCount;
@@ -127,7 +129,9 @@ namespace Cocoa::Vulkan {
         extensions.insert(extensions.end(), sdlExtensions, sdlExtensions + sdlCount);
 
         std::vector<const char*> layers = {
-            "VK_LAYER_KHRONOS_validation",
+            #ifdef DEBUG
+                "VK_LAYER_KHRONOS_validation",
+            #endif
         };
 
         vk::InstanceCreateInfo instanceDescriptor{};
