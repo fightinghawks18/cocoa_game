@@ -69,6 +69,14 @@ namespace Cocoa::Math {
         return result;
     }
 
+    inline Vector3 operator*(const Quaternion& a, const Vector3& b) {
+        Vector3 qvec(a.x, a.y, a.z);
+        Vector3 uv = qvec.Cross(b);
+        Vector3 uuv = qvec.Cross(uv);
+        
+        return b + ((uv * a.w) + uuv) * 2.0f;
+    }
+
     inline Quaternion FromEuler(float pitch, float yaw, float roll) {
         float cy = cos(yaw * 0.5f);
         float sy = sin(yaw * 0.5f);

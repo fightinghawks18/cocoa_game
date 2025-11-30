@@ -9,6 +9,7 @@
 
 #include "math/common.h"
 #include "math/quaternion.h"
+#include "objects/camera.h"
 #include "vulkan/common.h"
 #include "vulkan/device.h"
 #include "vulkan/surface.h"
@@ -68,16 +69,11 @@ int main() {
     auto model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
     auto projection = Cocoa::Math::CreatePerspectiveMatrix(Cocoa::Math::Radians(60), 1920.0f / 1080.0f, 0.1, 100);
     auto view = Cocoa::Math::LookAt(Cocoa::Math::Vector3(0, 0, 5), Cocoa::Math::Vector3(), Cocoa::Math::Vector3(0, 1, 0));
-
-    Cocoa::Vulkan::MVP mvpData;
-    mvpData.model = model.Transpose();
-    mvpData.projection = projection.Transpose();
-    mvpData.view = view.Transpose();
     
     Cocoa::Vulkan::BufferDesc mvpBufferDescriptor = {
         .usage = vk::BufferUsageFlagBits::eUniformBuffer,
         .size = sizeof(Cocoa::Vulkan::MVP),
-        .mapped = &mvpData
+        .mapped = nullptr
     };
     auto mvpBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), mvpBufferDescriptor);
 
@@ -280,6 +276,16 @@ int main() {
     };
     auto indexBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), indexBufferDescriptor);
 
+    Cocoa::Vulkan::MVP mvpData;
+    
+    // Objects
+    Cocoa::Objects::Camera camera;
+    camera.SetPosition(Cocoa::Math::Vector3(0, 0, 5));
+    camera.SetRotation(Cocoa::Math::Quaternion());
+    camera.SetFieldOfView(80);
+    camera.SetClipFarBounds(100);
+    camera.SetClipNearBounds(0.1);
+
     bool gameRun = true;
     while (gameRun) {
         SDL_Event e;
@@ -290,14 +296,17 @@ int main() {
             }
         }
 
-        rotation *= Cocoa::Math::FromAxisAngle(Cocoa::Math::Vector3(1, 0, 0), Cocoa::Math::Radians(0.5));
+        rotation *= Cocoa::Math::FromAxisAngle(Cocoa::Math::Vector3(1, 0.5, 0), Cocoa::Math::Radians(0.5));
         rotation.Normalize();
-        model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
         
         swapchain->GetNextBackBuffer();
         auto swapchainExtent = swapchain->GetExtent();
 
-        projection = Cocoa::Math::CreatePerspectiveMatrix(Cocoa::Math::Radians(60), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1, 100);
+        camera.SetAspectRatio(static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height));
+
+        model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
+        view = camera.GetViewMatrix();
+        projection = camera.GetProjectionMatrix();
 
         mvpData.model = model.Transpose();
         mvpData.projection = projection.Transpose();
