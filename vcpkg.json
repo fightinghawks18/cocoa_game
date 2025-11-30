@@ -5,6 +5,7 @@
             "name": "sdl3",
             "features": [ "vulkan" ]
         },
-        "vulkan-memory-allocator"
+        "vulkan-memory-allocator",
+        "discord-rpc"
     ]
 }

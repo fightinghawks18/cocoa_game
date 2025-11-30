@@ -10,6 +10,8 @@
 #include "math/common.h"
 #include "math/quaternion.h"
 #include "objects/camera.h"
+#include "objects/transform.h"
+#include "tools/rich_presence.h"
 #include "vulkan/common.h"
 #include "vulkan/device.h"
 #include "vulkan/surface.h"
@@ -63,14 +65,6 @@ int main() {
     vk::ShaderModuleCreateInfo pixelShaderDescriptor;
     pixelShaderDescriptor.setCode(pixelShaderCode);
     auto pixelShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), pixelShaderDescriptor);
-
-    auto position = Cocoa::Math::Vector3();
-    auto rotation = Cocoa::Math::Quaternion();
-    auto scale = Cocoa::Math::Vector3(1);
-
-    auto model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
-    auto projection = Cocoa::Math::CreatePerspectiveMatrix(Cocoa::Math::Radians(60), 1920.0f / 1080.0f, 0.1, 100);
-    auto view = Cocoa::Math::LookAt(Cocoa::Math::Vector3(0, 0, 5), Cocoa::Math::Vector3(), Cocoa::Math::Vector3(0, 1, 0));
     
     Cocoa::Vulkan::BufferDesc mvpBufferDescriptor = {
         .usage = vk::BufferUsageFlagBits::eUniformBuffer,
@@ -281,12 +275,22 @@ int main() {
     Cocoa::Vulkan::MVP mvpData;
     
     // Objects
+    Cocoa::Objects::Transform transform;
+
     Cocoa::Objects::Camera camera;
     camera.SetPosition(Cocoa::Math::Vector3(0, 0, 5));
     camera.SetRotation(Cocoa::Math::Quaternion());
     camera.SetFieldOfView(80);
     camera.SetClipFarBounds(100);
     camera.SetClipNearBounds(0.1);
+
+    // Rich presence (for fun)
+    Cocoa::Tools::RichPresenceDesc rpcDescriptor = {
+        .appID = "1444737693090316409"
+    };
+    Cocoa::Tools::RichPresence rpc(rpcDescriptor);
+    rpc.SetState("Watching a cube");
+    rpc.StartTimestamp();
 
     // SDL3 states
     bool mouseCaptured = false;
@@ -311,21 +315,20 @@ int main() {
             }
         }
 
-        rotation *= Cocoa::Math::FromAxisAngle(Cocoa::Math::Vector3(1, 0.5, 0), Cocoa::Math::Radians(0.5));
-        rotation.Normalize();
+        // Update RPC
+        rpc.Update();
+
+        transform.RotateX(Cocoa::Math::Radians(0.1));
+        transform.RotateY(Cocoa::Math::Radians(0.3));
         
         swapchain->GetNextBackBuffer();
         auto swapchainExtent = swapchain->GetExtent();
 
         camera.SetAspectRatio(static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height));
 
-        model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
-        view = camera.GetViewMatrix();
-        projection = camera.GetProjectionMatrix();
-
-        mvpData.model = model.Transpose();
-        mvpData.projection = projection.Transpose();
-        mvpData.view = view.Transpose();
+        mvpData.model = transform.GetModelMatrix().Transpose();
+        mvpData.projection = camera.GetProjectionMatrix().Transpose();
+        mvpData.view = camera.GetViewMatrix().Transpose();
         mvpBuffer->MapTo(&mvpData, sizeof(Cocoa::Vulkan::MVP), 0);
         
         auto encoder = renderDevice->Encode(swapchain.get());

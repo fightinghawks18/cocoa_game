@@ -12,8 +12,15 @@ find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 
 find_package(SDL3 CONFIG REQUIRED)
 
+find_library(DISCORD_RPC_LIB 
+    NAMES discord-rpc libdiscord-rpc
+    REQUIRED
+)
+
 add_executable(Cocoa
     src/main.cpp
+
+    src/tools/rich_presence.cpp
     
     src/vulkan/device.cpp
     src/vulkan/encoder.cpp
@@ -34,6 +41,7 @@ target_link_libraries(Cocoa
     PRIVATE Vulkan::Vulkan
     PRIVATE GPUOpen::VulkanMemoryAllocator
     PRIVATE SDL3::SDL3
+    PRIVATE ${DISCORD_RPC_LIB}
 )
 
 if(APPLE)
