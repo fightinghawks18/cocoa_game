@@ -44,7 +44,7 @@ namespace Cocoa::Math {
         projectionMatrix(0,0) = 1.0f / (aspectRatio * tanHalfFov);
         projectionMatrix(1,1) = -1.0f / tanHalfFov;
         projectionMatrix(2,2) = farZ / (nearZ - farZ);
-        projectionMatrix(2,3) = -(farZ * nearZ) / (farZ - nearZ);
+        projectionMatrix(2,3) = (farZ * nearZ) / (nearZ - farZ);
         projectionMatrix(3,2) = -1.0f;
         projectionMatrix(3,3) = 0.0f;
 

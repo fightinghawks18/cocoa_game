@@ -17,10 +17,13 @@ namespace Cocoa::Vulkan {
         CreateAllocator();
         CreateCommandPool();
         CreateCommandBuffers();
+        CreateDescriptorPool();
     }
     
     Device::~Device() {
         _device->waitIdle();
+
+        _descriptorPool.reset();
 
         _commandBuffers.clear();
         _commandPool.reset();
@@ -336,5 +339,17 @@ namespace Cocoa::Vulkan {
                         .setCommandPool(_commandPool.get())
                         .setLevel(vk::CommandBufferLevel::ePrimary);
         _commandBuffers = _device->allocateCommandBuffersUnique(commandBufferDescriptor);
+    }
+
+    void Device::CreateDescriptorPool() {
+        vk::DescriptorPoolSize poolSize{};
+        poolSize.setType(vk::DescriptorType::eUniformBuffer)
+                .setDescriptorCount(1000);
+        
+        vk::DescriptorPoolCreateInfo descriptorPoolDescriptor{};
+        descriptorPoolDescriptor.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+                    .setMaxSets(1000)
+                    .setPoolSizes(poolSize);
+        _descriptorPool = _device->createDescriptorPoolUnique(descriptorPoolDescriptor);
     }
 }

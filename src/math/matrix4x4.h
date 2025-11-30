@@ -101,7 +101,7 @@ namespace Cocoa::Math {
             return *this;
         }
 
-        Matrix4x4 operator*=(float scalar) {
+        Matrix4x4& operator*=(float scalar) {
             Matrix4x4 result;
             for (int r = 0; r < 4; r++) {
                 for (int c = 0; c < 4; c++) {
@@ -109,7 +109,7 @@ namespace Cocoa::Math {
                 }
             }
             *this = result;
-            return result;
+            return *this;
         }
 
     private:

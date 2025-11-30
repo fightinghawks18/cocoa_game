@@ -4,7 +4,15 @@
 #include <cstdint>
 #include <vulkan/vulkan.hpp>
 
-namespace Cocoa::Vulkan {
+#include "../math/matrix4x4.h"
+
+namespace Cocoa::Vulkan {    
+    struct MVP {
+        Math::Matrix4x4 model;
+        Math::Matrix4x4 view;
+        Math::Matrix4x4 projection;
+    };
+
     struct Vertex {
         std::array<float, 3> pos;
         std::array<float, 4> col;
@@ -14,6 +22,20 @@ namespace Cocoa::Vulkan {
         std::vector<Vertex> vertices;
         std::vector<uint16_t> indices;
     };
+
+    enum class GPUShaderStage {
+        Unknown = 0,
+        Vertex = 1 << 0,
+        Pixel = 1 << 1
+    };
+
+    inline bool operator&(GPUShaderStage a, GPUShaderStage b) {
+        return static_cast<GPUShaderStage>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)) != GPUShaderStage::Unknown;
+    }
+
+    inline GPUShaderStage operator|(GPUShaderStage a, GPUShaderStage b) {
+        return static_cast<GPUShaderStage>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+    }
 
     enum class GPUPowerPreference {
         HighPerformance,
@@ -32,6 +54,13 @@ namespace Cocoa::Vulkan {
         uint32_t family;
         vk::Queue queue;
     };
+
+    inline vk::ShaderStageFlags GPUShaderStageToVk(GPUShaderStage stage) {
+        vk::ShaderStageFlags flags;
+        if (stage & GPUShaderStage::Vertex) flags |= vk::ShaderStageFlagBits::eVertex;
+        if (stage & GPUShaderStage::Pixel) flags |= vk::ShaderStageFlagBits::eFragment;
+        return flags;
+    }
 
     inline std::string GPUQueueTypeToString(GPUQueueType type) {
         switch (type) {

@@ -9,6 +9,10 @@ namespace Cocoa::Math {
         float& operator()(int row, int col) {
             return m[row][col];
         }
+
+        const float& operator()(int row, int col) const {
+            return m[row][col];
+        }
         
         Matrix3x3() {
             m[0][0] = 1; m[0][1] = 0; m[0][2] = 0;
@@ -55,7 +59,7 @@ namespace Cocoa::Math {
         Matrix3x3& operator+=(const Matrix3x3& other) {
             for (uint32_t r = 0; r < 3; r++) {
                 for (uint32_t c = 0; c < 3; c++) {
-                    m[r][c] += m[r][c];
+                    m[r][c] += other(r, c);
                 }
             }
             return *this;
@@ -64,7 +68,7 @@ namespace Cocoa::Math {
         Matrix3x3& operator-=(const Matrix3x3& other) {
             for (uint32_t r = 0; r < 3; r++) {
                 for (uint32_t c = 0; c < 3; c++) {
-                    m[r][c] -= m[r][c];
+                    m[r][c] -= other(r, c);
                 }
             }
             return *this;
@@ -76,7 +80,7 @@ namespace Cocoa::Math {
                 for (uint32_t c = 0; c < 3; c++) {
                     result(r, c) = 0.0f;
                     for (uint32_t s = 0; s < 3; s++) {
-                        result(r, c) += m[r][s] * other.m[s][c];
+                        result(r, c) += m[r][s] * other(s, c);
                     }
                 }
             }

@@ -10,6 +10,17 @@ namespace Cocoa::Math {
 
         Quaternion() : x(0), y(0), z(0), w(1) {}
         explicit Quaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+
+        Quaternion& Normalize() {
+            float len = sqrt(x * x + y * y + z * z + w * w);
+            if (len > 0.0f) {
+                x /= len;
+                y /= len;
+                z /= len;
+                w /= len;
+            }
+            return *this;
+        }
         
         Quaternion& operator*=(const Quaternion& other) {
             float ox = x;
@@ -50,6 +61,28 @@ namespace Cocoa::Math {
         result(2, 2) = 1.0f - 2.0f * (xx + yy);
 
         return result;
+    }
+
+    inline Quaternion operator*(const Quaternion& a, const Quaternion& b) {
+        Quaternion result = a;
+        result *= b;
+        return result;
+    }
+
+    inline Quaternion FromEuler(float pitch, float yaw, float roll) {
+        float cy = cos(yaw * 0.5f);
+        float sy = sin(yaw * 0.5f);
+        float cp = cos(pitch * 0.5f);
+        float sp = sin(pitch * 0.5f);
+        float cr = cos(roll * 0.5f);
+        float sr = sin(roll * 0.5f);
+
+        return Quaternion(
+            sr * cp * cy - cr * sp * sy,
+            cr * sp * cy + sr * cp * sy,
+            cr * cp * sy - sr * sp * cy,
+            cr * cp * cy + sr * sp * sy 
+        );
     }
 
     inline Quaternion FromAxisAngle(Vector3 axis, float angle) {

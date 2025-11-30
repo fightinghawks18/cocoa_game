@@ -5,6 +5,8 @@
 #include "swapchain.h"
 #include "resources/render_pipeline.h"
 #include "resources/buffer.h"
+#include "resources/bind_group.h"
+#include "resources/pipeline_layout.h"
 
 namespace Cocoa::Vulkan {
     struct EncoderDesc {
@@ -20,6 +22,7 @@ namespace Cocoa::Vulkan {
         void StartRendering(vk::RenderingInfo renderDesc);
         void EndRendering();
         void SetRenderPipeline(RenderPipeline* renderPipeline);
+        void SetBindGroup(PipelineLayout* pipelineLayout, BindGroup* bindGroup);
         void SetVertexBuffer(Buffer* vertexBuffer);
         void SetIndexBuffer(Buffer* indexBuffer);
         void SetViewport(vk::Viewport viewport);

@@ -23,6 +23,11 @@ namespace Cocoa::Vulkan {
     void Encoder::SetRenderPipeline(RenderPipeline* renderPipeline) {
         _cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, renderPipeline->Get());
     }
+
+    void Encoder::SetBindGroup(PipelineLayout* pipelineLayout, BindGroup* bindGroup) {
+        auto set = bindGroup->GetBinding();
+        _cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout->Get(), 0, set, nullptr);
+    }
     
     void Encoder::SetVertexBuffer(Buffer* vertexBuffer) {
         vk::Buffer buffers[] = {vertexBuffer->Get()};

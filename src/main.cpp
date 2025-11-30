@@ -7,6 +7,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 
+#include "math/common.h"
+#include "math/quaternion.h"
 #include "vulkan/common.h"
 #include "vulkan/device.h"
 #include "vulkan/surface.h"
@@ -15,6 +17,7 @@
 #include "vulkan/resources/render_pipeline.h"
 #include "vulkan/resources/pipeline_layout.h"
 #include "vulkan/resources/buffer.h"
+#include "vulkan/resources/bind_group.h"
 
 #include "macros.h"
 
@@ -58,8 +61,57 @@ int main() {
     pixelShaderDescriptor.setCode(pixelShaderCode);
     auto pixelShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), pixelShaderDescriptor);
 
+    auto position = Cocoa::Math::Vector3();
+    auto rotation = Cocoa::Math::Quaternion();
+    auto scale = Cocoa::Math::Vector3(1);
+
+    auto model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
+    auto projection = Cocoa::Math::CreatePerspectiveMatrix(Cocoa::Math::Radians(60), 1920.0f / 1080.0f, 0.1, 100);
+    auto view = Cocoa::Math::LookAt(Cocoa::Math::Vector3(0, 0, 5), Cocoa::Math::Vector3(), Cocoa::Math::Vector3(0, 1, 0));
+
+    Cocoa::Vulkan::MVP mvpData;
+    mvpData.model = model.Transpose();
+    mvpData.projection = projection.Transpose();
+    mvpData.view = view.Transpose();
+    
+    Cocoa::Vulkan::BufferDesc mvpBufferDescriptor = {
+        .usage = vk::BufferUsageFlagBits::eUniformBuffer,
+        .size = sizeof(Cocoa::Vulkan::MVP),
+        .mapped = &mvpData
+    };
+    auto mvpBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), mvpBufferDescriptor);
+
+    Cocoa::Vulkan::BindGroupLayoutEntry mvpLayout = {
+        .binding = 0,
+        .visibility = Cocoa::Vulkan::GPUShaderStage::Vertex,
+        .type = Cocoa::Vulkan::BindGroupType::UniformBuffer
+    };
+
+    Cocoa::Vulkan::BindGroupLayoutDesc mvpBindGroupLayout = {
+        .entries = {mvpLayout}
+    };
+
+    Cocoa::Vulkan::BindGroupBuffer mvpBufferEntry = {
+        .buffer = mvpBuffer->Get(),
+        .offset = 0,
+        .size = sizeof(Cocoa::Vulkan::MVP)
+    };
+
+    Cocoa::Vulkan::BindGroupEntry mvpEntry = {
+        .binding = 0,
+        .buffer = mvpBufferEntry,
+    };
+
+    Cocoa::Vulkan::BindGroupDesc mvpBindGroupDesc = {
+        .layout = &mvpBindGroupLayout,
+        .entries = {mvpEntry}
+    };
+
+    auto mvpBindGroup = std::make_unique<Cocoa::Vulkan::BindGroup>(renderDevice.get(), mvpBindGroupDesc);
+    auto layouts = { mvpBindGroup->GetLayout() };
+
     vk::PipelineLayoutCreateInfo pipelineLayoutDescriptor;
-    pipelineLayoutDescriptor.setSetLayouts(nullptr)
+    pipelineLayoutDescriptor.setSetLayouts(layouts)
                 .setPushConstantRanges(nullptr);
 
     auto pipelineLayout = std::make_unique<Cocoa::Vulkan::PipelineLayout>(renderDevice.get(), pipelineLayoutDescriptor);
@@ -238,6 +290,14 @@ int main() {
             }
         }
 
+        rotation *= Cocoa::Math::FromAxisAngle(Cocoa::Math::Vector3(1, 0, 0), Cocoa::Math::Radians(0.5));
+        rotation.Normalize();
+        model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
+        mvpData.model = model.Transpose();
+        mvpData.projection = projection.Transpose();
+        mvpData.view = view.Transpose();
+        mvpBuffer->MapTo(&mvpData, sizeof(Cocoa::Vulkan::MVP), 0);
+
         auto encoder = renderDevice->Encode(swapchain.get());
 
         vk::ClearColorValue clearColor;
@@ -273,6 +333,7 @@ int main() {
         encoder->SetRenderPipeline(renderPipeline.get());
         encoder->SetViewport(viewport);
         encoder->SetScissor(scissor);
+        encoder->SetBindGroup(pipelineLayout.get(), mvpBindGroup.get());
         encoder->SetVertexBuffer(vertexBuffer.get());
         encoder->SetIndexBuffer(indexBuffer.get());
         encoder->DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
@@ -286,6 +347,8 @@ int main() {
     renderPipeline.reset();
     pipelineLayout.reset();
 
+    mvpBindGroup.reset();
+    mvpBuffer.reset();
     vertexShader.reset();
     pixelShader.reset();
     vertexBuffer.reset();

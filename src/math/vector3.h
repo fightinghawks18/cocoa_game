@@ -88,6 +88,18 @@ namespace Cocoa::Math {
         return result;
     }
 
+    inline Vector3 operator*(const Vector3& v, float scalar) {
+        return Vector3(v.x * scalar, v.y * scalar, v.z * scalar);
+    }
+
+    inline Vector3 operator*(float scalar, const Vector3& v) {
+        return v * scalar;
+    }
+
+    inline Vector3 operator/(const Vector3& v, float scalar) {
+        return Vector3(v.x / scalar, v.y / scalar, v.z / scalar);
+    }
+
     inline bool operator==(const Vector3& a, const Vector3& b) {
         return a.x == b.x 
             && a.y == b.y 

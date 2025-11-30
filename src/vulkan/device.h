@@ -32,6 +32,7 @@ namespace Cocoa::Vulkan {
         [[nodiscard]] vk::PhysicalDevice GetGPU() { return _gpu; }
         [[nodiscard]] vk::Device GetDevice() { return _device.get(); }
         [[nodiscard]] VmaAllocator GetAllocator() { return _allocator; }
+        [[nodiscard]] vk::DescriptorPool GetDescriptorPool() { return _descriptorPool.get(); }
     private:
         vk::UniqueInstance _instance;
         vk::PhysicalDevice _gpu;
@@ -43,6 +44,8 @@ namespace Cocoa::Vulkan {
         std::vector<vk::UniqueCommandBuffer> _commandBuffers;
         uint32_t _frame = 0;
 
+        vk::UniqueDescriptorPool _descriptorPool;
+
         void CreateInstance();
         void GetPhysicalDevice(DeviceDesc desc);
         GPUQueue GetSupportedQueue(std::vector<vk::QueueFamilyProperties> queueFamilies, GPUQueueType type);
@@ -51,5 +54,6 @@ namespace Cocoa::Vulkan {
         void CreateAllocator();
         void CreateCommandPool();
         void CreateCommandBuffers();
+        void CreateDescriptorPool();
     };
 }
