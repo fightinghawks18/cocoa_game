@@ -13,6 +13,11 @@ namespace Cocoa::Objects {
             UpdateRotation();
         }
 
+        void RotateYaw(float angle) {
+            _yaw += angle;
+            UpdateRotation();
+        }
+
         void SetPosition(const Math::Vector3& pos) { _position = pos; }
         void SetRotation(const Math::Quaternion& rot) { _rotation = rot; }
         void SetFieldOfView(float fov) { _fov = Math::Radians(fov); }

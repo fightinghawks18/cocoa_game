@@ -22,6 +22,8 @@
 
 #include "macros.h"
 
+constexpr float sensitivity = 0.002f;
+
 int main() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         PANIC("Failed to start SDL3");
@@ -286,6 +288,9 @@ int main() {
     camera.SetClipFarBounds(100);
     camera.SetClipNearBounds(0.1);
 
+    // SDL3 states
+    bool mouseCaptured = false;
+
     bool gameRun = true;
     while (gameRun) {
         SDL_Event e;
@@ -293,6 +298,16 @@ int main() {
             if (e.type == SDL_EVENT_QUIT) {
                 gameRun = false;
                 break;
+            }
+
+            if (e.type == SDL_EVENT_MOUSE_MOTION && mouseCaptured) {
+                camera.RotateYaw(-e.motion.xrel * sensitivity);
+                camera.RotatePitch(-e.motion.yrel * sensitivity);
+            }
+
+            if (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_ESCAPE) {
+                mouseCaptured = !mouseCaptured;
+                SDL_SetWindowRelativeMouseMode(window, mouseCaptured);
             }
         }
 
