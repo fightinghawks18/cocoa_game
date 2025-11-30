@@ -37,7 +37,7 @@ namespace Cocoa::Vulkan {
     }
     
     std::unique_ptr<Encoder> Device::Encode(Swapchain* swapchain) {
-        auto backBuffer = swapchain->GetNextBackBuffer();
+        auto backBuffer = swapchain->GetCurrentBackBuffer();
         
         EncoderDesc desc = {
             .swapchain = swapchain,

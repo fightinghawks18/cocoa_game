@@ -293,11 +293,17 @@ int main() {
         rotation *= Cocoa::Math::FromAxisAngle(Cocoa::Math::Vector3(1, 0, 0), Cocoa::Math::Radians(0.5));
         rotation.Normalize();
         model = Cocoa::Math::CreateModelMatrix(position, rotation, scale);
+        
+        swapchain->GetNextBackBuffer();
+        auto swapchainExtent = swapchain->GetExtent();
+
+        projection = Cocoa::Math::CreatePerspectiveMatrix(Cocoa::Math::Radians(60), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1, 100);
+
         mvpData.model = model.Transpose();
         mvpData.projection = projection.Transpose();
         mvpData.view = view.Transpose();
         mvpBuffer->MapTo(&mvpData, sizeof(Cocoa::Vulkan::MVP), 0);
-
+        
         auto encoder = renderDevice->Encode(swapchain.get());
 
         vk::ClearColorValue clearColor;
@@ -309,8 +315,6 @@ int main() {
                     .setLoadOp(vk::AttachmentLoadOp::eClear)
                     .setStoreOp(vk::AttachmentStoreOp::eStore)
                     .setImageView(swapchain->GetCurrentBackBuffer().imageView);
-        
-        auto swapchainExtent = swapchain->GetExtent();
         
         vk::RenderingInfo renderingDescriptor;
         renderingDescriptor.setColorAttachments(renderingAttachmentDescriptor)

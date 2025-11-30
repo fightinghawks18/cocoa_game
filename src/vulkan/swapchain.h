@@ -22,7 +22,7 @@ namespace Cocoa::Vulkan {
         void Submit(vk::CommandBuffer commandBuffer);
         void Present();
 
-        [[nodiscard]] SwapchainBackBuffer GetNextBackBuffer();
+        SwapchainBackBuffer GetNextBackBuffer();
         [[nodiscard]] SwapchainBackBuffer GetCurrentBackBuffer();
         [[nodiscard]] vk::Extent2D GetExtent() { return _swapchainExtent; }
         [[nodiscard]] vk::Format GetFormat() { return _swapchainFormat; }
