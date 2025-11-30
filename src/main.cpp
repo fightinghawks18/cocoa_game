@@ -7,12 +7,14 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 
+#include "vulkan/common.h"
 #include "vulkan/device.h"
 #include "vulkan/surface.h"
 #include "vulkan/swapchain.h"
 #include "vulkan/resources/shader_module.h"
 #include "vulkan/resources/render_pipeline.h"
 #include "vulkan/resources/pipeline_layout.h"
+#include "vulkan/resources/buffer.h"
 
 #include "macros.h"
 
@@ -77,11 +79,34 @@ int main() {
         )
     };
 
-    vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
-        {},
-        0, nullptr,
-        0, nullptr
+    vk::VertexInputAttributeDescription posAttribute(
+        0,
+        0,
+        vk::Format::eR32G32B32Sfloat,
+        offsetof(Cocoa::Vulkan::Vertex, pos)
     );
+
+    vk::VertexInputAttributeDescription colAttribute(
+        1,
+        0,
+        vk::Format::eR32G32B32A32Sfloat,
+        offsetof(Cocoa::Vulkan::Vertex, col)
+    );
+
+    std::vector attributes = {
+        posAttribute,
+        colAttribute
+    };
+
+    vk::VertexInputBindingDescription vertexBinding(
+        0,
+        sizeof(Cocoa::Vulkan::Vertex),
+        vk::VertexInputRate::eVertex
+    );
+    
+    vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+    vertexInputInfo.setVertexAttributeDescriptions(attributes)
+                .setVertexBindingDescriptions(vertexBinding);
 
     vk::PipelineInputAssemblyStateCreateInfo inputAssembly(
         {},
@@ -187,6 +212,22 @@ int main() {
 
     auto renderPipeline = std::make_unique<Cocoa::Vulkan::RenderPipeline>(renderDevice.get(), renderPipelineDescriptor);
 
+    auto plane = Cocoa::Vulkan::CreatePlaneIndexed();
+
+    Cocoa::Vulkan::BufferDesc vertexBufferDescriptor = {
+        .usage = vk::BufferUsageFlagBits::eVertexBuffer,
+        .size = sizeof(Cocoa::Vulkan::Vertex) * plane.vertices.size(),
+        .mapped = plane.vertices.data()
+    };
+    auto vertexBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), vertexBufferDescriptor);
+
+    Cocoa::Vulkan::BufferDesc indexBufferDescriptor = {
+        .usage = vk::BufferUsageFlagBits::eIndexBuffer,
+        .size = sizeof(uint16_t) * plane.indices.size(),
+        .mapped = plane.indices.data()
+    };
+    auto indexBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), indexBufferDescriptor);
+
     bool gameRun = true;
     while (gameRun) {
         SDL_Event e;
@@ -199,7 +240,7 @@ int main() {
 
         auto encoder = renderDevice->Encode(swapchain.get());
 
-         vk::ClearColorValue clearColor;
+        vk::ClearColorValue clearColor;
         clearColor.setFloat32({0.6f, 0.21f, 0.36f, 1.0f});
 
         vk::RenderingAttachmentInfo renderingAttachmentDescriptor;
@@ -232,7 +273,9 @@ int main() {
         encoder->SetRenderPipeline(renderPipeline.get());
         encoder->SetViewport(viewport);
         encoder->SetScissor(scissor);
-        encoder->Draw(3, 1, 0, 0);
+        encoder->SetVertexBuffer(vertexBuffer.get());
+        encoder->SetIndexBuffer(indexBuffer.get());
+        encoder->DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
         encoder->EndRendering();
 
         renderDevice->EndEncoding(std::move(encoder));
@@ -245,6 +288,8 @@ int main() {
 
     vertexShader.reset();
     pixelShader.reset();
+    vertexBuffer.reset();
+    indexBuffer.reset();
 
     swapchain.reset();
     surface.reset();

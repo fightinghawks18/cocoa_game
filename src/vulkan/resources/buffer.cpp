@@ -26,6 +26,10 @@ namespace Cocoa::Vulkan {
             PANIC("Failed to create a vulkan buffer");
         }
         _buffer = buffer;
+
+        if (desc.mapped != nullptr) {
+            MapTo(desc.mapped, desc.size, 0);
+        }
     }
 
     Buffer::~Buffer() {
