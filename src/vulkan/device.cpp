@@ -10,6 +10,16 @@
 #include "../macros.h"
 namespace Cocoa::Vulkan {
     Device::Device(DeviceDesc desc) {
+        _swapchainResources = std::make_unique<Tools::ResourceManager<Swapchain>>();
+        _surfaceResources = std::make_unique<Tools::ResourceManager<Surface>>();
+        _textureResources = std::make_unique<Tools::ResourceManager<Texture>>();
+        _bindGroupResources = std::make_unique<Tools::ResourceManager<BindGroup>>();
+        _shaderModuleResources = std::make_unique<Tools::ResourceManager<ShaderModule>>();
+        _samplerResources = std::make_unique<Tools::ResourceManager<Sampler>>();
+        _pipelineLayoutResources = std::make_unique<Tools::ResourceManager<PipelineLayout>>();
+        _renderPipelineResources = std::make_unique<Tools::ResourceManager<RenderPipeline>>();
+        _bufferResources = std::make_unique<Tools::ResourceManager<Buffer>>();
+
         CreateInstance();
         GetPhysicalDevice(desc);
         DiscoverQueues(desc);
@@ -23,8 +33,17 @@ namespace Cocoa::Vulkan {
     Device::~Device() {
         _device->waitIdle();
 
-        _descriptorPool.reset();
+        _swapchainResources.reset();
+        _surfaceResources.reset();
+        _textureResources.reset();
+        _bindGroupResources.reset();
+        _shaderModuleResources.reset();
+        _samplerResources.reset();
+        _pipelineLayoutResources.reset();
+        _renderPipelineResources.reset();
+        _bufferResources.reset();
 
+        _descriptorPool.reset();
         _commandBuffers.clear();
         _commandPool.reset();
 
@@ -35,15 +54,124 @@ namespace Cocoa::Vulkan {
         _device.reset();
         _instance.reset();
     }
-    
-    std::unique_ptr<Encoder> Device::Encode(Swapchain* swapchain) {
-        auto backBuffer = swapchain->GetCurrentBackBuffer();
+
+    SurfaceHandle Device::CreateSurface(SDL_Window* window) {
+        return _surfaceResources->Create(this, window);
+    }
+
+    SwapchainHandle Device::CreateSwapchain(SwapchainDesc swapchainDesc) {
+        return _swapchainResources->Create(this, swapchainDesc);
+    }
+
+    BufferHandle Device::CreateBuffer(BufferDesc bufferDesc) {
+        return _bufferResources->Create(this, bufferDesc);
+    }
+
+    PipelineLayoutHandle Device::CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc) {
+        return _pipelineLayoutResources->Create(this, pipelineLayoutDesc);
+    }
+
+    RenderPipelineHandle Device::CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc) {
+        return _renderPipelineResources->Create(this, renderPipelineDesc);
+    }
+
+    SamplerHandle Device::CreateSampler(vk::SamplerCreateInfo samplerDesc) {
+        return _samplerResources->Create(this, samplerDesc);
+    }
+
+    ShaderModuleHandle Device::CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc) {
+        return _shaderModuleResources->Create(this, shaderModuleDesc);
+    }
+
+    TextureHandle Device::CreateTexture(vk::ImageCreateInfo textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
+        return _textureResources->Create(this, textureDesc, textureViewDesc);
+    }
+
+    BindGroupHandle Device::CreateBindGroup(BindGroupDesc bindGroupDesc) {
+        return _bindGroupResources->Create(this, bindGroupDesc);
+    }
+
+    void Device::DestroySurface(SurfaceHandle surface) {
+        _surfaceResources->Free(surface);
+    }
+
+    void Device::DestroySwapchain(SwapchainHandle swapchain) {
+        _swapchainResources->Free(swapchain);
+    }
+
+    void Device::DestroyBuffer(BufferHandle buffer) {
+        _bufferResources->Free(buffer);
+    }
+
+    void Device::DestroyPipelineLayout(PipelineLayoutHandle pipelineLayout) {
+        _pipelineLayoutResources->Free(pipelineLayout);
+    }
+
+    void Device::DestroyRenderPipeline(RenderPipelineHandle renderPipeline) {
+        _renderPipelineResources->Free(renderPipeline);
+    }
+
+    void Device::DestroySampler(SamplerHandle sampler) {
+        _samplerResources->Free(sampler);
+    }
+
+    void Device::DestroyShaderModule(ShaderModuleHandle shaderModule) {
+        _shaderModuleResources->Free(shaderModule);
+    }
+
+    void Device::DestroyTexture(TextureHandle texture) {
+        _textureResources->Free(texture);
+    }
+
+    void Device::DestroyBindGroup(BindGroupHandle bindGroup) {
+        _bindGroupResources->Free(bindGroup);
+    }
+
+    Surface* Device::GetSurfaceInstance(SurfaceHandle surface) {
+        return _surfaceResources->Get(surface);
+    }
+
+    Swapchain* Device::GetSwapchainInstance(SwapchainHandle swapchain) {
+        return _swapchainResources->Get(swapchain);
+    }
+
+    Buffer* Device::GetBufferInstance(BufferHandle buffer) {
+        return _bufferResources->Get(buffer);
+    }
+
+    PipelineLayout* Device::GetPipelineLayoutInstance(PipelineLayoutHandle pipelineLayout) {
+        return _pipelineLayoutResources->Get(pipelineLayout);
+    }
+
+    RenderPipeline* Device::GetRenderPipelineInstance(RenderPipelineHandle renderPipeline) {
+        return _renderPipelineResources->Get(renderPipeline);
+    }
+
+    Sampler* Device::GetSamplerInstance(SamplerHandle sampler) {
+        return _samplerResources->Get(sampler);
+    }
+
+    ShaderModule* Device::GetShaderModuleInstance(ShaderModuleHandle shaderModule) {
+        return _shaderModuleResources->Get(shaderModule);
+    }
+
+    Texture* Device::GetTextureInstance(TextureHandle texture) {
+        return _textureResources->Get(texture);
+    }
+
+    BindGroup* Device::GetBindGroupInstance(BindGroupHandle bindGroup) {
+        return _bindGroupResources->Get(bindGroup);
+    }
+
+    std::unique_ptr<Encoder> Device::Encode(SwapchainHandle swapchain) {
+        auto swapchainInstance = GetSwapchainInstance(swapchain);
+        auto backBuffer = swapchainInstance->GetCurrentBackBuffer();
         
         EncoderDesc desc = {
             .swapchain = swapchain,
             .cmd = _commandBuffers[_frame].get()
         };
-        auto encoder = std::make_unique<Encoder>(desc);
+        auto encoder = std::make_unique<Encoder>(this, desc);
 
         vk::ImageSubresourceRange toColorSubresourceRange{};
         toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
@@ -68,7 +196,7 @@ namespace Cocoa::Vulkan {
     }
 
     void Device::EndEncoding(std::unique_ptr<Encoder> encoder) {
-        auto swapchain = encoder->GetTargetSwapchain();
+        auto swapchain = GetSwapchainInstance(encoder->GetTargetSwapchain());
         auto commandBuffer = encoder->GetCommandBuffer();
         auto backBuffer = swapchain->GetCurrentBackBuffer();
 

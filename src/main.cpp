@@ -44,14 +44,15 @@ int main() {
     };
     
     auto renderDevice = std::make_unique<Cocoa::Vulkan::Device>(desc);
-    auto surface = std::make_unique<Cocoa::Vulkan::Surface>(renderDevice.get(), window);
+    auto surface = renderDevice->CreateSurface(window);
     
     Cocoa::Vulkan::SwapchainDesc swapchainDesc = {
-        .surface = surface.get()
+        .surface = surface
     };
-    auto swapchain = std::make_unique<Cocoa::Vulkan::Swapchain>(renderDevice.get(), swapchainDesc);
+    auto swapchain = renderDevice->CreateSwapchain(swapchainDesc);
+    auto swapchainInstance = renderDevice->GetSwapchainInstance(swapchain);
 
-    auto swapchainFormat = swapchain->GetFormat();
+    auto swapchainFormat = swapchainInstance->GetFormat();
     vk::Format depthFormat = vk::Format::eD32Sfloat;
 
     auto currentDirectory = std::filesystem::current_path();
@@ -59,19 +60,19 @@ int main() {
     vk::ShaderModuleCreateInfo vertexShaderDescriptor;
     vertexShaderDescriptor.setCode(vertexShaderCode);
 
-    auto vertexShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), vertexShaderDescriptor);
+    auto vertexShader = renderDevice->CreateShaderModule(vertexShaderDescriptor);
 
     auto pixelShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.frag.spv").string());
     vk::ShaderModuleCreateInfo pixelShaderDescriptor;
     pixelShaderDescriptor.setCode(pixelShaderCode);
-    auto pixelShader = std::make_unique<Cocoa::Vulkan::ShaderModule>(renderDevice.get(), pixelShaderDescriptor);
+    auto pixelShader = renderDevice->CreateShaderModule(pixelShaderDescriptor);
     
     Cocoa::Vulkan::BufferDesc mvpBufferDescriptor = {
         .usage = vk::BufferUsageFlagBits::eUniformBuffer,
         .size = sizeof(Cocoa::Vulkan::MVP),
         .mapped = nullptr
     };
-    auto mvpBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), mvpBufferDescriptor);
+    auto mvpBuffer = renderDevice->CreateBuffer(mvpBufferDescriptor);
 
     Cocoa::Vulkan::BindGroupLayoutEntry mvpLayout = {
         .binding = 0,
@@ -84,7 +85,7 @@ int main() {
     };
 
     Cocoa::Vulkan::BindGroupBuffer mvpBufferEntry = {
-        .buffer = mvpBuffer->Get(),
+        .buffer = mvpBuffer,
         .offset = 0,
         .size = sizeof(Cocoa::Vulkan::MVP)
     };
@@ -99,26 +100,26 @@ int main() {
         .entries = {mvpEntry}
     };
 
-    auto mvpBindGroup = std::make_unique<Cocoa::Vulkan::BindGroup>(renderDevice.get(), mvpBindGroupDesc);
-    auto layouts = { mvpBindGroup->GetLayout() };
+    auto mvpBindGroup = renderDevice->CreateBindGroup(mvpBindGroupDesc);
+    auto layouts = { renderDevice->GetBindGroupInstance(mvpBindGroup)->GetLayout() };
 
     vk::PipelineLayoutCreateInfo pipelineLayoutDescriptor;
     pipelineLayoutDescriptor.setSetLayouts(layouts)
                 .setPushConstantRanges(nullptr);
 
-    auto pipelineLayout = std::make_unique<Cocoa::Vulkan::PipelineLayout>(renderDevice.get(), pipelineLayoutDescriptor);
+    auto pipelineLayout = renderDevice->CreatePipelineLayout(pipelineLayoutDescriptor);
 
     std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
         vk::PipelineShaderStageCreateInfo(
             {},
             vk::ShaderStageFlagBits::eVertex,
-            vertexShader->Get(),
+            renderDevice->GetShaderModuleInstance(vertexShader)->Get(),
             "main"
         ),
         vk::PipelineShaderStageCreateInfo(
             {},
             vk::ShaderStageFlagBits::eFragment,
-            pixelShader->Get(),
+            renderDevice->GetShaderModuleInstance(pixelShader)->Get(),
             "main"
         )
     };
@@ -250,11 +251,11 @@ int main() {
                 .setPDepthStencilState(&depthStencil)
                 .setPColorBlendState(&colorBlending)
                 .setPDynamicState(&dynamicState)
-                .setLayout(pipelineLayout->Get())
+                .setLayout(renderDevice->GetPipelineLayoutInstance(pipelineLayout)->Get())
                 .setRenderPass(nullptr)
                 .setSubpass(0);
 
-    auto renderPipeline = std::make_unique<Cocoa::Vulkan::RenderPipeline>(renderDevice.get(), renderPipelineDescriptor);
+    auto renderPipeline = renderDevice->CreateRenderPipeline(renderPipelineDescriptor);
 
     auto plane = Cocoa::Vulkan::CreatePlaneIndexed();
 
@@ -263,14 +264,14 @@ int main() {
         .size = sizeof(Cocoa::Vulkan::Vertex) * plane.vertices.size(),
         .mapped = plane.vertices.data()
     };
-    auto vertexBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), vertexBufferDescriptor);
+    auto vertexBuffer = renderDevice->CreateBuffer(vertexBufferDescriptor);
 
     Cocoa::Vulkan::BufferDesc indexBufferDescriptor = {
         .usage = vk::BufferUsageFlagBits::eIndexBuffer,
         .size = sizeof(uint16_t) * plane.indices.size(),
         .mapped = plane.indices.data()
     };
-    auto indexBuffer = std::make_unique<Cocoa::Vulkan::Buffer>(renderDevice.get(), indexBufferDescriptor);
+    auto indexBuffer = renderDevice->CreateBuffer(indexBufferDescriptor);
 
     Cocoa::Vulkan::MVP mvpData;
     
@@ -321,17 +322,17 @@ int main() {
         transform.RotateX(Cocoa::Math::Radians(0.1));
         transform.RotateY(Cocoa::Math::Radians(0.3));
         
-        swapchain->GetNextBackBuffer();
-        auto swapchainExtent = swapchain->GetExtent();
+        swapchainInstance->GetNextBackBuffer();
+        auto swapchainExtent = swapchainInstance->GetExtent();
 
         camera.SetAspectRatio(static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height));
 
         mvpData.model = transform.GetModelMatrix().Transpose();
         mvpData.projection = camera.GetProjectionMatrix().Transpose();
         mvpData.view = camera.GetViewMatrix().Transpose();
-        mvpBuffer->MapTo(&mvpData, sizeof(Cocoa::Vulkan::MVP), 0);
+        renderDevice->GetBufferInstance(mvpBuffer)->MapTo(&mvpData, sizeof(Cocoa::Vulkan::MVP), 0);
         
-        auto encoder = renderDevice->Encode(swapchain.get());
+        auto encoder = renderDevice->Encode(swapchain);
 
         vk::ClearColorValue clearColor;
         clearColor.setFloat32({0.6f, 0.21f, 0.36f, 1.0f});
@@ -341,7 +342,7 @@ int main() {
                     .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
                     .setLoadOp(vk::AttachmentLoadOp::eClear)
                     .setStoreOp(vk::AttachmentStoreOp::eStore)
-                    .setImageView(swapchain->GetCurrentBackBuffer().imageView);
+                    .setImageView(swapchainInstance->GetCurrentBackBuffer().imageView);
         
         vk::RenderingInfo renderingDescriptor;
         renderingDescriptor.setColorAttachments(renderingAttachmentDescriptor)
@@ -361,12 +362,12 @@ int main() {
                 .setY(0);
 
         encoder->StartRendering(renderingDescriptor);
-        encoder->SetRenderPipeline(renderPipeline.get());
+        encoder->SetRenderPipeline(renderPipeline);
         encoder->SetViewport(viewport);
         encoder->SetScissor(scissor);
-        encoder->SetBindGroup(pipelineLayout.get(), mvpBindGroup.get());
-        encoder->SetVertexBuffer(vertexBuffer.get());
-        encoder->SetIndexBuffer(indexBuffer.get());
+        encoder->SetBindGroup(pipelineLayout, mvpBindGroup);
+        encoder->SetVertexBuffer(vertexBuffer);
+        encoder->SetIndexBuffer(indexBuffer);
         encoder->DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
         encoder->EndRendering();
 
@@ -374,19 +375,6 @@ int main() {
     }
 
     std::cout << "Hello World!" << std::endl;
-    
-    renderPipeline.reset();
-    pipelineLayout.reset();
-
-    mvpBindGroup.reset();
-    mvpBuffer.reset();
-    vertexShader.reset();
-    pixelShader.reset();
-    vertexBuffer.reset();
-    indexBuffer.reset();
-
-    swapchain.reset();
-    surface.reset();
     renderDevice.reset();
     SDL_Quit();
     return 0;

@@ -9,6 +9,11 @@ namespace Cocoa::Vulkan {
         RenderPipeline(Device* device, vk::GraphicsPipelineCreateInfo desc);
         ~RenderPipeline();
 
+        RenderPipeline(const RenderPipeline& other) = delete;
+        RenderPipeline(RenderPipeline&& other) noexcept = default;
+        RenderPipeline& operator=(const RenderPipeline& other) = delete;
+        RenderPipeline& operator=(RenderPipeline&& other) noexcept = default;
+
         [[nodiscard]] vk::Pipeline Get() { return _renderPipeline.get(); }
     private:
         Device* _device;

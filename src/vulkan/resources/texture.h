@@ -10,6 +10,11 @@ namespace Cocoa::Vulkan {
         Texture(Device* device, vk::ImageCreateInfo desc, vk::ImageViewCreateInfo* viewDesc);
         ~Texture();
 
+        Texture(const Texture& other) = delete;
+        Texture(Texture&& other) noexcept = default;
+        Texture& operator=(const Texture& other) = delete;
+        Texture& operator=(Texture&& other) noexcept = default;
+
         [[nodiscard]] vk::Image Get() { return _image; }
         [[nodiscard]] vk::ImageView GetView() { return _imageView.get(); }
     private:

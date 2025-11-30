@@ -9,6 +9,11 @@ namespace Cocoa::Vulkan {
         Sampler(Device* device, vk::SamplerCreateInfo desc);
         ~Sampler();
 
+        Sampler(const Sampler& other) = delete;
+        Sampler(Sampler&& other) noexcept = default;
+        Sampler& operator=(const Sampler& other) = delete;
+        Sampler& operator=(Sampler&& other) noexcept = default;
+
         [[nodiscard]] vk::Sampler Get() { return _sampler.get(); }
     private:
         Device* _device;

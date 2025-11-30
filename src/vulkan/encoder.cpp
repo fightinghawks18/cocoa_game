@@ -1,7 +1,8 @@
 #include "encoder.h"
+#include "device.h"
 
 namespace Cocoa::Vulkan {
-    Encoder::Encoder(EncoderDesc desc) : _cmd(desc.cmd), _swapchain(desc.swapchain) {
+    Encoder::Encoder(Device* device, EncoderDesc desc) : _device(device), _cmd(desc.cmd), _swapchain(desc.swapchain) {
         _cmd.reset();
         vk::CommandBufferBeginInfo commandBeginDescriptor{};
         commandBeginDescriptor.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -20,23 +21,23 @@ namespace Cocoa::Vulkan {
         _cmd.endRendering();
     }
 
-    void Encoder::SetRenderPipeline(RenderPipeline* renderPipeline) {
-        _cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, renderPipeline->Get());
+    void Encoder::SetRenderPipeline(RenderPipelineHandle renderPipeline) {
+        _cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, _device->GetRenderPipelineInstance(renderPipeline)->Get());
     }
 
-    void Encoder::SetBindGroup(PipelineLayout* pipelineLayout, BindGroup* bindGroup) {
-        auto set = bindGroup->GetBinding();
-        _cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout->Get(), 0, set, nullptr);
+    void Encoder::SetBindGroup(PipelineLayoutHandle pipelineLayout, BindGroupHandle bindGroup) {
+        auto set = _device->GetBindGroupInstance(bindGroup)->GetBinding();
+        _cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _device->GetPipelineLayoutInstance(pipelineLayout)->Get(), 0, set, nullptr);
     }
     
-    void Encoder::SetVertexBuffer(Buffer* vertexBuffer) {
-        vk::Buffer buffers[] = {vertexBuffer->Get()};
+    void Encoder::SetVertexBuffer(BufferHandle vertexBuffer) {
+        vk::Buffer buffers[] = {_device->GetBufferInstance(vertexBuffer)->Get()};
         vk::DeviceSize offsets[] = {0};
         _cmd.bindVertexBuffers(0, 1, buffers, offsets);
     }
 
-    void Encoder::SetIndexBuffer(Buffer* indexBuffer) {
-        _cmd.bindIndexBuffer(indexBuffer->Get(), 0, vk::IndexType::eUint16);
+    void Encoder::SetIndexBuffer(BufferHandle indexBuffer) {
+        _cmd.bindIndexBuffer(_device->GetBufferInstance(indexBuffer)->Get(), 0, vk::IndexType::eUint16);
     }
 
     void Encoder::SetViewport(vk::Viewport viewport) {

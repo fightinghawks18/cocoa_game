@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "../common.h"
+#include "../handles.h"
 
 namespace Cocoa::Vulkan {
     enum class BindGroupType {
@@ -18,17 +19,17 @@ namespace Cocoa::Vulkan {
     };
 
     struct BindGroupBuffer {
-        vk::Buffer buffer;
+        BufferHandle buffer;
         vk::DeviceSize offset;
         vk::DeviceSize size;
     };
 
     struct BindGroupTexture {
-        vk::ImageView textureView;
+        TextureHandle texture;
     };
 
     struct BindGroupSampler {
-        vk::Sampler sampler;
+        SamplerHandle sampler;
     };
 
     struct BindGroupEntry {
@@ -67,6 +68,11 @@ namespace Cocoa::Vulkan {
     public:
         BindGroup(Device* device, BindGroupDesc desc);
         ~BindGroup() = default;
+
+        BindGroup(const BindGroup& other) = delete;
+        BindGroup(BindGroup&& other) noexcept = default;
+        BindGroup& operator=(const BindGroup& other) = delete;
+        BindGroup& operator=(BindGroup&& other) noexcept = default;
 
         [[nodiscard]] vk::DescriptorSetLayout GetLayout() { return _layout.get(); }
         [[nodiscard]] vk::DescriptorSet GetBinding() { return _set.get(); }

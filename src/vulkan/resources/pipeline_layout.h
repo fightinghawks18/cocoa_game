@@ -9,6 +9,11 @@ namespace Cocoa::Vulkan {
         PipelineLayout(Device* device, vk::PipelineLayoutCreateInfo desc);
         ~PipelineLayout();
 
+        PipelineLayout(const PipelineLayout& other) = delete;
+        PipelineLayout(PipelineLayout&& other) noexcept = default;
+        PipelineLayout& operator=(const PipelineLayout& other) = delete;
+        PipelineLayout& operator=(PipelineLayout&& other) noexcept = default;
+
         [[nodiscard]] vk::PipelineLayout Get() { return _pipelineLayout.get(); }
     private:
         Device* _device;

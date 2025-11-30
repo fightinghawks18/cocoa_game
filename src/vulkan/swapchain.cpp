@@ -7,7 +7,7 @@
 #include "../macros.h"
 
 namespace Cocoa::Vulkan {
-    Swapchain::Swapchain(Device* device, SwapchainDesc desc) : _device(device), _surface(desc.surface) {
+    Swapchain::Swapchain(Device* device, SwapchainDesc desc) : _device(device), _surface(device->GetSurfaceInstance(desc.surface)) {
         CreateSwapchain();
         CreateSemaphores();
         CreateFences();

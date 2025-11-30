@@ -47,7 +47,7 @@ namespace Cocoa::Vulkan {
                 case BindGroupType::UniformBuffer:
                 case BindGroupType::StorageBuffer: {
                     vk::DescriptorBufferInfo bufferInfo;
-                    bufferInfo.buffer = entry.buffer.buffer;
+                    bufferInfo.buffer = device->GetBufferInstance(entry.buffer.buffer)->Get();
                     bufferInfo.offset = entry.buffer.offset;
                     bufferInfo.range = entry.buffer.size;
                     bufferDescriptors.push_back(bufferInfo);
@@ -60,7 +60,7 @@ namespace Cocoa::Vulkan {
                 }
                 case BindGroupType::Texture: {
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setImageView(entry.texture.textureView)
+                    imageDescriptor.setImageView(device->GetTextureInstance(entry.texture.texture)->GetView())
                                 .setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
                     imageDescriptors.push_back(imageDescriptor);
 
@@ -70,7 +70,7 @@ namespace Cocoa::Vulkan {
                 }
                 case BindGroupType::Sampler: {
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setSampler(entry.sampler.sampler);
+                    imageDescriptor.setSampler(device->GetSamplerInstance(entry.sampler.sampler)->Get());
                     imageDescriptors.push_back(imageDescriptor);
 
                     descriptorWrite.descriptorType = vk::DescriptorType::eSampler;

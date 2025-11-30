@@ -48,6 +48,10 @@ if(APPLE)
     target_link_libraries(Cocoa
         PRIVATE "-framework AppKit"
     )
+elseif(WIN32)
+    target_link_options(Cocoa 
+        PRIVATE $<$<CONFIG:Release>:-mwindows>
+    )
 endif()
 
 compile_glsl_dir_to_spirv(content content)

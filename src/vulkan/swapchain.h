@@ -2,10 +2,11 @@
 
 #include <vulkan/vulkan.hpp>
 #include "surface.h"
+#include "handles.h"
 
 namespace Cocoa::Vulkan {
     struct SwapchainDesc {
-        Surface* surface;
+        SurfaceHandle surface;
     };
 
     struct SwapchainBackBuffer {
@@ -18,6 +19,11 @@ namespace Cocoa::Vulkan {
     public:
         Swapchain(Device* device, SwapchainDesc desc);
         ~Swapchain();
+
+        Swapchain(const Swapchain& other) = delete;
+        Swapchain(Swapchain&& other) noexcept = default;
+        Swapchain& operator=(const Swapchain& other) = delete;
+        Swapchain& operator=(Swapchain&& other) noexcept = default;
 
         void Submit(vk::CommandBuffer commandBuffer);
         void Present();

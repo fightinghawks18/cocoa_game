@@ -29,6 +29,11 @@ namespace Cocoa::Vulkan {
         ShaderModule(Device* device, vk::ShaderModuleCreateInfo desc);
         ~ShaderModule();
 
+        ShaderModule(const ShaderModule& other) = delete;
+        ShaderModule(ShaderModule&& other) noexcept = default;
+        ShaderModule& operator=(const ShaderModule& other) = delete;
+        ShaderModule& operator=(ShaderModule&& other) noexcept = default;
+
         [[nodiscard]] vk::ShaderModule Get() { return _shaderMod.get(); }
     private:
         Device* _device;

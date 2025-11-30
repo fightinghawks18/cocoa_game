@@ -2,38 +2,37 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "swapchain.h"
-#include "resources/render_pipeline.h"
-#include "resources/buffer.h"
-#include "resources/bind_group.h"
-#include "resources/pipeline_layout.h"
+#include "handles.h"
 
 namespace Cocoa::Vulkan {
     struct EncoderDesc {
-        Swapchain* swapchain;
+        SwapchainHandle swapchain;
         vk::CommandBuffer cmd;  
     };
 
+    class Device;
     class Encoder {
     public:
-        Encoder(EncoderDesc desc);
+        Encoder(Device* device, EncoderDesc desc);
         ~Encoder();
 
         void StartRendering(vk::RenderingInfo renderDesc);
         void EndRendering();
-        void SetRenderPipeline(RenderPipeline* renderPipeline);
-        void SetBindGroup(PipelineLayout* pipelineLayout, BindGroup* bindGroup);
-        void SetVertexBuffer(Buffer* vertexBuffer);
-        void SetIndexBuffer(Buffer* indexBuffer);
+        void SetRenderPipeline(RenderPipelineHandle renderPipeline);
+        void SetBindGroup(PipelineLayoutHandle pipelineLayout, BindGroupHandle bindGroup);
+        void SetVertexBuffer(BufferHandle vertexBuffer);
+        void SetIndexBuffer(BufferHandle indexBuffer);
         void SetViewport(vk::Viewport viewport);
         void SetScissor(vk::Rect2D scissor);
         void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t vertexOffset, uint32_t firstInstance);
         void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
 
-        [[nodiscard]] Swapchain* GetTargetSwapchain() { return _swapchain; }
+        [[nodiscard]] SwapchainHandle GetTargetSwapchain() { return _swapchain; }
         [[nodiscard]] vk::CommandBuffer GetCommandBuffer() { return _cmd; }
     private:
+        Device* _device;
+
         vk::CommandBuffer _cmd;
-        Swapchain* _swapchain;
+        SwapchainHandle _swapchain;
     };
 }
