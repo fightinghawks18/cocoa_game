@@ -267,6 +267,8 @@ namespace Cocoa::Vulkan {
     }
 
     void Device::CreateDevice() {
+         auto queueFamilies = _gpu.getQueueFamilyProperties();
+
         // Vulkan requires unique queue families, it's possible
         // we may have same family indices so we must accumulate queue count to avoid this
         std::map<uint32_t, uint32_t> uniqueFamilies;
@@ -278,10 +280,13 @@ namespace Cocoa::Vulkan {
 
         std::vector<vk::DeviceQueueCreateInfo> deviceQueueDescriptors;
         for (const auto& [family, count] : uniqueFamilies) {
-            queuePriorities[family] = std::vector<float>(count, 1.0f);
+            auto availableQueueCount = queueFamilies[family].queueCount;
+            auto actualQueueCount = std::min(count, availableQueueCount);
+
+            queuePriorities[family] = std::vector<float>(actualQueueCount, 1.0f);
             vk::DeviceQueueCreateInfo deviceQueueDescriptor;
             deviceQueueDescriptor.setQueuePriorities(queuePriorities[family])
-                                .setQueueCount(count)
+                                .setQueueCount(actualQueueCount)
                                 .setQueueFamilyIndex(family);
             deviceQueueDescriptors.push_back(deviceQueueDescriptor);
         }

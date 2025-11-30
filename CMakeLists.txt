@@ -36,6 +36,12 @@ target_link_libraries(Cocoa
     PRIVATE SDL3::SDL3
 )
 
+if(APPLE)
+    target_link_libraries(Cocoa
+        PRIVATE "-framework AppKit"
+    )
+endif()
+
 compile_glsl_dir_to_spirv(content content)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)

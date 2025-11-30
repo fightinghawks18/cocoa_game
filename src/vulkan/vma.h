@@ -5,7 +5,11 @@
 #pragma clang diagnostic ignored "-Weverything"
 #endif
 
-#include <vma/vk_mem_alloc.h>
+#ifdef _WIN32
+    #include <vma/vk_mem_alloc.h>
+#else
+    #include <vk_mem_alloc.h>
+#endif
 
 #ifdef __clang__
 #pragma clang diagnostic pop
