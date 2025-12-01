@@ -1,7 +1,8 @@
 #include "bind_group.h"
 #include "../device.h"
 
-#include "../helpers.h"
+#include "../internal/helpers/enums.h"
+#include "../internal/helpers/flags.h"
 namespace Cocoa::Vulkan {
     BindGroup::BindGroup(Device* device, Graphics::BindGroupDesc desc) : _device(device) {
         std::vector<vk::DescriptorSetLayoutBinding> vkBindings;

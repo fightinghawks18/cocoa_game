@@ -2,7 +2,7 @@
 #include "../device.h"
 
 #include "../../macros.h"
-#include "../helpers.h"
+#include "../internal/helpers/flags.h"
 
 namespace Cocoa::Vulkan {
     Buffer::Buffer(Device* device, Graphics::BufferDesc desc) : _device(device) {

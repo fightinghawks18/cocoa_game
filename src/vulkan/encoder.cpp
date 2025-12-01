@@ -1,7 +1,7 @@
 #include "encoder.h"
 #include "device.h"
 
-#include "helpers.h"
+#include "internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
     Encoder::Encoder(Device* device, EncoderDesc desc) : _device(device), _cmd(desc.cmd), _swapchain(desc.swapchain) {
