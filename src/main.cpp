@@ -71,7 +71,7 @@ int main() {
     auto mvpBuffer = renderDevice->CreateBuffer(mvpBufferDescriptor);
 
     // Image sampled
-    auto path = (std::filesystem::current_path() / "content" / "texture.png");
+    auto path = (std::filesystem::current_path() / "content" / "texture.jpg");
     int width, height, channels;
     stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
     if (!pixels) {
@@ -117,7 +117,7 @@ int main() {
     renderDevice->EncodeImmediateCommands([&](Cocoa::Vulkan::Encoder& encoder) {
         encoder.UploadBufferToImage(stagingBuffer, imageTexture);
         encoder.TransitionTexture(imageTexture, Cocoa::Graphics::GPUTextureLayout::ShaderReadOnly);
-    });
+    }, Cocoa::Graphics::GPUQueueType::Transfer);
     renderDevice->DestroyBuffer(stagingBuffer);
 
     Cocoa::Graphics::SamplerDesc samplerDescriptor = {};
