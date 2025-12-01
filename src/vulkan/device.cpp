@@ -82,8 +82,12 @@ namespace Cocoa::Vulkan {
         return _shaderModuleResources->Emplace(this, shaderModuleDesc);
     }
 
-    TextureHandle Device::CreateTexture(vk::ImageCreateInfo textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
+    TextureHandle Device::CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
         return _textureResources->Emplace(this, textureDesc, textureViewDesc);
+    }
+
+    TextureHandle Device::CreateTextureWrapped(const vk::Image image, const vk::ImageView view) {
+        return _textureResources->Emplace(this, image, view);
     }
 
     BindGroupHandle Device::CreateBindGroup(BindGroupDesc bindGroupDesc) {
@@ -179,7 +183,7 @@ namespace Cocoa::Vulkan {
                     .setBaseMipLevel(0)
                     .setLevelCount(1);
         vk::ImageMemoryBarrier2 toColor{};
-        toColor.setImage(backBuffer.image)
+        toColor.setImage(GetTextureInstance(backBuffer)->Get())
                     .setSrcStageMask(vk::PipelineStageFlagBits2::eNone)
                     .setSrcAccessMask(vk::AccessFlagBits2::eNone)
                     .setDstStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
@@ -206,7 +210,7 @@ namespace Cocoa::Vulkan {
                     .setBaseMipLevel(0)
                     .setLevelCount(1);
         vk::ImageMemoryBarrier2 toPresent{};
-        toPresent.setImage(backBuffer.image)
+        toPresent.setImage(GetTextureInstance(backBuffer)->Get())
                     .setSrcStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
                     .setSrcAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
                     .setDstStageMask(vk::PipelineStageFlagBits2::eNone)

@@ -281,7 +281,7 @@ int main() {
     Cocoa::Objects::Camera camera;
     camera.SetPosition(Cocoa::Math::Vector3(0, 0, 5));
     camera.SetRotation(Cocoa::Math::Quaternion());
-    camera.SetFieldOfView(80);
+    camera.SetFieldOfView(60);
     camera.SetClipFarBounds(100);
     camera.SetClipNearBounds(0.1);
 
@@ -322,10 +322,10 @@ int main() {
         transform.RotateX(Cocoa::Math::Radians(0.1));
         transform.RotateY(Cocoa::Math::Radians(0.3));
         
-        swapchainInstance->GetNextBackBuffer();
+        auto backBuffer = swapchainInstance->GetNextBackBuffer();
         auto swapchainExtent = swapchainInstance->GetExtent();
 
-        camera.SetAspectRatio(static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height));
+        camera.SetAspectRatio(static_cast<float>(swapchainExtent.w) / static_cast<float>(swapchainExtent.h));
 
         mvpData.model = transform.GetModelMatrix().Transpose();
         mvpData.projection = camera.GetProjectionMatrix().Transpose();
@@ -334,34 +334,35 @@ int main() {
         
         auto encoder = renderDevice->Encode(swapchain);
 
-        vk::ClearColorValue clearColor;
-        clearColor.setFloat32({0.6f, 0.21f, 0.36f, 1.0f});
+        Cocoa::Vulkan::GPUColorPassDesc colorPassDesc = {
+            .texture = backBuffer,
+            .clearColor = {0.6f, 0.21f, 0.36f, 1.0f},
+            .loadOp = Cocoa::Vulkan::GPUPassLoadOp::Clear,
+            .storeOp = Cocoa::Vulkan::GPUPassStoreOp::Store
+        };
 
-        vk::RenderingAttachmentInfo renderingAttachmentDescriptor;
-        renderingAttachmentDescriptor.setClearValue(clearColor)
-                    .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-                    .setLoadOp(vk::AttachmentLoadOp::eClear)
-                    .setStoreOp(vk::AttachmentStoreOp::eStore)
-                    .setImageView(swapchainInstance->GetCurrentBackBuffer().imageView);
-        
-        vk::RenderingInfo renderingDescriptor;
-        renderingDescriptor.setColorAttachments(renderingAttachmentDescriptor)
-                    .setRenderArea({{0, 0}, swapchainExtent})
-                    .setViewMask(0)
-                    .setLayerCount(1);
+        Cocoa::Vulkan::GPUPassDesc passDesc = {
+            .colorPasses = {colorPassDesc},
+            .depthPass = nullptr,
+            .renderArea = {
+                .offset = {0},
+                .extent = swapchainExtent
+            },
+            .viewMask = 0,
+            .layerCount = 1
+        };
 
-        vk::Rect2D scissor;
-        scissor.setOffset({0, 0})
-                .setExtent(swapchainExtent);
-        vk::Viewport viewport;
-        viewport.setWidth(swapchainExtent.width)
-                .setHeight(swapchainExtent.height)
-                .setMaxDepth(1)
-                .setMinDepth(0)
-                .setX(0)
-                .setY(0);
+        Cocoa::Vulkan::Viewport viewport = {
+            .offset = {0},
+            .extent = swapchainExtent,
+        };
 
-        encoder->StartRendering(renderingDescriptor);
+        Cocoa::Vulkan::Rect scissor = {
+            .offset = viewport.offset,
+            .extent = viewport.extent
+        };
+
+        encoder->StartRendering(passDesc);
         encoder->SetRenderPipeline(renderPipeline);
         encoder->SetViewport(viewport);
         encoder->SetScissor(scissor);

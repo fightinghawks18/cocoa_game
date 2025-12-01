@@ -1,17 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include "common.h"
 #include "surface.h"
 #include "handles.h"
 
 namespace Cocoa::Vulkan {
     struct SwapchainDesc {
         SurfaceHandle surface;
-    };
-
-    struct SwapchainBackBuffer {
-        vk::Image image;
-        vk::ImageView imageView;
     };
 
     class Device;
@@ -28,9 +24,9 @@ namespace Cocoa::Vulkan {
         void Submit(vk::CommandBuffer commandBuffer);
         void Present();
 
-        SwapchainBackBuffer GetNextBackBuffer();
-        [[nodiscard]] SwapchainBackBuffer GetCurrentBackBuffer();
-        [[nodiscard]] vk::Extent2D GetExtent() { return _swapchainExtent; }
+        TextureHandle GetNextBackBuffer();
+        [[nodiscard]] TextureHandle GetCurrentBackBuffer();
+        [[nodiscard]] Extent GetExtent() { return _swapchainExtent; }
         [[nodiscard]] vk::Format GetFormat() { return _swapchainFormat; }
         [[nodiscard]] vk::SwapchainKHR Get() { return _swapchain.get(); }
     private:
@@ -39,9 +35,8 @@ namespace Cocoa::Vulkan {
 
         vk::UniqueSwapchainKHR _swapchain;
         vk::Format _swapchainFormat;
-        vk::Extent2D _swapchainExtent;
-        std::vector<vk::Image> _swapchainImages;
-        std::vector<vk::UniqueImageView> _swapchainImageViews;
+        Extent _swapchainExtent;
+        std::vector<TextureHandle> _swapchainImages;
         uint32_t _imageIndex;
 
         std::vector<vk::UniqueFence> _fences;
@@ -53,5 +48,7 @@ namespace Cocoa::Vulkan {
         void CreateFences();
         void CreateSemaphores();
         void Resize();
+
+        void DestroySwapchainImages();
     };
 }

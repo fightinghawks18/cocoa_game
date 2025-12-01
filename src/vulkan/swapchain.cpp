@@ -1,6 +1,5 @@
 #include "swapchain.h"
 
-#include <limits>
 
 #include "device.h"
 
@@ -20,7 +19,7 @@ namespace Cocoa::Vulkan {
         _imageSemaphores.clear();
         _fences.clear();
 
-        _swapchainImageViews.clear();
+        DestroySwapchainImages();
         _swapchain.reset();
     }
 
@@ -60,7 +59,7 @@ namespace Cocoa::Vulkan {
         _frame = (_frame + 1) % 2;
     }
 
-    SwapchainBackBuffer Swapchain::GetNextBackBuffer() {
+    TextureHandle Swapchain::GetNextBackBuffer() {
         vk::Result waitForPreviousOperations = _device->GetDevice().waitForFences(1, &_fences[_frame].get(), true, UINT64_MAX);
         if (waitForPreviousOperations != vk::Result::eSuccess) {
             PANIC("Failed to wait for previous operations");
@@ -75,17 +74,11 @@ namespace Cocoa::Vulkan {
             PANIC("Failed to get next swapchain image index!");
         }
         
-        return {
-            .image = _swapchainImages[_imageIndex],
-            .imageView = _swapchainImageViews[_imageIndex].get()
-        };
+        return _swapchainImages[_imageIndex];
     }
 
-    SwapchainBackBuffer Swapchain::GetCurrentBackBuffer() {
-        return {
-            .image = _swapchainImages[_imageIndex],
-            .imageView = _swapchainImageViews[_imageIndex].get()
-        };
+    TextureHandle Swapchain::GetCurrentBackBuffer() {
+        return _swapchainImages[_imageIndex];
     }
 
     void Swapchain::CreateSwapchain() {
@@ -127,14 +120,15 @@ namespace Cocoa::Vulkan {
 
         _swapchain = _device->GetDevice().createSwapchainKHRUnique(swapchainDescriptor);
         _swapchainFormat = chosenFormat.format;
-        _swapchainExtent = extent;
+        _swapchainExtent = {
+            .w = extent.width,
+            .h = extent.height
+        };
 
         oldSwapchain.reset();
 
-        _swapchainImages = _device->GetDevice().getSwapchainImagesKHR(_swapchain.get());
-
-        _swapchainImageViews.clear();
-        for (const auto& image : _swapchainImages) {
+        auto vkSwapchainImages = _device->GetDevice().getSwapchainImagesKHR(_swapchain.get());
+        for (auto& image : vkSwapchainImages) {
             vk::ComponentMapping components{};
             components.setR(vk::ComponentSwizzle::eIdentity)
                         .setG(vk::ComponentSwizzle::eIdentity)
@@ -153,8 +147,9 @@ namespace Cocoa::Vulkan {
                         .setComponents(components)
                         .setFormat(chosenFormat.format)
                         .setSubresourceRange(subresourceRange);
-            
-            _swapchainImageViews.push_back(_device->GetDevice().createImageViewUnique(imageViewDescriptor));
+            auto imageView = _device->GetDevice().createImageView(imageViewDescriptor);
+
+            _swapchainImages.push_back(_device->CreateTextureWrapped(image, imageView));
         }
     }
 
@@ -180,12 +175,21 @@ namespace Cocoa::Vulkan {
         _renderSemaphores.clear();
         _imageSemaphores.clear();
         _fences.clear();
-        _swapchainImageViews.clear();
+        DestroySwapchainImages();
 
         CreateSwapchain();
         CreateSemaphores();
         CreateFences();
 
         PUSH_INFO("Resized swapchain!");
+    }
+
+    void Swapchain::DestroySwapchainImages() {
+        for (const auto& textureHandle : _swapchainImages) {
+            auto textureInstance = _device->GetTextureInstance(textureHandle);
+            _device->GetDevice().destroyImageView(textureInstance->GetView());
+            _device->DestroyTexture(textureHandle);
+        }
+        _swapchainImages.clear();
     }
 }

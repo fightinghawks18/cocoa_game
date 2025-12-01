@@ -23,6 +23,25 @@ namespace Cocoa::Vulkan {
         std::vector<uint16_t> indices;
     };
 
+    struct Offset {
+        int x, y;
+    };
+
+    struct Extent {
+        uint32_t w, h;
+    };
+
+    struct Viewport {
+        Offset offset;
+        Extent extent;
+        float minDepth, maxDepth;
+    };
+
+    struct Rect {
+        Offset offset;
+        Extent extent;
+    };
+
     enum class GPUShaderStage {
         Unknown = 0,
         Vertex = 1 << 0,

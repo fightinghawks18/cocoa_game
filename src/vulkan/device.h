@@ -21,6 +21,7 @@
 #include "resources/shader_module.h"
 
 namespace Cocoa::Vulkan {
+
     struct DeviceDesc {
         SDL_Window* window;
         std::vector<GPUQueueType> desiredQueues;
@@ -39,7 +40,8 @@ namespace Cocoa::Vulkan {
         RenderPipelineHandle CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc);
         SamplerHandle CreateSampler(vk::SamplerCreateInfo samplerDesc);
         ShaderModuleHandle CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc);
-        TextureHandle CreateTexture(vk::ImageCreateInfo textureDesc, vk::ImageViewCreateInfo* textureViewDesc);
+        TextureHandle CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc);
+        TextureHandle CreateTextureWrapped(const vk::Image image, const vk::ImageView view);
         BindGroupHandle CreateBindGroup(BindGroupDesc bindGroupDesc);
 
         void DestroySurface(SurfaceHandle surface);

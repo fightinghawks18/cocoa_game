@@ -7,7 +7,8 @@ namespace Cocoa::Vulkan {
     class Device;
     class Texture {
     public:
-        Texture(Device* device, vk::ImageCreateInfo desc, vk::ImageViewCreateInfo* viewDesc);
+        Texture(Device* device, const vk::ImageCreateInfo* desc, vk::ImageViewCreateInfo* viewDesc);
+        Texture(Device* device, const vk::Image image, const vk::ImageView view);
         ~Texture();
 
         Texture(const Texture& other) = delete;
@@ -16,11 +17,13 @@ namespace Cocoa::Vulkan {
         Texture& operator=(Texture&& other) noexcept = default;
 
         [[nodiscard]] vk::Image Get() { return _image; }
-        [[nodiscard]] vk::ImageView GetView() { return _imageView.get(); }
+        [[nodiscard]] vk::ImageView GetView() { return _imageView; }
     private:
         Device* _device;
 
-        vk::UniqueImageView _imageView;
+        bool _allocatedImage = false;
+        bool _allocatedView = false;
+        vk::ImageView _imageView;
         vk::Image _image;
         VmaAllocation _allocation;
     };
