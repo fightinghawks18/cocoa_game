@@ -2,6 +2,7 @@
 #include "device.h"
 
 #include "internal/helpers/enums.h"
+#include "internal/helpers/types.h"
 
 namespace Cocoa::Vulkan {
     Encoder::Encoder(Device* device, EncoderDesc desc) : _device(device), _cmd(desc.cmd), _swapchain(desc.swapchain) {
@@ -13,6 +14,32 @@ namespace Cocoa::Vulkan {
 
     Encoder::~Encoder() {
         _cmd.end();
+    }
+
+    void Encoder::TransitionTexture(Graphics::TextureHandle texture, Graphics::GPUTextureLayout newLayout) {
+        auto textureInstance = _device->GetTextureInstance(texture);
+        auto oldLayoutInfo = GetLayoutInfo(GPUTextureLayoutToVk(textureInstance->GetLayout()));
+        auto newLayoutInfo = GetLayoutInfo(GPUTextureLayoutToVk(newLayout));
+
+        vk::ImageSubresourceRange toColorSubresourceRange{};
+        toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+                    .setBaseArrayLayer(0)
+                    .setLayerCount(textureInstance->GetLayers())
+                    .setBaseMipLevel(0)
+                    .setLevelCount(textureInstance->GetLevels());
+        vk::ImageMemoryBarrier2 transition{};
+        transition.setImage(textureInstance->Get())
+                    .setSrcStageMask(oldLayoutInfo.stage)
+                    .setSrcAccessMask(oldLayoutInfo.access)
+                    .setDstStageMask(newLayoutInfo.stage)
+                    .setDstAccessMask(newLayoutInfo.access)
+                    .setOldLayout(GPUTextureLayoutToVk(textureInstance->GetLayout()))
+                    .setNewLayout(GPUTextureLayoutToVk(newLayout))
+                    .setSubresourceRange(toColorSubresourceRange);
+        vk::DependencyInfo dependencyDescriptor{};
+        dependencyDescriptor.setImageMemoryBarriers(transition);
+        _cmd.pipelineBarrier2(dependencyDescriptor);
+        textureInstance->SetLayout(newLayout);
     }
 
     void Encoder::StartRendering(Graphics::GPUPassDesc passDesc) {

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include "../../graphics/descriptors.h"
 
 namespace Cocoa::Vulkan {
     class Device;
     class Sampler {
     public:
-        Sampler(Device* device, vk::SamplerCreateInfo desc);
+        Sampler(Device* device, Graphics::SamplerDesc desc);
         ~Sampler();
 
         Sampler(const Sampler& other) = delete;

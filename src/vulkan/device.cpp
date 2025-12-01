@@ -75,7 +75,7 @@ namespace Cocoa::Vulkan {
         return _renderPipelineResources->Emplace(this, renderPipelineDesc);
     }
 
-    Graphics::SamplerHandle Device::CreateSampler(vk::SamplerCreateInfo samplerDesc) {
+    Graphics::SamplerHandle Device::CreateSampler(Graphics::SamplerDesc samplerDesc) {
         return _samplerResources->Emplace(this, samplerDesc);
     }
 
@@ -172,25 +172,7 @@ namespace Cocoa::Vulkan {
             .cmd = _commandBuffers[_frame].get()
         };
         auto encoder = std::make_unique<Encoder>(this, desc);
-
-        vk::ImageSubresourceRange toColorSubresourceRange{};
-        toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-                    .setBaseArrayLayer(0)
-                    .setLayerCount(1)
-                    .setBaseMipLevel(0)
-                    .setLevelCount(1);
-        vk::ImageMemoryBarrier2 toColor{};
-        toColor.setImage(GetTextureInstance(backBuffer)->Get())
-                    .setSrcStageMask(vk::PipelineStageFlagBits2::eNone)
-                    .setSrcAccessMask(vk::AccessFlagBits2::eNone)
-                    .setDstStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
-                    .setDstAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
-                    .setOldLayout(vk::ImageLayout::eUndefined)
-                    .setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
-                    .setSubresourceRange(toColorSubresourceRange);
-        vk::DependencyInfo dependencyDescriptor{};
-        dependencyDescriptor.setImageMemoryBarriers(toColor);
-        encoder->GetCommandBuffer().pipelineBarrier2(dependencyDescriptor);
+        encoder->TransitionTexture(backBuffer, Graphics::GPUTextureLayout::ColorAttachment);
 
         return encoder;
     }
@@ -200,24 +182,7 @@ namespace Cocoa::Vulkan {
         auto commandBuffer = encoder->GetCommandBuffer();
         auto backBuffer = swapchain->GetCurrentBackBuffer();
 
-        vk::ImageSubresourceRange toColorSubresourceRange{};
-        toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-                    .setBaseArrayLayer(0)
-                    .setLayerCount(1)
-                    .setBaseMipLevel(0)
-                    .setLevelCount(1);
-        vk::ImageMemoryBarrier2 toPresent{};
-        toPresent.setImage(GetTextureInstance(backBuffer)->Get())
-                    .setSrcStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
-                    .setSrcAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)
-                    .setDstStageMask(vk::PipelineStageFlagBits2::eNone)
-                    .setDstAccessMask(vk::AccessFlagBits2::eNone)
-                    .setOldLayout(vk::ImageLayout::eColorAttachmentOptimal)
-                    .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
-                    .setSubresourceRange(toColorSubresourceRange);
-        vk::DependencyInfo dependencyDescriptor;
-        dependencyDescriptor.setImageMemoryBarriers(toPresent);
-        encoder->GetCommandBuffer().pipelineBarrier2(dependencyDescriptor);
+        encoder->TransitionTexture(backBuffer, Graphics::GPUTextureLayout::Present);
         encoder.reset();
         
 

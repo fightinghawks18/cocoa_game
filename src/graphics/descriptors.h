@@ -147,4 +147,16 @@ namespace Cocoa::Graphics {
     struct ShaderModuleDesc {
         std::string shaderPath;
     };
+
+    struct SamplerDesc {
+        GPUFilter magnification = GPUFilter::Linear;
+        GPUFilter minification = GPUFilter::Linear;
+        GPUMipmapMode mipmapMode = GPUMipmapMode::Linear;
+        GPUWrappingMode horizontalWrapping = GPUWrappingMode::Repeat;
+        GPUWrappingMode verticalWrapping = GPUWrappingMode::Repeat;
+        GPUWrappingMode depthWrapping = GPUWrappingMode::Repeat;
+        float minLevel = 0.0f;
+        float maxLevel = 1000.0f;
+        float levelBias = 0.0f;
+    };
 }

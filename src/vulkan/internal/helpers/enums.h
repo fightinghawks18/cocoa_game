@@ -37,6 +37,60 @@ namespace Cocoa::Vulkan {
         }
     }
 
+    inline vk::Filter GPUFilterToVk(Graphics::GPUFilter filter) {
+        switch (filter) {
+            case Graphics::GPUFilter::Linear:
+                return vk::Filter::eLinear;
+            case Graphics::GPUFilter::Nearest:
+                return vk::Filter::eNearest;
+        }
+    }
+
+    inline vk::SamplerMipmapMode GPUMipMapModeToVk(Graphics::GPUMipmapMode mipmapMode) {
+        switch (mipmapMode) {
+            case Graphics::GPUMipmapMode::Linear:
+                return vk::SamplerMipmapMode::eLinear;
+            case Graphics::GPUMipmapMode::Nearest:
+                return vk::SamplerMipmapMode::eNearest;
+        }
+    }
+
+    inline vk::SamplerAddressMode GPUWrappingModeToVk(Graphics::GPUWrappingMode wrappingMode) {
+        switch (wrappingMode) {
+            case Graphics::GPUWrappingMode::Repeat:
+                return vk::SamplerAddressMode::eRepeat;
+            case Graphics::GPUWrappingMode::ClampToEdge:
+                return vk::SamplerAddressMode::eClampToEdge;
+            case Graphics::GPUWrappingMode::ClampToBorder:
+                return vk::SamplerAddressMode::eClampToBorder;
+            case Graphics::GPUWrappingMode::MirroredRepeat:
+                return vk::SamplerAddressMode::eMirroredRepeat;
+        }
+    }
+
+    inline vk::ImageLayout GPUTextureLayoutToVk(Graphics::GPUTextureLayout textureLayout) {
+        switch (textureLayout) {
+            case Graphics::GPUTextureLayout::Unknown:
+                return vk::ImageLayout::eUndefined;
+            case Graphics::GPUTextureLayout::General:
+                return vk::ImageLayout::eGeneral;
+            case Graphics::GPUTextureLayout::ColorAttachment:
+                return vk::ImageLayout::eColorAttachmentOptimal;
+            case Graphics::GPUTextureLayout::DepthStencilAttachment:
+                return vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal;
+            case Graphics::GPUTextureLayout::DepthStencilReadOnly:
+                return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+            case Graphics::GPUTextureLayout::ShaderReadOnly:
+                return vk::ImageLayout::eShaderReadOnlyOptimal;
+            case Graphics::GPUTextureLayout::Present:
+                return vk::ImageLayout::ePresentSrcKHR;
+            case Graphics::GPUTextureLayout::TransferDst:
+                return vk::ImageLayout::eTransferDstOptimal;
+            case Graphics::GPUTextureLayout::TransferSrc:
+                return vk::ImageLayout::eTransferSrcOptimal;
+        }
+    }
+
     inline Graphics::GPUFormat VkToGPUFormat(vk::Format format) {
         switch (format) {
             case vk::Format::eUndefined:

@@ -83,4 +83,21 @@ namespace Cocoa::Graphics {
         ThreeDimensional,
         Cube
     };
+
+    enum class GPUFilter {
+        Linear,
+        Nearest
+    };
+
+    enum class GPUMipmapMode {
+        Linear,
+        Nearest
+    };
+
+    enum class GPUWrappingMode {
+        Repeat,
+        ClampToEdge,
+        ClampToBorder,
+        MirroredRepeat
+    };
 }

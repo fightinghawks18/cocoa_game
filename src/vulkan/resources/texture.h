@@ -17,10 +17,14 @@ namespace Cocoa::Vulkan {
         Texture& operator=(Texture&& other) noexcept = default;
 
         TextureView* CreateView(Graphics::TextureViewDesc viewDesc);
+        void SetLayout(Graphics::GPUTextureLayout layout) { _layout = layout; }
 
         [[nodiscard]] vk::Image Get() { return _image; }
         [[nodiscard]] std::vector<TextureView*> GetViews();
         [[nodiscard]] TextureView* GetView(uint32_t index) { return _imageViews[index].get(); }
+        [[nodiscard]] Graphics::GPUTextureLayout GetLayout() { return _layout; }
+        [[nodiscard]] uint32_t GetLevels() { return _levels; }
+        [[nodiscard]] uint32_t GetLayers() { return _layers; }
     private:
         Device* _device;
 
@@ -28,5 +32,9 @@ namespace Cocoa::Vulkan {
         std::vector<std::unique_ptr<TextureView>> _imageViews;
         vk::Image _image;
         VmaAllocation _allocation;
+        Graphics::GPUTextureLayout _layout = Graphics::GPUTextureLayout::Unknown;
+
+        uint32_t _levels;
+        uint32_t _layers;
     };
 }

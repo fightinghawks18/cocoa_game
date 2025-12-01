@@ -5,7 +5,7 @@
 #include "../internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
-    TextureView::TextureView(Device* device, Texture* texture, Graphics::TextureViewDesc viewDesc) : _device(device), _texture(texture) {
+    TextureView::TextureView(Device* device, Texture* texture, Graphics::TextureViewDesc viewDesc) : _device(device), _texture(texture), _aspect(viewDesc.aspect) {
         vk::ComponentMapping components{};
         components.setR(vk::ComponentSwizzle::eIdentity)
                     .setG(vk::ComponentSwizzle::eIdentity)

@@ -4,7 +4,7 @@
 #include "../../macros.h"
 
 namespace Cocoa::Vulkan {
-    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device) {
+    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device), _layout(desc.initialLayout), _levels(desc.levels), _layers(desc.layers) {
         if (!desc.external) {
             VmaAllocationCreateInfo allocationDescriptor = {0};
             allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;

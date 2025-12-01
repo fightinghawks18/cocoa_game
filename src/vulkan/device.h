@@ -33,7 +33,7 @@ namespace Cocoa::Vulkan {
         Graphics::BufferHandle CreateBuffer(Graphics::BufferDesc bufferDesc);
         Graphics::PipelineLayoutHandle CreatePipelineLayout(Graphics::PipelineLayoutDesc pipelineLayoutDesc);
         Graphics::RenderPipelineHandle CreateRenderPipeline(Graphics::PipelineDesc renderPipelineDesc);
-        Graphics::SamplerHandle CreateSampler(vk::SamplerCreateInfo samplerDesc);
+        Graphics::SamplerHandle CreateSampler(Graphics::SamplerDesc samplerDesc);
         Graphics::ShaderModuleHandle CreateShaderModule(Graphics::ShaderModuleDesc shaderModuleDesc);
         Graphics::TextureHandle CreateTexture(Graphics::TextureDesc textureDesc);
         Graphics::BindGroupHandle CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc);
