@@ -1,6 +1,5 @@
 #include <iostream>
 #include <memory>
-#include <filesystem>
 
 #include <vulkan/vulkan.hpp>
 
@@ -50,16 +49,14 @@ int main() {
     auto swapchain = renderDevice->CreateSwapchain(swapchainDesc);
     auto swapchainInstance = renderDevice->GetSwapchainInstance(swapchain);
 
-    auto currentDirectory = std::filesystem::current_path();
-    auto vertexShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.vert.spv").string());
-    vk::ShaderModuleCreateInfo vertexShaderDescriptor;
-    vertexShaderDescriptor.setCode(vertexShaderCode);
-
+    Cocoa::Graphics::ShaderModuleDesc vertexShaderDescriptor = {
+        .shaderPath = "content/vertex.vert.spv"
+    };
     auto vertexShader = renderDevice->CreateShaderModule(vertexShaderDescriptor);
 
-    auto pixelShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.frag.spv").string());
-    vk::ShaderModuleCreateInfo pixelShaderDescriptor;
-    pixelShaderDescriptor.setCode(pixelShaderCode);
+    Cocoa::Graphics::ShaderModuleDesc pixelShaderDescriptor = {
+        .shaderPath = "content/vertex.frag.spv"
+    };
     auto pixelShader = renderDevice->CreateShaderModule(pixelShaderDescriptor);
     
     Cocoa::Graphics::BufferDesc mvpBufferDescriptor = {

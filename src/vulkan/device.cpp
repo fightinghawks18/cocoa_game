@@ -79,7 +79,7 @@ namespace Cocoa::Vulkan {
         return _samplerResources->Emplace(this, samplerDesc);
     }
 
-    Graphics::ShaderModuleHandle Device::CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc) {
+    Graphics::ShaderModuleHandle Device::CreateShaderModule(Graphics::ShaderModuleDesc shaderModuleDesc) {
         return _shaderModuleResources->Emplace(this, shaderModuleDesc);
     }
 

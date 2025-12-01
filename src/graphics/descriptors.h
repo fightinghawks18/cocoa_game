@@ -143,4 +143,8 @@ namespace Cocoa::Graphics {
         uint32_t firstLayer = 0;
         uint32_t layers = 1;
     };
+
+    struct ShaderModuleDesc {
+        std::string shaderPath;
+    };
 }

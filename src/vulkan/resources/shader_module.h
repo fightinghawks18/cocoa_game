@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vulkan/vulkan.hpp>
 
+#include "../../graphics/descriptors.h"
 #include "../../macros.h"
 
 namespace Cocoa::Vulkan {
@@ -26,7 +27,7 @@ namespace Cocoa::Vulkan {
     class Device;
     class ShaderModule {
     public:
-        ShaderModule(Device* device, vk::ShaderModuleCreateInfo desc);
+        ShaderModule(Device* device, Graphics::ShaderModuleDesc desc);
         ~ShaderModule();
 
         ShaderModule(const ShaderModule& other) = delete;

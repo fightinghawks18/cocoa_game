@@ -31,8 +31,11 @@ namespace Cocoa::Vulkan {
     }
 
     Texture::~Texture() {
-        if (!_allocatedImage) return;
+        if (!_allocatedImage && _imageViews.empty()) return;
         _device->GetDevice().waitIdle();
+
+        _imageViews.clear();
+        if (!_allocatedImage) return;
         vmaDestroyImage(_device->GetAllocator(), _image, _allocation);
     }
 
