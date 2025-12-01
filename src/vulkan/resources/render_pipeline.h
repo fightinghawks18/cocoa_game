@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include "../../graphics/descriptors.h"
 
 namespace Cocoa::Vulkan {
     class Device;
     class RenderPipeline {
     public:
-        RenderPipeline(Device* device, vk::GraphicsPipelineCreateInfo desc);
+        RenderPipeline(Device* device, Graphics::PipelineDesc desc);
         ~RenderPipeline();
 
         RenderPipeline(const RenderPipeline& other) = delete;

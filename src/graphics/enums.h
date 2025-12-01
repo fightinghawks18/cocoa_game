@@ -7,7 +7,7 @@ namespace Cocoa::Graphics {
     };
 
     enum class GPUQueueType {
-        Unknown,
+        Unknown = 0,
         Graphics,
         Compute,
         Transfer
@@ -29,5 +29,33 @@ namespace Cocoa::Graphics {
         StorageBuffer,
         Texture,
         Sampler
+    };
+
+    enum class GPUTopology {
+        TriangleList
+    };
+
+    enum class GPUPolygonMode {
+        Fill,
+        Line
+    };
+
+    enum class GPUCullMode {
+        None = 0,
+        Frontside,
+        Backside,
+        Both
+    };
+    
+    enum class GPUFrontFace {
+        Clockwise,
+        CounterClockwise
+    };
+
+    enum class GPUFormat {
+        Unknown = 0,
+        BGRA8_SRGB,
+        RGB32_SFLOAT,
+        RGBA32_SFLOAT
     };
 }

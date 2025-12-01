@@ -19,4 +19,10 @@ namespace Cocoa::Vulkan {
         if (stage & Graphics::GPUShaderStage::Pixel) flags |= vk::ShaderStageFlagBits::eFragment;
         return flags;
     }
+
+    inline vk::ShaderStageFlagBits GPUShaderStageToVkBit(Graphics::GPUShaderStage stage) {
+        if (stage & Graphics::GPUShaderStage::Vertex) return vk::ShaderStageFlagBits::eVertex;
+        if (stage & Graphics::GPUShaderStage::Pixel) return vk::ShaderStageFlagBits::eFragment;
+        return vk::ShaderStageFlagBits::eAll;
+    }
 }

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include "../../graphics/descriptors.h"
 
 namespace Cocoa::Vulkan {
     class Device;
     class PipelineLayout {
     public:
-        PipelineLayout(Device* device, vk::PipelineLayoutCreateInfo desc);
+        PipelineLayout(Device* device, Graphics::PipelineLayoutDesc desc);
         ~PipelineLayout();
 
         PipelineLayout(const PipelineLayout& other) = delete;

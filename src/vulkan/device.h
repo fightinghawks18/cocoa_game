@@ -31,8 +31,8 @@ namespace Cocoa::Vulkan {
         Graphics::SurfaceHandle CreateSurface(SDL_Window* window);
         Graphics::SwapchainHandle CreateSwapchain(SwapchainDesc swapchainDesc);
         Graphics::BufferHandle CreateBuffer(Graphics::BufferDesc bufferDesc);
-        Graphics::PipelineLayoutHandle CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc);
-        Graphics::RenderPipelineHandle CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc);
+        Graphics::PipelineLayoutHandle CreatePipelineLayout(Graphics::PipelineLayoutDesc pipelineLayoutDesc);
+        Graphics::RenderPipelineHandle CreateRenderPipeline(Graphics::PipelineDesc renderPipelineDesc);
         Graphics::SamplerHandle CreateSampler(vk::SamplerCreateInfo samplerDesc);
         Graphics::ShaderModuleHandle CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc);
         Graphics::TextureHandle CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc);

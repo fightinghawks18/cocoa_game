@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <vector>
 #include <SDL3/SDL.h>
 
@@ -70,5 +71,54 @@ namespace Cocoa::Graphics {
     struct BindGroupDesc {
         BindGroupLayoutDesc* layout;
         std::vector<BindGroupEntry> entries;
+    };
+
+    struct PipelineLayoutDesc {
+        std::vector<BindGroupHandle> bindGroups;
+    };
+
+    struct PipelineVertexAttribute {
+        GPUFormat format;
+        uint32_t offset;
+    };
+
+    struct PipelineVertexBinding {
+        uint32_t binding;
+        uint32_t stride;
+        std::vector<PipelineVertexAttribute> attributes;
+
+        PipelineVertexBinding& Attribute(GPUFormat format, uint32_t offset) {
+            attributes.push_back({
+                .format = format,
+                .offset = offset
+            });
+            return *this;
+        }
+    };
+
+    struct PipelineDesc {
+        std::unordered_map<GPUShaderStage, ShaderModuleHandle> shaders;
+        std::vector<PipelineVertexBinding> vertexLayout;
+        GPUTopology topology = GPUTopology::TriangleList;
+        GPUCullMode cullMode = GPUCullMode::Backside;
+        GPUPolygonMode polygonMode = GPUPolygonMode::Fill;
+        GPUFrontFace frontFace = GPUFrontFace::CounterClockwise;
+        GPUFormat colorFormat = GPUFormat::BGRA8_SRGB;
+        GPUFormat depthFormat = GPUFormat::Unknown;
+        GPUFormat stencilFormat = GPUFormat::Unknown;
+        PipelineLayoutHandle pipelineLayout;
+
+        void AddShader(GPUShaderStage stage, ShaderModuleHandle shaderModule) {
+            shaders[stage] = shaderModule;
+        }
+
+        PipelineVertexBinding& Bind(uint32_t binding, uint32_t stride) {
+            vertexLayout.push_back({
+                .binding = binding,
+                .stride = stride,
+                .attributes = {}
+            });
+            return vertexLayout.back();
+        }
     };
 }

@@ -50,9 +50,6 @@ int main() {
     auto swapchain = renderDevice->CreateSwapchain(swapchainDesc);
     auto swapchainInstance = renderDevice->GetSwapchainInstance(swapchain);
 
-    auto swapchainFormat = swapchainInstance->GetFormat();
-    vk::Format depthFormat = vk::Format::eD32Sfloat;
-
     auto currentDirectory = std::filesystem::current_path();
     auto vertexShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / "content" / "vertex.vert.spv").string());
     vk::ShaderModuleCreateInfo vertexShaderDescriptor;
@@ -93,161 +90,22 @@ int main() {
     };
 
     auto mvpBindGroup = renderDevice->CreateBindGroup(mvpBindGroupDesc);
-    auto layouts = { renderDevice->GetBindGroupInstance(mvpBindGroup)->GetLayout() };
 
-    vk::PipelineLayoutCreateInfo pipelineLayoutDescriptor;
-    pipelineLayoutDescriptor.setSetLayouts(layouts)
-                .setPushConstantRanges(nullptr);
-
-    auto pipelineLayout = renderDevice->CreatePipelineLayout(pipelineLayoutDescriptor);
-
-    std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = {
-        vk::PipelineShaderStageCreateInfo(
-            {},
-            vk::ShaderStageFlagBits::eVertex,
-            renderDevice->GetShaderModuleInstance(vertexShader)->Get(),
-            "main"
-        ),
-        vk::PipelineShaderStageCreateInfo(
-            {},
-            vk::ShaderStageFlagBits::eFragment,
-            renderDevice->GetShaderModuleInstance(pixelShader)->Get(),
-            "main"
-        )
+    Cocoa::Graphics::PipelineLayoutDesc pipelineLayoutDesc = {
+        .bindGroups = {mvpBindGroup}
     };
 
-    vk::VertexInputAttributeDescription posAttribute(
-        0,
-        0,
-        vk::Format::eR32G32B32Sfloat,
-        offsetof(Cocoa::Graphics::Vertex, pos)
-    );
+    auto pipelineLayout = renderDevice->CreatePipelineLayout(pipelineLayoutDesc);
+    Cocoa::Graphics::PipelineDesc pipelineDescriptor{};
+    pipelineDescriptor.AddShader(Cocoa::Graphics::GPUShaderStage::Vertex, vertexShader);
+    pipelineDescriptor.AddShader(Cocoa::Graphics::GPUShaderStage::Pixel, pixelShader);
+    pipelineDescriptor.Bind(0, sizeof(Cocoa::Graphics::Vertex))
+                .Attribute(Cocoa::Graphics::GPUFormat::RGB32_SFLOAT, offsetof(Cocoa::Graphics::Vertex, pos))
+                .Attribute(Cocoa::Graphics::GPUFormat::RGBA32_SFLOAT, offsetof(Cocoa::Graphics::Vertex, col));
+    pipelineDescriptor.cullMode = Cocoa::Graphics::GPUCullMode::None;
+    pipelineDescriptor.pipelineLayout = pipelineLayout;
 
-    vk::VertexInputAttributeDescription colAttribute(
-        1,
-        0,
-        vk::Format::eR32G32B32A32Sfloat,
-        offsetof(Cocoa::Graphics::Vertex, col)
-    );
-
-    std::vector attributes = {
-        posAttribute,
-        colAttribute
-    };
-
-    vk::VertexInputBindingDescription vertexBinding(
-        0,
-        sizeof(Cocoa::Graphics::Vertex),
-        vk::VertexInputRate::eVertex
-    );
-    
-    vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
-    vertexInputInfo.setVertexAttributeDescriptions(attributes)
-                .setVertexBindingDescriptions(vertexBinding);
-
-    vk::PipelineInputAssemblyStateCreateInfo inputAssembly(
-        {},
-        vk::PrimitiveTopology::eTriangleList,
-        VK_FALSE
-    );
-
-    vk::PipelineViewportStateCreateInfo viewportState(
-        {},
-        1, nullptr,
-        1, nullptr
-    );
-
-    vk::PipelineRasterizationStateCreateInfo rasterizer(
-        {},
-        VK_FALSE,  
-        VK_FALSE,
-        vk::PolygonMode::eFill,
-        vk::CullModeFlagBits::eNone,
-        vk::FrontFace::eCounterClockwise,
-        VK_FALSE,
-        0.0f, 0.0f, 0.0f,
-        1.0f  
-    );
-
-    vk::PipelineMultisampleStateCreateInfo multisampling(
-        {},
-        vk::SampleCountFlagBits::e1,
-        VK_FALSE,
-        1.0f,
-        nullptr,
-        VK_FALSE,
-        VK_FALSE
-    );
-
-    vk::PipelineColorBlendAttachmentState colorBlendAttachment(
-        VK_FALSE,
-        vk::BlendFactor::eOne,
-        vk::BlendFactor::eZero,
-        vk::BlendOp::eAdd,
-        vk::BlendFactor::eOne,
-        vk::BlendFactor::eZero,
-        vk::BlendOp::eAdd,
-        vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | 
-        vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
-    );
-
-    vk::PipelineColorBlendStateCreateInfo colorBlending(
-        {},
-        VK_FALSE,
-        vk::LogicOp::eCopy,
-        1, &colorBlendAttachment,
-        {0.0f, 0.0f, 0.0f, 0.0f} 
-    );
-
-    std::vector<vk::DynamicState> dynamicStates = {
-        vk::DynamicState::eViewport,
-        vk::DynamicState::eScissor
-    };
-
-    vk::PipelineDynamicStateCreateInfo dynamicState(
-        {},
-        dynamicStates.size(),
-        dynamicStates.data()
-    );
-
-    vk::PipelineDepthStencilStateCreateInfo depthStencil(
-        {},
-        VK_TRUE,
-        VK_TRUE,
-        vk::CompareOp::eLess,
-        VK_FALSE,
-        VK_FALSE,
-        {},
-        {},
-        0.0f, 1.0f
-    );
-
-
-    vk::PipelineRenderingCreateInfo pipelineRenderingInfo(
-        0,
-        1,
-        &swapchainFormat,
-        depthFormat,
-        vk::Format::eUndefined
-    );
-
-    vk::GraphicsPipelineCreateInfo renderPipelineDescriptor{};
-    renderPipelineDescriptor.setStages(shaderStages)
-                .setPNext(&pipelineRenderingInfo)
-                .setPVertexInputState(&vertexInputInfo)
-                .setPInputAssemblyState(&inputAssembly)
-                .setPTessellationState(nullptr)
-                .setPViewportState(&viewportState)
-                .setPRasterizationState(&rasterizer)
-                .setPMultisampleState(&multisampling)
-                .setPDepthStencilState(&depthStencil)
-                .setPColorBlendState(&colorBlending)
-                .setPDynamicState(&dynamicState)
-                .setLayout(renderDevice->GetPipelineLayoutInstance(pipelineLayout)->Get())
-                .setRenderPass(nullptr)
-                .setSubpass(0);
-
-    auto renderPipeline = renderDevice->CreateRenderPipeline(renderPipelineDescriptor);
+    auto renderPipeline = renderDevice->CreateRenderPipeline(pipelineDescriptor);
 
     auto plane = Cocoa::Vulkan::CreatePlaneIndexed();
 

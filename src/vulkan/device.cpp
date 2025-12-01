@@ -67,11 +67,11 @@ namespace Cocoa::Vulkan {
         return _bufferResources->Emplace(this, bufferDesc);
     }
 
-    Graphics::PipelineLayoutHandle Device::CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc) {
+    Graphics::PipelineLayoutHandle Device::CreatePipelineLayout(Graphics::PipelineLayoutDesc pipelineLayoutDesc) {
         return _pipelineLayoutResources->Emplace(this, pipelineLayoutDesc);
     }
 
-    Graphics::RenderPipelineHandle Device::CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc) {
+    Graphics::RenderPipelineHandle Device::CreateRenderPipeline(Graphics::PipelineDesc renderPipelineDesc) {
         return _renderPipelineResources->Emplace(this, renderPipelineDesc);
     }
 
