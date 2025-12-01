@@ -6,9 +6,10 @@
 #include "../macros.h"
 #include "../graphics/enums.h"
 #include "../graphics/handles.h"
+#include "internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
-    Swapchain::Swapchain(Device* device, SwapchainDesc desc) : _device(device), _surface(device->GetSurfaceInstance(desc.surface)) {
+    Swapchain::Swapchain(Device* device, Graphics::SwapchainDesc desc) : _device(device), _surface(device->GetSurfaceInstance(desc.surface)) {
         CreateSwapchain();
         CreateSemaphores();
         CreateFences();
@@ -131,27 +132,18 @@ namespace Cocoa::Vulkan {
 
         auto vkSwapchainImages = _device->GetDevice().getSwapchainImagesKHR(_swapchain.get());
         for (auto& image : vkSwapchainImages) {
-            vk::ComponentMapping components{};
-            components.setR(vk::ComponentSwizzle::eIdentity)
-                        .setG(vk::ComponentSwizzle::eIdentity)
-                        .setB(vk::ComponentSwizzle::eIdentity)
-                        .setA(vk::ComponentSwizzle::eIdentity);
-            vk::ImageSubresourceRange subresourceRange{};
-            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
-                        .setBaseArrayLayer(0)
-                        .setLayerCount(1)
-                        .setBaseMipLevel(0)
-                        .setLevelCount(1);
+            Graphics::TextureDesc textureDescriptor = {
+                .external = image
+            };
 
-            vk::ImageViewCreateInfo imageViewDescriptor{};
-            imageViewDescriptor.setImage(image)
-                        .setViewType(vk::ImageViewType::e2D)
-                        .setComponents(components)
-                        .setFormat(chosenFormat.format)
-                        .setSubresourceRange(subresourceRange);
-            auto imageView = _device->GetDevice().createImageView(imageViewDescriptor);
+            Graphics::TextureViewDesc viewDescriptor = {
+                .format = VkToGPUFormat(chosenFormat.format)
+            };
 
-            _swapchainImages.push_back(_device->CreateTextureWrapped(image, imageView));
+            auto texture = _device->CreateTexture(textureDescriptor);
+            auto textureInstance = _device->GetTextureInstance(texture);
+            textureInstance->CreateView(viewDescriptor);
+            _swapchainImages.push_back(texture);
         }
     }
 
@@ -188,8 +180,6 @@ namespace Cocoa::Vulkan {
 
     void Swapchain::DestroySwapchainImages() {
         for (const auto& textureHandle : _swapchainImages) {
-            auto textureInstance = _device->GetTextureInstance(textureHandle);
-            _device->GetDevice().destroyImageView(textureInstance->GetView());
             _device->DestroyTexture(textureHandle);
         }
         _swapchainImages.clear();

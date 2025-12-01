@@ -3,18 +3,16 @@
 #include <vulkan/vulkan.hpp>
 #include "surface.h"
 
+#include "../graphics/descriptors.h"
 #include "../graphics/handles.h"
 #include "../graphics/types.h"
 
 namespace Cocoa::Vulkan {
-    struct SwapchainDesc {
-        Graphics::SurfaceHandle surface;
-    };
 
     class Device;
     class Swapchain {
     public:
-        Swapchain(Device* device, SwapchainDesc desc);
+        Swapchain(Device* device, Graphics::SwapchainDesc desc);
         ~Swapchain();
 
         Swapchain(const Swapchain& other) = delete;

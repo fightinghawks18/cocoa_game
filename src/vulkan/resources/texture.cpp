@@ -4,8 +4,8 @@
 #include "../../macros.h"
 
 namespace Cocoa::Vulkan {
-    Texture::Texture(Device* device, const vk::ImageCreateInfo* desc, vk::ImageViewCreateInfo* viewDesc) : _device(device) {
-        if (desc) {
+    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device) {
+        if (!desc.external) {
             VmaAllocationCreateInfo allocationDescriptor = {0};
             allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;
             allocationDescriptor.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
@@ -24,23 +24,31 @@ namespace Cocoa::Vulkan {
             }
             _image = image;
             _allocatedImage = true;
+            return;
         }
 
-        if (!viewDesc) return;
-        viewDesc->setImage(_image);
-        _imageView = _device->GetDevice().createImageView(*viewDesc);
-        _allocatedView = true;
+        _image = reinterpret_cast<VkImage>(desc.external);
     }
 
-    Texture::Texture(Device* device, const vk::Image image, const vk::ImageView view) : _device(device), _imageView(view), _image(image) {}
-
     Texture::~Texture() {
-        if (!_allocatedImage && !_allocatedView) return;
+        if (!_allocatedImage) return;
         _device->GetDevice().waitIdle();
-
-        if (!_imageView) return;
-        _device->GetDevice().destroyImageView(_imageView);
-        if (!_allocatedImage || !_image) return;
         vmaDestroyImage(_device->GetAllocator(), _image, _allocation);
+    }
+
+    TextureView* Texture::CreateView(Graphics::TextureViewDesc viewDesc) {
+        auto view = std::make_unique<TextureView>(_device, this, viewDesc);
+        auto ptr = view.get();
+        _imageViews.push_back(std::move(view));
+        return ptr;
+    }
+
+    std::vector<TextureView*> Texture::GetViews() {
+        std::vector<TextureView*> rawVector;
+        rawVector.reserve(_imageViews.size());
+        for (const auto& view : _imageViews) {
+            rawVector.push_back(view.get());
+        }
+        return rawVector;
     }
 }

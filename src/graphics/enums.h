@@ -24,7 +24,7 @@ namespace Cocoa::Graphics {
         DontCare
     };
 
-    enum class BindGroupType {
+    enum class GPUBindGroupType {
         UniformBuffer,
         StorageBuffer,
         Texture,
@@ -57,5 +57,30 @@ namespace Cocoa::Graphics {
         BGRA8_SRGB,
         RGB32_SFLOAT,
         RGBA32_SFLOAT
+    };
+
+    enum class GPUTextureDimension {
+        One,
+        Two,
+        Three
+    };
+
+    enum class GPUTextureLayout {
+        Unknown = 0,
+        General,
+        ColorAttachment,
+        DepthStencilAttachment,
+        DepthStencilReadOnly,
+        ShaderReadOnly,
+        TransferSrc,
+        TransferDst,
+        Present
+    };
+
+    enum class GPUTextureViewType {
+        OneDimensional,
+        TwoDimensional,
+        ThreeDimensional,
+        Cube
     };
 }

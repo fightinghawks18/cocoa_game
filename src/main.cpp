@@ -44,7 +44,7 @@ int main() {
     auto renderDevice = std::make_unique<Cocoa::Vulkan::Device>(desc);
     auto surface = renderDevice->CreateSurface(window);
     
-    Cocoa::Vulkan::SwapchainDesc swapchainDesc = {
+    Cocoa::Graphics::SwapchainDesc swapchainDesc = {
         .surface = surface
     };
     auto swapchain = renderDevice->CreateSwapchain(swapchainDesc);
@@ -72,7 +72,7 @@ int main() {
     Cocoa::Graphics::BindGroupLayoutEntry mvpLayout = {
         .binding = 0,
         .visibility = Cocoa::Graphics::GPUShaderStage::Vertex,
-        .type = Cocoa::Graphics::BindGroupType::UniformBuffer
+        .type = Cocoa::Graphics::GPUBindGroupType::UniformBuffer
     };
 
     Cocoa::Graphics::BindGroupLayoutDesc mvpBindGroupLayout = {

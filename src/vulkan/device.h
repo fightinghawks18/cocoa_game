@@ -29,14 +29,13 @@ namespace Cocoa::Vulkan {
         ~Device();
 
         Graphics::SurfaceHandle CreateSurface(SDL_Window* window);
-        Graphics::SwapchainHandle CreateSwapchain(SwapchainDesc swapchainDesc);
+        Graphics::SwapchainHandle CreateSwapchain(Graphics::SwapchainDesc swapchainDesc);
         Graphics::BufferHandle CreateBuffer(Graphics::BufferDesc bufferDesc);
         Graphics::PipelineLayoutHandle CreatePipelineLayout(Graphics::PipelineLayoutDesc pipelineLayoutDesc);
         Graphics::RenderPipelineHandle CreateRenderPipeline(Graphics::PipelineDesc renderPipelineDesc);
         Graphics::SamplerHandle CreateSampler(vk::SamplerCreateInfo samplerDesc);
         Graphics::ShaderModuleHandle CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc);
-        Graphics::TextureHandle CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc);
-        Graphics::TextureHandle CreateTextureWrapped(const vk::Image image, const vk::ImageView view);
+        Graphics::TextureHandle CreateTexture(Graphics::TextureDesc textureDesc);
         Graphics::BindGroupHandle CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc);
 
         void DestroySurface(Graphics::SurfaceHandle surface);

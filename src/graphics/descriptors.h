@@ -52,7 +52,7 @@ namespace Cocoa::Graphics {
     struct BindGroupLayoutEntry {
         uint32_t binding;
         GPUShaderStage visibility;
-        BindGroupType type;
+        GPUBindGroupType type;
     };
 
     struct BindGroupEntry {
@@ -120,5 +120,27 @@ namespace Cocoa::Graphics {
             });
             return vertexLayout.back();
         }
+    };
+
+    struct TextureDesc {
+        GPUTextureDimension dimension = GPUTextureDimension::Two;
+        GPUTextureUsage usage = GPUTextureUsage::Unknown;
+        GPUFormat format = GPUFormat::Unknown;
+        GPUTextureLayout initialLayout = GPUTextureLayout::Unknown;
+        GPUSamplingCount samples = GPUSamplingCount::None;
+        Extent3D extent = {};
+        uint32_t levels = 1;
+        uint32_t layers = 1;
+        void* external = nullptr;
+    };
+
+    struct TextureViewDesc {
+        GPUTextureViewType type = GPUTextureViewType::TwoDimensional;
+        GPUFormat format = GPUFormat::Unknown;
+        GPUTextureAspect aspect = GPUTextureAspect::Color;
+        uint32_t firstLevel = 0;
+        uint32_t levels = 1;
+        uint32_t firstLayer = 0;
+        uint32_t layers = 1;
     };
 }

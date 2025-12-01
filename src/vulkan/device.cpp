@@ -59,7 +59,7 @@ namespace Cocoa::Vulkan {
         return _surfaceResources->Emplace(this, window);
     }
 
-    Graphics::SwapchainHandle Device::CreateSwapchain(SwapchainDesc swapchainDesc) {
+    Graphics::SwapchainHandle Device::CreateSwapchain(Graphics::SwapchainDesc swapchainDesc) {
         return _swapchainResources->Emplace(this, swapchainDesc);
     }
 
@@ -83,12 +83,8 @@ namespace Cocoa::Vulkan {
         return _shaderModuleResources->Emplace(this, shaderModuleDesc);
     }
 
-    Graphics::TextureHandle Device::CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
-        return _textureResources->Emplace(this, textureDesc, textureViewDesc);
-    }
-
-    Graphics::TextureHandle Device::CreateTextureWrapped(const vk::Image image, const vk::ImageView view) {
-        return _textureResources->Emplace(this, image, view);
+    Graphics::TextureHandle Device::CreateTexture(Graphics::TextureDesc textureDesc) {
+        return _textureResources->Emplace(this, textureDesc);
     }
 
     Graphics::BindGroupHandle Device::CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc) {

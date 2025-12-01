@@ -30,6 +30,10 @@ namespace Cocoa::Graphics {
         uint32_t w, h;
     };
 
+    struct Extent3D {
+        uint32_t w, h, d;
+    };
+
     struct Viewport {
         Offset offset;
         Extent extent;

@@ -34,6 +34,7 @@ add_executable(Cocoa
     src/vulkan/resources/render_pipeline.cpp
     src/vulkan/resources/pipeline_layout.cpp
     src/vulkan/resources/texture.cpp
+    src/vulkan/resources/texture_view.cpp
     src/vulkan/resources/bind_group.cpp
 )
 

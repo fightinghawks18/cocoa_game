@@ -30,7 +30,7 @@ namespace Cocoa::Vulkan {
                         .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
                         .setLoadOp(GPUPassLoadOpToVk(colorPass.loadOp))
                         .setStoreOp(GPUPassStoreOpToVk(colorPass.storeOp))
-                        .setImageView(_device->GetTextureInstance(colorPass.texture)->GetView());
+                        .setImageView(_device->GetTextureInstance(colorPass.texture)->GetView(0)->Get());
             renderColorDescs.push_back(colorAttachment);
         }
 
@@ -45,7 +45,7 @@ namespace Cocoa::Vulkan {
                         .setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
                         .setLoadOp(GPUPassLoadOpToVk(passDesc.depthPass->loadOp))
                         .setStoreOp(GPUPassStoreOpToVk(passDesc.depthPass->storeOp))
-                        .setImageView(_device->GetTextureInstance(passDesc.depthPass->texture)->GetView());
+                        .setImageView(_device->GetTextureInstance(passDesc.depthPass->texture)->GetView(0)->Get());
             renderDepthDesc = &depthAttachment;
         }
 

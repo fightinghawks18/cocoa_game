@@ -37,6 +37,20 @@ namespace Cocoa::Vulkan {
         }
     }
 
+    inline Graphics::GPUFormat VkToGPUFormat(vk::Format format) {
+        switch (format) {
+            case vk::Format::eUndefined:
+                return Graphics::GPUFormat::Unknown;
+            case vk::Format::eB8G8R8A8Srgb:
+                return Graphics::GPUFormat::BGRA8_SRGB;
+            case vk::Format::eR32G32B32Sfloat:
+                return Graphics::GPUFormat::RGB32_SFLOAT;
+            case vk::Format::eR32G32B32A32Sfloat:
+                return Graphics::GPUFormat::RGBA32_SFLOAT;
+            default: return Graphics::GPUFormat::Unknown;
+        }
+    }
+
     inline vk::PrimitiveTopology GPUTopologyToVk(Graphics::GPUTopology topology) {
         switch (topology) {
             case Graphics::GPUTopology::TriangleList:
@@ -75,15 +89,15 @@ namespace Cocoa::Vulkan {
         }
     }
 
-    inline vk::DescriptorType BindGroupTypeToVk(Graphics::BindGroupType type) {
+    inline vk::DescriptorType BindGroupTypeToVk(Graphics::GPUBindGroupType type) {
         switch (type) {
-            case Graphics::BindGroupType::UniformBuffer:
+            case Graphics::GPUBindGroupType::UniformBuffer:
                 return vk::DescriptorType::eUniformBuffer;
-            case Graphics::BindGroupType::StorageBuffer:
+            case Graphics::GPUBindGroupType::StorageBuffer:
                 return vk::DescriptorType::eStorageBuffer;
-            case Graphics::BindGroupType::Texture:
+            case Graphics::GPUBindGroupType::Texture:
                 return vk::DescriptorType::eUniformTexelBuffer;
-            case Graphics::BindGroupType::Sampler:
+            case Graphics::GPUBindGroupType::Sampler:
                 return vk::DescriptorType::eSampler;
         }
     }

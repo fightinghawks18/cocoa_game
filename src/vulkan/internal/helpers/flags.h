@@ -25,4 +25,13 @@ namespace Cocoa::Vulkan {
         if (stage & Graphics::GPUShaderStage::Pixel) return vk::ShaderStageFlagBits::eFragment;
         return vk::ShaderStageFlagBits::eAll;
     }
+
+    inline vk::ImageAspectFlags GPUTextureAspectToVk(Graphics::GPUTextureAspect aspect) {
+        vk::ImageAspectFlags flags;
+        if (aspect & Graphics::GPUTextureAspect::None) flags |= vk::ImageAspectFlagBits::eNone;
+        if (aspect & Graphics::GPUTextureAspect::Color) flags |= vk::ImageAspectFlagBits::eColor;
+        if (aspect & Graphics::GPUTextureAspect::Depth) flags |= vk::ImageAspectFlagBits::eDepth;
+        if (aspect & Graphics::GPUTextureAspect::Stencil) flags |= vk::ImageAspectFlagBits::eStencil;
+        return flags;
+    }
 }

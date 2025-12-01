@@ -46,8 +46,8 @@ namespace Cocoa::Vulkan {
             }
             
             switch (layoutEntry.type) {
-                case Graphics::BindGroupType::UniformBuffer:
-                case Graphics::BindGroupType::StorageBuffer: {
+                case Graphics::GPUBindGroupType::UniformBuffer:
+                case Graphics::GPUBindGroupType::StorageBuffer: {
                     auto bufferInstance = device->GetBufferInstance(entry.buffer);
 
                     vk::DescriptorBufferInfo bufferInfo;
@@ -56,15 +56,15 @@ namespace Cocoa::Vulkan {
                     bufferInfo.range = bufferInstance->GetSize();
                     bufferDescriptors.push_back(bufferInfo);
 
-                    descriptorWrite.descriptorType = (layoutEntry.type == Graphics::BindGroupType::UniformBuffer) 
+                    descriptorWrite.descriptorType = (layoutEntry.type == Graphics::GPUBindGroupType::UniformBuffer) 
                         ? vk::DescriptorType::eUniformBuffer 
                         : vk::DescriptorType::eStorageBuffer;
                     descriptorWrite.pBufferInfo = &bufferDescriptors.back();
                     break;
                 }
-                case Graphics::BindGroupType::Texture: {
+                case Graphics::GPUBindGroupType::Texture: {
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setImageView(device->GetTextureInstance(entry.texture)->GetView())
+                    imageDescriptor.setImageView(device->GetTextureInstance(entry.texture)->GetView(0)->Get())
                                 .setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
                     imageDescriptors.push_back(imageDescriptor);
 
@@ -72,7 +72,7 @@ namespace Cocoa::Vulkan {
                     descriptorWrite.pImageInfo = &imageDescriptors.back();
                     break;
                 }
-                case Graphics::BindGroupType::Sampler: {
+                case Graphics::GPUBindGroupType::Sampler: {
                     vk::DescriptorImageInfo imageDescriptor{};
                     imageDescriptor.setSampler(device->GetSamplerInstance(entry.sampler)->Get());
                     imageDescriptors.push_back(imageDescriptor);
