@@ -7,8 +7,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 
-#include "math/common.h"
-#include "math/quaternion.h"
 #include "objects/camera.h"
 #include "objects/transform.h"
 #include "tools/rich_presence.h"
@@ -24,7 +22,7 @@
 
 #include "macros.h"
 
-constexpr float sensitivity = 0.002f;
+constexpr float sensitivity = 0.1f;
 
 int main() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -279,9 +277,8 @@ int main() {
     Cocoa::Objects::Transform transform;
 
     Cocoa::Objects::Camera camera;
-    camera.SetPosition(Cocoa::Math::Vector3(0, 0, 5));
-    camera.SetRotation(Cocoa::Math::Quaternion());
-    camera.SetFieldOfView(60);
+    camera.GetTransform().Translate(Cocoa::Math::Vector3(0, 0, 5));
+    camera.SetFieldOfView(95);
     camera.SetClipFarBounds(100);
     camera.SetClipNearBounds(0.1);
 
@@ -290,7 +287,7 @@ int main() {
         .appID = "1444737693090316409"
     };
     Cocoa::Tools::RichPresence rpc(rpcDescriptor);
-    rpc.SetState("Watching a cube");
+    rpc.SetState("Watching a plane");
     rpc.StartTimestamp();
 
     // SDL3 states
@@ -305,9 +302,9 @@ int main() {
                 break;
             }
 
-            if (e.type == SDL_EVENT_MOUSE_MOTION && mouseCaptured) {
-                camera.RotateYaw(-e.motion.xrel * sensitivity);
-                camera.RotatePitch(-e.motion.yrel * sensitivity);
+            if (mouseCaptured && e.type == SDL_EVENT_MOUSE_MOTION) {
+                camera.GetTransform().RotateY(-e.motion.xrel * sensitivity);
+                camera.GetTransform().RotateX(-e.motion.yrel * sensitivity);
             }
 
             if (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_ESCAPE) {
@@ -316,11 +313,33 @@ int main() {
             }
         }
 
+        // Do some movement
+        const bool* keyStates = SDL_GetKeyboardState(nullptr);
+    
+        Cocoa::Math::Vector3 input(0, 0, 0);
+        if (keyStates[SDL_SCANCODE_W]) input.z += 1.0f;
+        if (keyStates[SDL_SCANCODE_S]) input.z -= 1.0f;
+
+        if (keyStates[SDL_SCANCODE_A]) input.x -= 1.0f;
+        if (keyStates[SDL_SCANCODE_D]) input.x += 1.0f;
+
+        if (keyStates[SDL_SCANCODE_SPACE]) input.y += 1.0f;
+        if (keyStates[SDL_SCANCODE_LCTRL]) input.y -= 1.0f;
+        
+        if (input.LengthSquared() > 0) {
+            input.Normalize();
+            auto offset = camera.GetTransform().GetForward() * input.z + 
+                          camera.GetTransform().GetRight() * input.x +
+                          Cocoa::Math::Vector3(0, 1, 0) * input.y;
+            camera.GetTransform().Translate(offset * 0.1);
+        }
+
         // Update RPC
         rpc.Update();
 
-        transform.RotateX(Cocoa::Math::Radians(0.1));
-        transform.RotateY(Cocoa::Math::Radians(0.3));
+        transform.RotateX(0.15);
+        transform.RotateY(0.3);
+        transform.RotateZ(0.35);
         
         auto backBuffer = swapchainInstance->GetNextBackBuffer();
         auto swapchainExtent = swapchainInstance->GetExtent();

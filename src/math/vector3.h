@@ -26,6 +26,10 @@ namespace Cocoa::Math {
         float Length() const {
             return sqrt(x * x + y * y + z * z);
         }
+
+        float LengthSquared() const {
+            return x * x + y * y + z * z;
+        }
     
         Vector3 Normalize() const {
             float len = Length();
