@@ -1,8 +1,9 @@
 #include "bind_group.h"
 #include "../device.h"
 
+#include "../helpers.h"
 namespace Cocoa::Vulkan {
-    BindGroup::BindGroup(Device* device, BindGroupDesc desc) : _device(device) {
+    BindGroup::BindGroup(Device* device, Graphics::BindGroupDesc desc) : _device(device) {
         std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
         for (const auto& entry : desc.layout->entries) {
             vk::DescriptorSetLayoutBinding binding;
@@ -37,30 +38,32 @@ namespace Cocoa::Vulkan {
                         .setDstBinding(entry.binding)
                         .setDescriptorCount(1);
  
-            BindGroupLayoutEntry layoutEntry;
+            Graphics::BindGroupLayoutEntry layoutEntry;
             for (const auto& lEntry : desc.layout->entries) {
                 if (lEntry.binding != entry.binding) continue;
                 layoutEntry = lEntry;
             }
             
             switch (layoutEntry.type) {
-                case BindGroupType::UniformBuffer:
-                case BindGroupType::StorageBuffer: {
+                case Graphics::BindGroupType::UniformBuffer:
+                case Graphics::BindGroupType::StorageBuffer: {
+                    auto bufferInstance = device->GetBufferInstance(entry.buffer);
+
                     vk::DescriptorBufferInfo bufferInfo;
-                    bufferInfo.buffer = device->GetBufferInstance(entry.buffer.buffer)->Get();
-                    bufferInfo.offset = entry.buffer.offset;
-                    bufferInfo.range = entry.buffer.size;
+                    bufferInfo.buffer = bufferInstance->Get();
+                    bufferInfo.offset = 0;
+                    bufferInfo.range = bufferInstance->GetSize();
                     bufferDescriptors.push_back(bufferInfo);
 
-                    descriptorWrite.descriptorType = (layoutEntry.type == BindGroupType::UniformBuffer) 
+                    descriptorWrite.descriptorType = (layoutEntry.type == Graphics::BindGroupType::UniformBuffer) 
                         ? vk::DescriptorType::eUniformBuffer 
                         : vk::DescriptorType::eStorageBuffer;
                     descriptorWrite.pBufferInfo = &bufferDescriptors.back();
                     break;
                 }
-                case BindGroupType::Texture: {
+                case Graphics::BindGroupType::Texture: {
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setImageView(device->GetTextureInstance(entry.texture.texture)->GetView())
+                    imageDescriptor.setImageView(device->GetTextureInstance(entry.texture)->GetView())
                                 .setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
                     imageDescriptors.push_back(imageDescriptor);
 
@@ -68,9 +71,9 @@ namespace Cocoa::Vulkan {
                     descriptorWrite.pImageInfo = &imageDescriptors.back();
                     break;
                 }
-                case BindGroupType::Sampler: {
+                case Graphics::BindGroupType::Sampler: {
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setSampler(device->GetSamplerInstance(entry.sampler.sampler)->Get());
+                    imageDescriptor.setSampler(device->GetSamplerInstance(entry.sampler)->Get());
                     imageDescriptors.push_back(imageDescriptor);
 
                     descriptorWrite.descriptorType = vk::DescriptorType::eSampler;

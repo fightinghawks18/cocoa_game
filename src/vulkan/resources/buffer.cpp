@@ -2,11 +2,12 @@
 #include "../device.h"
 
 #include "../../macros.h"
+#include "../helpers.h"
 
 namespace Cocoa::Vulkan {
-    Buffer::Buffer(Device* device, BufferDesc desc) : _device(device) {
+    Buffer::Buffer(Device* device, Graphics::BufferDesc desc) : _device(device) {
         vk::BufferCreateInfo bufferDescriptor{};
-        bufferDescriptor.setUsage(desc.usage)
+        bufferDescriptor.setUsage(GPUBufferUsageToVk(desc.usage))
                     .setSharingMode(vk::SharingMode::eExclusive)
                     .setSize(desc.size);
         VmaAllocationCreateInfo allocationDescriptor = {0};
@@ -25,7 +26,9 @@ namespace Cocoa::Vulkan {
         if (result != VK_SUCCESS) {
             PANIC("Failed to create a vulkan buffer");
         }
+        
         _buffer = buffer;
+        _size = desc.size;
 
         if (desc.mapped != nullptr) {
             MapTo(desc.mapped, desc.size, 0);

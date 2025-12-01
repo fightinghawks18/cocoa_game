@@ -6,10 +6,12 @@
 #include <vulkan/vulkan.hpp>
 #include <SDL3/SDL.h>
 
-#include "handles.h"
+#include "../graphics/handles.h"
 #include "vma.h"
 #include "common.h"
 #include "encoder.h"
+
+#include "../graphics/descriptors.h"
 
 #include "swapchain.h"
 #include "resources/buffer.h"
@@ -21,53 +23,46 @@
 #include "resources/shader_module.h"
 
 namespace Cocoa::Vulkan {
-
-    struct DeviceDesc {
-        SDL_Window* window;
-        std::vector<GPUQueueType> desiredQueues;
-        GPUPowerPreference powerPreference;
-    };
-
     class Device {
     public:
-        Device(DeviceDesc desc);
+        Device(Graphics::DeviceDesc desc);
         ~Device();
 
-        SurfaceHandle CreateSurface(SDL_Window* window);
-        SwapchainHandle CreateSwapchain(SwapchainDesc swapchainDesc);
-        BufferHandle CreateBuffer(BufferDesc bufferDesc);
-        PipelineLayoutHandle CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc);
-        RenderPipelineHandle CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc);
-        SamplerHandle CreateSampler(vk::SamplerCreateInfo samplerDesc);
-        ShaderModuleHandle CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc);
-        TextureHandle CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc);
-        TextureHandle CreateTextureWrapped(const vk::Image image, const vk::ImageView view);
-        BindGroupHandle CreateBindGroup(BindGroupDesc bindGroupDesc);
+        Graphics::SurfaceHandle CreateSurface(SDL_Window* window);
+        Graphics::SwapchainHandle CreateSwapchain(SwapchainDesc swapchainDesc);
+        Graphics::BufferHandle CreateBuffer(Graphics::BufferDesc bufferDesc);
+        Graphics::PipelineLayoutHandle CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc);
+        Graphics::RenderPipelineHandle CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc);
+        Graphics::SamplerHandle CreateSampler(vk::SamplerCreateInfo samplerDesc);
+        Graphics::ShaderModuleHandle CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc);
+        Graphics::TextureHandle CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc);
+        Graphics::TextureHandle CreateTextureWrapped(const vk::Image image, const vk::ImageView view);
+        Graphics::BindGroupHandle CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc);
 
-        void DestroySurface(SurfaceHandle surface);
-        void DestroySwapchain(SwapchainHandle swapchain);
-        void DestroyBuffer(BufferHandle buffer);
-        void DestroyPipelineLayout(PipelineLayoutHandle pipelineLayout);
-        void DestroyRenderPipeline(RenderPipelineHandle renderPipeline);
-        void DestroySampler(SamplerHandle sampler);
-        void DestroyShaderModule(ShaderModuleHandle shaderModule);
-        void DestroyTexture(TextureHandle texture);
-        void DestroyBindGroup(BindGroupHandle bindGroup);
+        void DestroySurface(Graphics::SurfaceHandle surface);
+        void DestroySwapchain(Graphics::SwapchainHandle swapchain);
+        void DestroyBuffer(Graphics::BufferHandle buffer);
+        void DestroyPipelineLayout(Graphics::PipelineLayoutHandle pipelineLayout);
+        void DestroyRenderPipeline(Graphics::RenderPipelineHandle renderPipeline);
+        void DestroySampler(Graphics::SamplerHandle sampler);
+        void DestroyShaderModule(Graphics::ShaderModuleHandle shaderModule);
+        void DestroyTexture(Graphics::TextureHandle texture);
+        void DestroyBindGroup(Graphics::BindGroupHandle bindGroup);
 
-        [[nodiscard]] Surface* GetSurfaceInstance(SurfaceHandle surface);
-        [[nodiscard]] Swapchain* GetSwapchainInstance(SwapchainHandle swapchain);
-        [[nodiscard]] Buffer* GetBufferInstance(BufferHandle buffer);
-        [[nodiscard]] PipelineLayout* GetPipelineLayoutInstance(PipelineLayoutHandle pipelineLayout);
-        [[nodiscard]] RenderPipeline* GetRenderPipelineInstance(RenderPipelineHandle renderPipeline);
-        [[nodiscard]] Sampler* GetSamplerInstance(SamplerHandle sampler);
-        [[nodiscard]] ShaderModule* GetShaderModuleInstance(ShaderModuleHandle shaderModule);
-        [[nodiscard]] Texture* GetTextureInstance(TextureHandle texture);
-        [[nodiscard]] BindGroup* GetBindGroupInstance(BindGroupHandle bindGroup);
+        [[nodiscard]] Surface* GetSurfaceInstance(Graphics::SurfaceHandle surface);
+        [[nodiscard]] Swapchain* GetSwapchainInstance(Graphics::SwapchainHandle swapchain);
+        [[nodiscard]] Buffer* GetBufferInstance(Graphics::BufferHandle buffer);
+        [[nodiscard]] PipelineLayout* GetPipelineLayoutInstance(Graphics::PipelineLayoutHandle pipelineLayout);
+        [[nodiscard]] RenderPipeline* GetRenderPipelineInstance(Graphics::RenderPipelineHandle renderPipeline);
+        [[nodiscard]] Sampler* GetSamplerInstance(Graphics::SamplerHandle sampler);
+        [[nodiscard]] ShaderModule* GetShaderModuleInstance(Graphics::ShaderModuleHandle shaderModule);
+        [[nodiscard]] Texture* GetTextureInstance(Graphics::TextureHandle texture);
+        [[nodiscard]] BindGroup* GetBindGroupInstance(Graphics::BindGroupHandle bindGroup);
 
-        std::unique_ptr<Encoder> Encode(SwapchainHandle swapchain);
+        std::unique_ptr<Encoder> Encode(Graphics::SwapchainHandle swapchain);
         void EndEncoding(std::unique_ptr<Encoder> encoder);
 
-        [[nodiscard]] std::optional<GPUQueue> GetQueue(GPUQueueType queueType);
+        [[nodiscard]] std::optional<GPUQueue> GetQueue(Graphics::GPUQueueType queueType);
         [[nodiscard]] vk::Instance GetInstance() { return _instance.get(); }
         [[nodiscard]] vk::PhysicalDevice GetGPU() { return _gpu; }
         [[nodiscard]] vk::Device GetDevice() { return _device.get(); }
@@ -77,7 +72,7 @@ namespace Cocoa::Vulkan {
         vk::UniqueInstance _instance;
         vk::PhysicalDevice _gpu;
         vk::UniqueDevice _device;
-        std::unordered_map<GPUQueueType, GPUQueue> _queues;
+        std::unordered_map<Graphics::GPUQueueType, GPUQueue> _queues;
         VmaAllocator _allocator;
 
         vk::UniqueCommandPool _commandPool;
@@ -97,9 +92,9 @@ namespace Cocoa::Vulkan {
         std::optional<Tools::ResourceManager<BindGroup>> _bindGroupResources;
 
         void CreateInstance();
-        void GetPhysicalDevice(DeviceDesc desc);
-        GPUQueue GetSupportedQueue(std::vector<vk::QueueFamilyProperties> queueFamilies, GPUQueueType type);
-        void DiscoverQueues(DeviceDesc desc);
+        void GetPhysicalDevice(Graphics::DeviceDesc desc);
+        GPUQueue GetSupportedQueue(std::vector<vk::QueueFamilyProperties> queueFamilies, Graphics::GPUQueueType type);
+        void DiscoverQueues(Graphics::DeviceDesc desc);
         void CreateDevice();
         void CreateAllocator();
         void CreateCommandPool();

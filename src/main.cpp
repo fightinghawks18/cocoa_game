@@ -31,14 +31,14 @@ int main() {
 
     SDL_Window* window = SDL_CreateWindow("Cocoa", 800, 600, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 
-    Cocoa::Vulkan::DeviceDesc desc = {
+    Cocoa::Graphics::DeviceDesc desc = {
         .window = window,
         .desiredQueues = {
-            Cocoa::Vulkan::GPUQueueType::Graphics,
-            Cocoa::Vulkan::GPUQueueType::Transfer,
-            Cocoa::Vulkan::GPUQueueType::Compute
+            Cocoa::Graphics::GPUQueueType::Graphics,
+            Cocoa::Graphics::GPUQueueType::Transfer,
+            Cocoa::Graphics::GPUQueueType::Compute
         },
-        .powerPreference = Cocoa::Vulkan::GPUPowerPreference::HighPerformance,
+        .powerPreference = Cocoa::Graphics::GPUPowerPreference::HighPerformance,
     };
     
     auto renderDevice = std::make_unique<Cocoa::Vulkan::Device>(desc);
@@ -65,35 +65,29 @@ int main() {
     pixelShaderDescriptor.setCode(pixelShaderCode);
     auto pixelShader = renderDevice->CreateShaderModule(pixelShaderDescriptor);
     
-    Cocoa::Vulkan::BufferDesc mvpBufferDescriptor = {
-        .usage = vk::BufferUsageFlagBits::eUniformBuffer,
-        .size = sizeof(Cocoa::Vulkan::MVP),
+    Cocoa::Graphics::BufferDesc mvpBufferDescriptor = {
+        .usage = Cocoa::Graphics::GPUBufferUsage::Uniform,
+        .size = sizeof(Cocoa::Graphics::MVP),
         .mapped = nullptr
     };
     auto mvpBuffer = renderDevice->CreateBuffer(mvpBufferDescriptor);
 
-    Cocoa::Vulkan::BindGroupLayoutEntry mvpLayout = {
+    Cocoa::Graphics::BindGroupLayoutEntry mvpLayout = {
         .binding = 0,
-        .visibility = Cocoa::Vulkan::GPUShaderStage::Vertex,
-        .type = Cocoa::Vulkan::BindGroupType::UniformBuffer
+        .visibility = Cocoa::Graphics::GPUShaderStage::Vertex,
+        .type = Cocoa::Graphics::BindGroupType::UniformBuffer
     };
 
-    Cocoa::Vulkan::BindGroupLayoutDesc mvpBindGroupLayout = {
+    Cocoa::Graphics::BindGroupLayoutDesc mvpBindGroupLayout = {
         .entries = {mvpLayout}
     };
 
-    Cocoa::Vulkan::BindGroupBuffer mvpBufferEntry = {
-        .buffer = mvpBuffer,
-        .offset = 0,
-        .size = sizeof(Cocoa::Vulkan::MVP)
-    };
-
-    Cocoa::Vulkan::BindGroupEntry mvpEntry = {
+    Cocoa::Graphics::BindGroupEntry mvpEntry = {
         .binding = 0,
-        .buffer = mvpBufferEntry,
+        .buffer = mvpBuffer,
     };
 
-    Cocoa::Vulkan::BindGroupDesc mvpBindGroupDesc = {
+    Cocoa::Graphics::BindGroupDesc mvpBindGroupDesc = {
         .layout = &mvpBindGroupLayout,
         .entries = {mvpEntry}
     };
@@ -126,14 +120,14 @@ int main() {
         0,
         0,
         vk::Format::eR32G32B32Sfloat,
-        offsetof(Cocoa::Vulkan::Vertex, pos)
+        offsetof(Cocoa::Graphics::Vertex, pos)
     );
 
     vk::VertexInputAttributeDescription colAttribute(
         1,
         0,
         vk::Format::eR32G32B32A32Sfloat,
-        offsetof(Cocoa::Vulkan::Vertex, col)
+        offsetof(Cocoa::Graphics::Vertex, col)
     );
 
     std::vector attributes = {
@@ -143,7 +137,7 @@ int main() {
 
     vk::VertexInputBindingDescription vertexBinding(
         0,
-        sizeof(Cocoa::Vulkan::Vertex),
+        sizeof(Cocoa::Graphics::Vertex),
         vk::VertexInputRate::eVertex
     );
     
@@ -257,21 +251,21 @@ int main() {
 
     auto plane = Cocoa::Vulkan::CreatePlaneIndexed();
 
-    Cocoa::Vulkan::BufferDesc vertexBufferDescriptor = {
-        .usage = vk::BufferUsageFlagBits::eVertexBuffer,
-        .size = sizeof(Cocoa::Vulkan::Vertex) * plane.vertices.size(),
+    Cocoa::Graphics::BufferDesc vertexBufferDescriptor = {
+        .usage = Cocoa::Graphics::GPUBufferUsage::Vertex,
+        .size = sizeof(Cocoa::Graphics::Vertex) * plane.vertices.size(),
         .mapped = plane.vertices.data()
     };
     auto vertexBuffer = renderDevice->CreateBuffer(vertexBufferDescriptor);
 
-    Cocoa::Vulkan::BufferDesc indexBufferDescriptor = {
-        .usage = vk::BufferUsageFlagBits::eIndexBuffer,
+    Cocoa::Graphics::BufferDesc indexBufferDescriptor = {
+        .usage = Cocoa::Graphics::GPUBufferUsage::Index,
         .size = sizeof(uint16_t) * plane.indices.size(),
         .mapped = plane.indices.data()
     };
     auto indexBuffer = renderDevice->CreateBuffer(indexBufferDescriptor);
 
-    Cocoa::Vulkan::MVP mvpData;
+    Cocoa::Graphics::MVP mvpData;
     
     // Objects
     Cocoa::Objects::Transform transform;
@@ -349,18 +343,18 @@ int main() {
         mvpData.model = transform.GetModelMatrix().Transpose();
         mvpData.projection = camera.GetProjectionMatrix().Transpose();
         mvpData.view = camera.GetViewMatrix().Transpose();
-        renderDevice->GetBufferInstance(mvpBuffer)->MapTo(&mvpData, sizeof(Cocoa::Vulkan::MVP), 0);
+        renderDevice->GetBufferInstance(mvpBuffer)->MapTo(&mvpData, sizeof(Cocoa::Graphics::MVP), 0);
         
         auto encoder = renderDevice->Encode(swapchain);
 
-        Cocoa::Vulkan::GPUColorPassDesc colorPassDesc = {
+        Cocoa::Graphics::GPUColorPassDesc colorPassDesc = {
             .texture = backBuffer,
             .clearColor = {0.6f, 0.21f, 0.36f, 1.0f},
-            .loadOp = Cocoa::Vulkan::GPUPassLoadOp::Clear,
-            .storeOp = Cocoa::Vulkan::GPUPassStoreOp::Store
+            .loadOp = Cocoa::Graphics::GPUPassLoadOp::Clear,
+            .storeOp = Cocoa::Graphics::GPUPassStoreOp::Store
         };
 
-        Cocoa::Vulkan::GPUPassDesc passDesc = {
+        Cocoa::Graphics::GPUPassDesc passDesc = {
             .colorPasses = {colorPassDesc},
             .depthPass = nullptr,
             .renderArea = {
@@ -371,12 +365,12 @@ int main() {
             .layerCount = 1
         };
 
-        Cocoa::Vulkan::Viewport viewport = {
+        Cocoa::Graphics::Viewport viewport = {
             .offset = {0},
             .extent = swapchainExtent,
         };
 
-        Cocoa::Vulkan::Rect scissor = {
+        Cocoa::Graphics::Rect scissor = {
             .offset = viewport.offset,
             .extent = viewport.extent
         };

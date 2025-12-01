@@ -4,6 +4,8 @@
 #include "device.h"
 
 #include "../macros.h"
+#include "../graphics/enums.h"
+#include "../graphics/handles.h"
 
 namespace Cocoa::Vulkan {
     Swapchain::Swapchain(Device* device, SwapchainDesc desc) : _device(device), _surface(device->GetSurfaceInstance(desc.surface)) {
@@ -40,7 +42,7 @@ namespace Cocoa::Vulkan {
                     .setSignalSemaphoreInfos(renderSubmitDescriptor)
                     .setCommandBufferInfos(commandSubmitDescriptor);
         
-        _device->GetQueue(GPUQueueType::Graphics)->queue.submit2(submitDescriptor, _fences[_frame].get());
+        _device->GetQueue(Graphics::GPUQueueType::Graphics)->queue.submit2(submitDescriptor, _fences[_frame].get());
     }
 
     void Swapchain::Present() {
@@ -48,7 +50,7 @@ namespace Cocoa::Vulkan {
         presentDescriptor.setImageIndices({_imageIndex})
                     .setSwapchains({_swapchain.get()})
                     .setWaitSemaphores({_renderSemaphores[_frame].get()});
-        vk::Result presentResult = _device->GetQueue(GPUQueueType::Graphics)->queue.presentKHR(presentDescriptor);
+        vk::Result presentResult = _device->GetQueue(Graphics::GPUQueueType::Graphics)->queue.presentKHR(presentDescriptor);
         if (presentResult == vk::Result::eSuboptimalKHR || presentResult == vk::Result::eErrorOutOfDateKHR) {
             Resize();
             return;
@@ -59,7 +61,7 @@ namespace Cocoa::Vulkan {
         _frame = (_frame + 1) % 2;
     }
 
-    TextureHandle Swapchain::GetNextBackBuffer() {
+    Graphics::TextureHandle Swapchain::GetNextBackBuffer() {
         vk::Result waitForPreviousOperations = _device->GetDevice().waitForFences(1, &_fences[_frame].get(), true, UINT64_MAX);
         if (waitForPreviousOperations != vk::Result::eSuccess) {
             PANIC("Failed to wait for previous operations");
@@ -77,7 +79,7 @@ namespace Cocoa::Vulkan {
         return _swapchainImages[_imageIndex];
     }
 
-    TextureHandle Swapchain::GetCurrentBackBuffer() {
+    Graphics::TextureHandle Swapchain::GetCurrentBackBuffer() {
         return _swapchainImages[_imageIndex];
     }
 

@@ -1,14 +1,15 @@
 #include "device.h"
 
 #include <iostream>
-
-#include <SDL3/SDL_vulkan.h>
 #include <map>
 #include <ranges>
 
+#include <SDL3/SDL_vulkan.h>
+
+#include "../graphics/helpers.h"
 #include "../macros.h"
 namespace Cocoa::Vulkan {
-    Device::Device(DeviceDesc desc) {
+    Device::Device(Graphics::DeviceDesc desc) {
         _swapchainResources.emplace(1024);
         _surfaceResources.emplace(1024);
         _textureResources.emplace(1024);
@@ -54,119 +55,119 @@ namespace Cocoa::Vulkan {
         _instance.reset();
     }
 
-    SurfaceHandle Device::CreateSurface(SDL_Window* window) {
+    Graphics::SurfaceHandle Device::CreateSurface(SDL_Window* window) {
         return _surfaceResources->Emplace(this, window);
     }
 
-    SwapchainHandle Device::CreateSwapchain(SwapchainDesc swapchainDesc) {
+    Graphics::SwapchainHandle Device::CreateSwapchain(SwapchainDesc swapchainDesc) {
         return _swapchainResources->Emplace(this, swapchainDesc);
     }
 
-    BufferHandle Device::CreateBuffer(BufferDesc bufferDesc) {
+    Graphics::BufferHandle Device::CreateBuffer(Graphics::BufferDesc bufferDesc) {
         return _bufferResources->Emplace(this, bufferDesc);
     }
 
-    PipelineLayoutHandle Device::CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc) {
+    Graphics::PipelineLayoutHandle Device::CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc) {
         return _pipelineLayoutResources->Emplace(this, pipelineLayoutDesc);
     }
 
-    RenderPipelineHandle Device::CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc) {
+    Graphics::RenderPipelineHandle Device::CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc) {
         return _renderPipelineResources->Emplace(this, renderPipelineDesc);
     }
 
-    SamplerHandle Device::CreateSampler(vk::SamplerCreateInfo samplerDesc) {
+    Graphics::SamplerHandle Device::CreateSampler(vk::SamplerCreateInfo samplerDesc) {
         return _samplerResources->Emplace(this, samplerDesc);
     }
 
-    ShaderModuleHandle Device::CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc) {
+    Graphics::ShaderModuleHandle Device::CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc) {
         return _shaderModuleResources->Emplace(this, shaderModuleDesc);
     }
 
-    TextureHandle Device::CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
+    Graphics::TextureHandle Device::CreateTexture(const vk::ImageCreateInfo* textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
         return _textureResources->Emplace(this, textureDesc, textureViewDesc);
     }
 
-    TextureHandle Device::CreateTextureWrapped(const vk::Image image, const vk::ImageView view) {
+    Graphics::TextureHandle Device::CreateTextureWrapped(const vk::Image image, const vk::ImageView view) {
         return _textureResources->Emplace(this, image, view);
     }
 
-    BindGroupHandle Device::CreateBindGroup(BindGroupDesc bindGroupDesc) {
+    Graphics::BindGroupHandle Device::CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc) {
         return _bindGroupResources->Emplace(this, bindGroupDesc);
     }
 
-    void Device::DestroySurface(SurfaceHandle surface) {
+    void Device::DestroySurface(Graphics::SurfaceHandle surface) {
         _surfaceResources->Remove(surface);
     }
 
-    void Device::DestroySwapchain(SwapchainHandle swapchain) {
+    void Device::DestroySwapchain(Graphics::SwapchainHandle swapchain) {
         _swapchainResources->Remove(swapchain);
     }
 
-    void Device::DestroyBuffer(BufferHandle buffer) {
+    void Device::DestroyBuffer(Graphics::BufferHandle buffer) {
         _bufferResources->Remove(buffer);
     }
 
-    void Device::DestroyPipelineLayout(PipelineLayoutHandle pipelineLayout) {
+    void Device::DestroyPipelineLayout(Graphics::PipelineLayoutHandle pipelineLayout) {
         _pipelineLayoutResources->Remove(pipelineLayout);
     }
 
-    void Device::DestroyRenderPipeline(RenderPipelineHandle renderPipeline) {
+    void Device::DestroyRenderPipeline(Graphics::RenderPipelineHandle renderPipeline) {
         _renderPipelineResources->Remove(renderPipeline);
     }
 
-    void Device::DestroySampler(SamplerHandle sampler) {
+    void Device::DestroySampler(Graphics::SamplerHandle sampler) {
         _samplerResources->Remove(sampler);
     }
 
-    void Device::DestroyShaderModule(ShaderModuleHandle shaderModule) {
+    void Device::DestroyShaderModule(Graphics::ShaderModuleHandle shaderModule) {
         _shaderModuleResources->Remove(shaderModule);
     }
 
-    void Device::DestroyTexture(TextureHandle texture) {
+    void Device::DestroyTexture(Graphics::TextureHandle texture) {
         _textureResources->Remove(texture);
     }
 
-    void Device::DestroyBindGroup(BindGroupHandle bindGroup) {
+    void Device::DestroyBindGroup(Graphics::BindGroupHandle bindGroup) {
         _bindGroupResources->Remove(bindGroup);
     }
 
-    Surface* Device::GetSurfaceInstance(SurfaceHandle surface) {
+    Surface* Device::GetSurfaceInstance(Graphics::SurfaceHandle surface) {
         return _surfaceResources->Get(surface);
     }
 
-    Swapchain* Device::GetSwapchainInstance(SwapchainHandle swapchain) {
+    Swapchain* Device::GetSwapchainInstance(Graphics::SwapchainHandle swapchain) {
         return _swapchainResources->Get(swapchain);
     }
 
-    Buffer* Device::GetBufferInstance(BufferHandle buffer) {
+    Buffer* Device::GetBufferInstance(Graphics::BufferHandle buffer) {
         return _bufferResources->Get(buffer);
     }
 
-    PipelineLayout* Device::GetPipelineLayoutInstance(PipelineLayoutHandle pipelineLayout) {
+    PipelineLayout* Device::GetPipelineLayoutInstance(Graphics::PipelineLayoutHandle pipelineLayout) {
         return _pipelineLayoutResources->Get(pipelineLayout);
     }
 
-    RenderPipeline* Device::GetRenderPipelineInstance(RenderPipelineHandle renderPipeline) {
+    RenderPipeline* Device::GetRenderPipelineInstance(Graphics::RenderPipelineHandle renderPipeline) {
         return _renderPipelineResources->Get(renderPipeline);
     }
 
-    Sampler* Device::GetSamplerInstance(SamplerHandle sampler) {
+    Sampler* Device::GetSamplerInstance(Graphics::SamplerHandle sampler) {
         return _samplerResources->Get(sampler);
     }
 
-    ShaderModule* Device::GetShaderModuleInstance(ShaderModuleHandle shaderModule) {
+    ShaderModule* Device::GetShaderModuleInstance(Graphics::ShaderModuleHandle shaderModule) {
         return _shaderModuleResources->Get(shaderModule);
     }
 
-    Texture* Device::GetTextureInstance(TextureHandle texture) {
+    Texture* Device::GetTextureInstance(Graphics::TextureHandle texture) {
         return _textureResources->Get(texture);
     }
 
-    BindGroup* Device::GetBindGroupInstance(BindGroupHandle bindGroup) {
+    BindGroup* Device::GetBindGroupInstance(Graphics::BindGroupHandle bindGroup) {
         return _bindGroupResources->Get(bindGroup);
     }
 
-    std::unique_ptr<Encoder> Device::Encode(SwapchainHandle swapchain) {
+    std::unique_ptr<Encoder> Device::Encode(Graphics::SwapchainHandle swapchain) {
         auto swapchainInstance = GetSwapchainInstance(swapchain);
         auto backBuffer = swapchainInstance->GetCurrentBackBuffer();
         
@@ -230,7 +231,7 @@ namespace Cocoa::Vulkan {
         _frame = (_frame + 1) % 2;
     }
 
-    std::optional<GPUQueue> Device::GetQueue(GPUQueueType queueType) {
+    std::optional<GPUQueue> Device::GetQueue(Graphics::GPUQueueType queueType) {
         if (!_queues.contains(queueType)) return std::nullopt;
         return _queues[queueType];
     } 
@@ -273,7 +274,7 @@ namespace Cocoa::Vulkan {
         _instance = vk::createInstanceUnique(instanceDescriptor);
     }
 
-    void Device::GetPhysicalDevice(DeviceDesc desc) {
+    void Device::GetPhysicalDevice(Graphics::DeviceDesc desc) {
         auto physicalDevices = _instance->enumeratePhysicalDevices();
         
         std::map<int32_t, vk::PhysicalDevice> physicalDevicesRanked;
@@ -284,20 +285,20 @@ namespace Cocoa::Vulkan {
 
             switch (properties.deviceType) {
                 case vk::PhysicalDeviceType::eDiscreteGpu:
-                    score += desc.powerPreference == GPUPowerPreference::HighPerformance ? 1000 : 100;
+                    score += desc.powerPreference == Graphics::GPUPowerPreference::HighPerformance ? 1000 : 100;
                     break;
                 case vk::PhysicalDeviceType::eIntegratedGpu:
-                    score += desc.powerPreference == GPUPowerPreference::HighPerformance ? 500 : 500;
+                    score += desc.powerPreference == Graphics::GPUPowerPreference::HighPerformance ? 500 : 500;
                     break;
                 case vk::PhysicalDeviceType::eCpu:
-                    score += desc.powerPreference == GPUPowerPreference::HighPerformance ? 100 : 250;
+                    score += desc.powerPreference == Graphics::GPUPowerPreference::HighPerformance ? 100 : 250;
                     break;
                 case vk::PhysicalDeviceType::eOther:
                 case vk::PhysicalDeviceType::eVirtualGpu:
                   break;
             }
 
-            float capabilityWeight = (desc.powerPreference == GPUPowerPreference::HighPerformance) ? 1.0f : 0.2f;
+            float capabilityWeight = (desc.powerPreference == Graphics::GPUPowerPreference::HighPerformance) ? 1.0f : 0.2f;
             score += static_cast<int32_t>(std::log2(properties.limits.maxImageDimension2D) * 5 * capabilityWeight);
 
             // TODO: Add feature checking
@@ -308,18 +309,18 @@ namespace Cocoa::Vulkan {
         std::cout << "Found GPU: " << _gpu.getProperties().deviceName << std::endl;
     }
 
-    GPUQueue Device::GetSupportedQueue(std::vector<vk::QueueFamilyProperties> queueFamilies, GPUQueueType type) {
+    GPUQueue Device::GetSupportedQueue(std::vector<vk::QueueFamilyProperties> queueFamilies, Graphics::GPUQueueType type) {
         vk::QueueFlags requestedFlags;
         switch (type) {
-            case GPUQueueType::Unknown:
+            case Graphics::GPUQueueType::Unknown:
                 break;
-            case GPUQueueType::Graphics:
+            case Graphics::GPUQueueType::Graphics:
                 requestedFlags |= vk::QueueFlagBits::eGraphics;
                 break;
-            case GPUQueueType::Transfer:
+            case Graphics::GPUQueueType::Transfer:
                 requestedFlags |= vk::QueueFlagBits::eTransfer;
                 break;
-            case GPUQueueType::Compute:
+            case Graphics::GPUQueueType::Compute:
                 requestedFlags |= vk::QueueFlagBits::eCompute;
                 break;
         }
@@ -338,41 +339,41 @@ namespace Cocoa::Vulkan {
         }
 
         return {
-            .type = GPUQueueType::Unknown,
+            .type = Graphics::GPUQueueType::Unknown,
             .family = 0,
             .queue = nullptr
         };
     }
 
-    void Device::DiscoverQueues(DeviceDesc desc) {
+    void Device::DiscoverQueues(Graphics::DeviceDesc desc) {
         auto queueFamilies = _gpu.getQueueFamilyProperties();
 
         for (const auto& queueType : desc.desiredQueues) {
-            if (queueType == GPUQueueType::Unknown) continue;
+            if (queueType == Graphics::GPUQueueType::Unknown) continue;
             if (_queues.contains(queueType)) continue;
             
             vk::QueueFlags requestedFlags;
             switch (queueType) {
-                case GPUQueueType::Unknown:
+                case Graphics::GPUQueueType::Unknown:
                     break;
-                case GPUQueueType::Graphics:
+                case Graphics::GPUQueueType::Graphics:
                     requestedFlags |= vk::QueueFlagBits::eGraphics;
                     break;
-                case GPUQueueType::Transfer:
+                case Graphics::GPUQueueType::Transfer:
                     requestedFlags |= vk::QueueFlagBits::eTransfer;
                     break;
-                case GPUQueueType::Compute:
+                case Graphics::GPUQueueType::Compute:
                     requestedFlags |= vk::QueueFlagBits::eCompute;
                     break;
             }
 
             auto queue = GetSupportedQueue(queueFamilies, queueType);
-            if (queue.type == GPUQueueType::Unknown) continue;
+            if (queue.type == Graphics::GPUQueueType::Unknown) continue;
             _queues[queueType] = queue;
         }
 
         uint32_t totalSatisfied = 0;
-        std::unordered_map<GPUQueueType, uint32_t> satisfiedQueues;
+        std::unordered_map<Graphics::GPUQueueType, uint32_t> satisfiedQueues;
         for (const auto& queue : _queues) {
             bool found = false;
             for (const auto& queueRequested : desc.desiredQueues) {
@@ -381,16 +382,16 @@ namespace Cocoa::Vulkan {
                     totalSatisfied += 1;
 
                     if (satisfiedQueues[queue.first] > 1) {
-                        std::cout << "Reduntant " << GPUQueueTypeToString(queue.first) << " queue was specified, please remove this duplicate!" << std::endl;
+                        std::cout << "Reduntant " << Graphics::GPUQueueTypeToString(queue.first) << " queue was specified, please remove this duplicate!" << std::endl;
                     } else {
-                        std::cout << "Found " << GPUQueueTypeToString(queue.first) << " queue!" << std::endl;
+                        std::cout << "Found " << Graphics::GPUQueueTypeToString(queue.first) << " queue!" << std::endl;
                     }
                     found = true;
                 }
             }
 
             if (!found) {
-                std::cerr << "Failed to find " << GPUQueueTypeToString(queue.first) << " queue!" << std::endl;
+                std::cerr << "Failed to find " << Graphics::GPUQueueTypeToString(queue.first) << " queue!" << std::endl;
             }
         }
 
@@ -469,7 +470,7 @@ namespace Cocoa::Vulkan {
     void Device::CreateCommandPool() {
         vk::CommandPoolCreateInfo commandPoolDescriptor{};
         commandPoolDescriptor.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
-                        .setQueueFamilyIndex(_queues[GPUQueueType::Graphics].family);
+                        .setQueueFamilyIndex(_queues[Graphics::GPUQueueType::Graphics].family);
         _commandPool = _device->createCommandPoolUnique(commandPoolDescriptor);
     }
 

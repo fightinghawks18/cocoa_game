@@ -1,6 +1,8 @@
 #include "encoder.h"
 #include "device.h"
 
+#include "helpers.h"
+
 namespace Cocoa::Vulkan {
     Encoder::Encoder(Device* device, EncoderDesc desc) : _device(device), _cmd(desc.cmd), _swapchain(desc.swapchain) {
         _cmd.reset();
@@ -13,7 +15,7 @@ namespace Cocoa::Vulkan {
         _cmd.end();
     }
 
-    void Encoder::StartRendering(GPUPassDesc passDesc) {
+    void Encoder::StartRendering(Graphics::GPUPassDesc passDesc) {
         std::vector<vk::RenderingAttachmentInfo> renderColorDescs;
         renderColorDescs.reserve(passDesc.colorPasses.size());
         for (const auto& colorPass : passDesc.colorPasses) {
@@ -26,8 +28,8 @@ namespace Cocoa::Vulkan {
             vk::RenderingAttachmentInfo colorAttachment{};
             colorAttachment.setClearValue(colorClear)
                         .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
-                        .setLoadOp(LoadOpToVk(colorPass.loadOp))
-                        .setStoreOp(StoreOpToVk(colorPass.storeOp))
+                        .setLoadOp(GPUPassLoadOpToVk(colorPass.loadOp))
+                        .setStoreOp(GPUPassStoreOpToVk(colorPass.storeOp))
                         .setImageView(_device->GetTextureInstance(colorPass.texture)->GetView());
             renderColorDescs.push_back(colorAttachment);
         }
@@ -41,8 +43,8 @@ namespace Cocoa::Vulkan {
 
             depthAttachment.setClearValue(depthClear)
                         .setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
-                        .setLoadOp(LoadOpToVk(passDesc.depthPass->loadOp))
-                        .setStoreOp(StoreOpToVk(passDesc.depthPass->storeOp))
+                        .setLoadOp(GPUPassLoadOpToVk(passDesc.depthPass->loadOp))
+                        .setStoreOp(GPUPassStoreOpToVk(passDesc.depthPass->storeOp))
                         .setImageView(_device->GetTextureInstance(passDesc.depthPass->texture)->GetView());
             renderDepthDesc = &depthAttachment;
         }
@@ -64,26 +66,26 @@ namespace Cocoa::Vulkan {
         _cmd.endRendering();
     }
 
-    void Encoder::SetRenderPipeline(RenderPipelineHandle renderPipeline) {
+    void Encoder::SetRenderPipeline(Graphics::RenderPipelineHandle renderPipeline) {
         _cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, _device->GetRenderPipelineInstance(renderPipeline)->Get());
     }
 
-    void Encoder::SetBindGroup(PipelineLayoutHandle pipelineLayout, BindGroupHandle bindGroup) {
+    void Encoder::SetBindGroup(Graphics::PipelineLayoutHandle pipelineLayout, Graphics::BindGroupHandle bindGroup) {
         auto set = _device->GetBindGroupInstance(bindGroup)->GetBinding();
         _cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _device->GetPipelineLayoutInstance(pipelineLayout)->Get(), 0, set, nullptr);
     }
     
-    void Encoder::SetVertexBuffer(BufferHandle vertexBuffer) {
+    void Encoder::SetVertexBuffer(Graphics::BufferHandle vertexBuffer) {
         vk::Buffer buffers[] = {_device->GetBufferInstance(vertexBuffer)->Get()};
         vk::DeviceSize offsets[] = {0};
         _cmd.bindVertexBuffers(0, 1, buffers, offsets);
     }
 
-    void Encoder::SetIndexBuffer(BufferHandle indexBuffer) {
+    void Encoder::SetIndexBuffer(Graphics::BufferHandle indexBuffer) {
         _cmd.bindIndexBuffer(_device->GetBufferInstance(indexBuffer)->Get(), 0, vk::IndexType::eUint16);
     }
 
-    void Encoder::SetViewport(Viewport viewport) {
+    void Encoder::SetViewport(Graphics::Viewport viewport) {
         _cmd.setViewport(0, vk::Viewport(
             viewport.offset.x,
             viewport.offset.y,
@@ -94,7 +96,7 @@ namespace Cocoa::Vulkan {
         ));
     }
 
-    void Encoder::SetScissor(Rect scissor) {
+    void Encoder::SetScissor(Graphics::Rect scissor) {
         _cmd.setScissor(0, vk::Rect2D(
             {scissor.offset.x, scissor.offset.y},
             {scissor.extent.w, scissor.extent.h}

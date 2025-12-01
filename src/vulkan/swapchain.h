@@ -1,13 +1,14 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "common.h"
 #include "surface.h"
-#include "handles.h"
+
+#include "../graphics/handles.h"
+#include "../graphics/types.h"
 
 namespace Cocoa::Vulkan {
     struct SwapchainDesc {
-        SurfaceHandle surface;
+        Graphics::SurfaceHandle surface;
     };
 
     class Device;
@@ -24,9 +25,9 @@ namespace Cocoa::Vulkan {
         void Submit(vk::CommandBuffer commandBuffer);
         void Present();
 
-        TextureHandle GetNextBackBuffer();
-        [[nodiscard]] TextureHandle GetCurrentBackBuffer();
-        [[nodiscard]] Extent GetExtent() { return _swapchainExtent; }
+        Graphics::TextureHandle GetNextBackBuffer();
+        [[nodiscard]] Graphics::TextureHandle GetCurrentBackBuffer();
+        [[nodiscard]] Graphics::Extent GetExtent() { return _swapchainExtent; }
         [[nodiscard]] vk::Format GetFormat() { return _swapchainFormat; }
         [[nodiscard]] vk::SwapchainKHR Get() { return _swapchain.get(); }
     private:
@@ -35,8 +36,8 @@ namespace Cocoa::Vulkan {
 
         vk::UniqueSwapchainKHR _swapchain;
         vk::Format _swapchainFormat;
-        Extent _swapchainExtent;
-        std::vector<TextureHandle> _swapchainImages;
+        Graphics::Extent _swapchainExtent;
+        std::vector<Graphics::TextureHandle> _swapchainImages;
         uint32_t _imageIndex;
 
         std::vector<vk::UniqueFence> _fences;
