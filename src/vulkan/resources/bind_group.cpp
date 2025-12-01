@@ -5,26 +5,13 @@
 #include "../internal/helpers/flags.h"
 namespace Cocoa::Vulkan {
     BindGroup::BindGroup(Device* device, Graphics::BindGroupDesc desc) : _device(device) {
-        std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
-        for (const auto& entry : desc.layout->entries) {
-            vk::DescriptorSetLayoutBinding binding;
-            binding.binding = entry.binding;
-            binding.descriptorCount = 1;
-            binding.stageFlags = GPUShaderStageToVk(entry.visibility);
-            binding.descriptorType = BindGroupTypeToVk(entry.type);
-            vkBindings.push_back(binding);
-        }
-
-        vk::DescriptorSetLayoutCreateInfo layoutDescriptor{};
-        layoutDescriptor.bindingCount = vkBindings.size();
-        layoutDescriptor.pBindings = vkBindings.data();
-
-        _layout = _device->GetDevice().createDescriptorSetLayoutUnique(layoutDescriptor);
+        auto groupLayoutInstance = device->GetBindGroupLayoutInstance(desc.layout);
+        auto layouts = { groupLayoutInstance->GetLayout() };
 
         vk::DescriptorSetAllocateInfo descriptorSetDescriptor{};
         descriptorSetDescriptor.setDescriptorPool(device->GetDescriptorPool())
                     .setDescriptorSetCount(1)
-                    .setSetLayouts(_layout.get());
+                    .setSetLayouts(layouts);
 
         auto sets = _device->GetDevice().allocateDescriptorSetsUnique(descriptorSetDescriptor);
         _set = std::move(sets[0]);
@@ -37,22 +24,21 @@ namespace Cocoa::Vulkan {
         bufferDescriptors.reserve(desc.entries.size());
         imageDescriptors.reserve(desc.entries.size());
 
-        for (const auto& entry : desc.entries) {
+        for (uint32_t i = 0; i < desc.entries.size(); i++) {
+            const auto layoutEntry = groupLayoutInstance->GetDesc().entries[i];
+            const auto& resource = desc.entries[i];
+
             vk::WriteDescriptorSet descriptorWrite{};
             descriptorWrite.setDstSet(_set.get())
-                        .setDstBinding(entry.binding)
+                        .setDstBinding(layoutEntry.binding)
                         .setDescriptorCount(1);
- 
-            Graphics::BindGroupLayoutEntry layoutEntry;
-            for (const auto& lEntry : desc.layout->entries) {
-                if (lEntry.binding != entry.binding) continue;
-                layoutEntry = lEntry;
-            }
+            
             
             switch (layoutEntry.type) {
                 case Graphics::GPUBindGroupType::UniformBuffer:
                 case Graphics::GPUBindGroupType::StorageBuffer: {
-                    auto bufferInstance = device->GetBufferInstance(entry.buffer);
+                    auto bufferHandle = std::get<Graphics::BufferHandle>(resource);
+                    auto bufferInstance = device->GetBufferInstance(bufferHandle);
 
                     vk::DescriptorBufferInfo bufferInfo;
                     bufferInfo.buffer = bufferInstance->Get();
@@ -67,7 +53,8 @@ namespace Cocoa::Vulkan {
                     break;
                 }
                 case Graphics::GPUBindGroupType::Texture: {
-                    auto image = device->GetTextureInstance(entry.texture);
+                    auto textureHandle = std::get<Graphics::TextureHandle>(resource);
+                    auto image = device->GetTextureInstance(textureHandle);
                     auto imageView = image->GetView(0);
                     vk::DescriptorImageInfo imageDescriptor{};
                     imageDescriptor.setImageView(imageView->Get())
@@ -79,8 +66,11 @@ namespace Cocoa::Vulkan {
                     break;
                 }
                 case Graphics::GPUBindGroupType::Sampler: {
+                    auto samplerHandle = std::get<Graphics::SamplerHandle>(resource);
+                    auto sampler = device->GetSamplerInstance(samplerHandle);
+                    auto samplerObject = sampler->Get();
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setSampler(device->GetSamplerInstance(entry.sampler)->Get());
+                    imageDescriptor.setSampler(samplerObject);
                     imageDescriptors.push_back(imageDescriptor);
 
                     descriptorWrite.descriptorType = vk::DescriptorType::eSampler;

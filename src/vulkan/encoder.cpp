@@ -5,16 +5,14 @@
 #include "internal/helpers/types.h"
 
 namespace Cocoa::Vulkan {
-    Encoder::Encoder(Device* device, EncoderDesc desc) : _device(device), _cmd(desc.cmd), _swapchain(desc.swapchain) {
+    Encoder::Encoder(Device* device, EncoderDesc desc) : _device(device), _active(true), _cmd(desc.cmd), _swapchain(desc.swapchain) {
         _cmd.reset();
         vk::CommandBufferBeginInfo commandBeginDescriptor{};
         commandBeginDescriptor.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
         _cmd.begin(commandBeginDescriptor);
     }
 
-    Encoder::~Encoder() {
-        _cmd.end();
-    }
+    Encoder::~Encoder() = default;
 
     void Encoder::TransitionTexture(Graphics::TextureHandle texture, Graphics::GPUTextureLayout newLayout) {
         auto textureInstance = _device->GetTextureInstance(texture);
@@ -169,5 +167,11 @@ namespace Cocoa::Vulkan {
 
     void Encoder::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {
         _cmd.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+    }
+
+    void Encoder::End() {
+        _cmd.end();
+        _cmd = nullptr;
+        _active = false;
     }
 }

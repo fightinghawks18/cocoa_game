@@ -14,6 +14,7 @@ namespace Cocoa::Vulkan {
         _surfaceResources.emplace(1024);
         _textureResources.emplace(1024);
         _bindGroupResources.emplace(1024);
+        _bindGroupLayoutResources.emplace(1024);
         _shaderModuleResources.emplace(1024);
         _samplerResources.emplace(1024);
         _pipelineLayoutResources.emplace(1024);
@@ -27,6 +28,7 @@ namespace Cocoa::Vulkan {
         CreateAllocator();
         CreateCommandPool();
         CreateCommandBuffers();
+        CreateImmediateResources();
         CreateDescriptorPool();
     }
     
@@ -37,6 +39,7 @@ namespace Cocoa::Vulkan {
         _surfaceResources.reset();
         _textureResources.reset();
         _bindGroupResources.reset();
+        _bindGroupLayoutResources.reset();
         _shaderModuleResources.reset();
         _samplerResources.reset();
         _pipelineLayoutResources.reset();
@@ -45,6 +48,8 @@ namespace Cocoa::Vulkan {
 
         _descriptorPool.reset();
         _commandBuffers.clear();
+        _immediateCommandBuffer.reset();
+        _immediateFence.reset();
         _commandPool.reset();
 
         vmaDestroyAllocator(_allocator);
@@ -91,6 +96,10 @@ namespace Cocoa::Vulkan {
         return _bindGroupResources->Emplace(this, bindGroupDesc);
     }
 
+    Graphics::BindGroupLayoutHandle Device::CreateBindGroupLayout(Graphics::BindGroupLayoutDesc bindGroupLayoutDesc) {
+        return _bindGroupLayoutResources->Emplace(this, bindGroupLayoutDesc);
+    }
+
     void Device::DestroySurface(Graphics::SurfaceHandle surface) {
         _surfaceResources->Remove(surface);
     }
@@ -125,6 +134,10 @@ namespace Cocoa::Vulkan {
 
     void Device::DestroyBindGroup(Graphics::BindGroupHandle bindGroup) {
         _bindGroupResources->Remove(bindGroup);
+    }
+
+    void Device::DestroyBindGroupLayout(Graphics::BindGroupLayoutHandle bindGroupLayout) {
+        _bindGroupLayoutResources->Remove(bindGroupLayout);
     }
 
     Surface* Device::GetSurfaceInstance(Graphics::SurfaceHandle surface) {
@@ -163,7 +176,11 @@ namespace Cocoa::Vulkan {
         return _bindGroupResources->Get(bindGroup);
     }
 
-    std::unique_ptr<Encoder> Device::Encode(Graphics::SwapchainHandle swapchain) {
+    BindGroupLayout* Device::GetBindGroupLayoutInstance(Graphics::BindGroupLayoutHandle bindGroupLayout) {
+        return _bindGroupLayoutResources->Get(bindGroupLayout);
+    }
+
+    Encoder Device::Encode(Graphics::SwapchainHandle swapchain) {
         auto swapchainInstance = GetSwapchainInstance(swapchain);
         auto backBuffer = swapchainInstance->GetCurrentBackBuffer();
         
@@ -171,25 +188,47 @@ namespace Cocoa::Vulkan {
             .swapchain = swapchain,
             .cmd = _commandBuffers[_frame].get()
         };
-        auto encoder = std::make_unique<Encoder>(this, desc);
-        encoder->TransitionTexture(backBuffer, Graphics::GPUTextureLayout::ColorAttachment);
 
+        Encoder encoder(this, desc);
+        encoder.TransitionTexture(backBuffer, Graphics::GPUTextureLayout::ColorAttachment);
         return encoder;
     }
 
-    void Device::EndEncoding(std::unique_ptr<Encoder> encoder) {
-        auto swapchain = GetSwapchainInstance(encoder->GetTargetSwapchain());
-        auto commandBuffer = encoder->GetCommandBuffer();
+    void Device::EndEncoding(Encoder encoder) {
+        auto swapchain = GetSwapchainInstance(encoder.GetTargetSwapchain());
+        auto commandBuffer = encoder.GetCommandBuffer();
         auto backBuffer = swapchain->GetCurrentBackBuffer();
-
-        encoder->TransitionTexture(backBuffer, Graphics::GPUTextureLayout::Present);
-        encoder.reset();
-        
+        encoder.TransitionTexture(backBuffer, Graphics::GPUTextureLayout::Present);
+        encoder.End();
 
         swapchain->Submit(commandBuffer);
         swapchain->Present();
 
         _frame = (_frame + 1) % 2;
+    }
+    
+    void Device::EncodeImmediateCommands(std::function<void(Encoder& encoder)> encoderFun, Graphics::GPUQueueType queueType) {
+        EncoderDesc desc = {
+            .swapchain = {UINT32_MAX},
+            .cmd = _immediateCommandBuffer.get()
+        };
+
+        Encoder immediateEncoder(this, desc);
+        encoderFun(immediateEncoder);
+        immediateEncoder.End();
+
+        vk::CommandBufferSubmitInfo commandSubmitDescriptor{};
+        commandSubmitDescriptor.setCommandBuffer(_immediateCommandBuffer.get());
+
+        vk::SubmitInfo2 submitDescriptor{};
+        submitDescriptor.setCommandBufferInfos(commandSubmitDescriptor);
+        GetQueue(queueType)->queue.submit2(submitDescriptor, _immediateFence.get());
+
+        auto result = _device->waitForFences(_immediateFence.get(), VK_TRUE, UINT64_MAX);
+        if (result != vk::Result::eSuccess) {
+            PANIC("Failed to wait for GPU to finish submission of immediate commands");
+        }
+        _device->resetFences(_immediateFence.get());
     }
 
     std::optional<GPUQueue> Device::GetQueue(Graphics::GPUQueueType queueType) {
@@ -441,6 +480,18 @@ namespace Cocoa::Vulkan {
                         .setCommandPool(_commandPool.get())
                         .setLevel(vk::CommandBufferLevel::ePrimary);
         _commandBuffers = _device->allocateCommandBuffersUnique(commandBufferDescriptor);
+    }
+
+    void Device::CreateImmediateResources() {
+        vk::CommandBufferAllocateInfo commandBufferDescriptor{};
+            commandBufferDescriptor.setCommandBufferCount(1)
+                        .setCommandPool(_commandPool.get())
+                        .setLevel(vk::CommandBufferLevel::ePrimary);
+        auto buffers = _device->allocateCommandBuffersUnique(commandBufferDescriptor);
+        _immediateCommandBuffer = std::move(buffers[0]);
+
+        vk::FenceCreateInfo fenceDescriptor{};
+        _immediateFence = _device->createFenceUnique(fenceDescriptor);
     }
 
     void Device::CreateDescriptorPool() {

@@ -114,62 +114,35 @@ int main() {
     auto imageTexture = renderDevice->CreateTexture(imageTextureDescriptor);
     renderDevice->GetTextureInstance(imageTexture)->CreateView(imageViewTextureDescriptor);
 
+    renderDevice->EncodeImmediateCommands([&](Cocoa::Vulkan::Encoder& encoder) {
+        encoder.UploadBufferToImage(stagingBuffer, imageTexture);
+        encoder.TransitionTexture(imageTexture, Cocoa::Graphics::GPUTextureLayout::ShaderReadOnly);
+    });
+    renderDevice->DestroyBuffer(stagingBuffer);
+
     Cocoa::Graphics::SamplerDesc samplerDescriptor = {};
     auto sampler = renderDevice->CreateSampler(samplerDescriptor);
 
-    Cocoa::Graphics::BindGroupLayoutEntry mvpLayout = {
-        .binding = 0,
-        .visibility = Cocoa::Graphics::GPUShaderStage::Vertex,
-        .type = Cocoa::Graphics::GPUBindGroupType::UniformBuffer
-    };
+    Cocoa::Graphics::BindGroupLayoutDesc meshBindGroupLayoutDescriptor{};
+    meshBindGroupLayoutDescriptor.Entry(Cocoa::Graphics::GPUShaderStage::Vertex, Cocoa::Graphics::GPUBindGroupType::UniformBuffer)
+                .Entry(Cocoa::Graphics::GPUShaderStage::Pixel, Cocoa::Graphics::GPUBindGroupType::Texture)
+                .Entry(Cocoa::Graphics::GPUShaderStage::Pixel, Cocoa::Graphics::GPUBindGroupType::Sampler);
+    auto meshBindGroupLayout = renderDevice->CreateBindGroupLayout(meshBindGroupLayoutDescriptor);
 
-    Cocoa::Graphics::BindGroupLayoutEntry textureLayout = {
-        .binding = 1,
-        .visibility = Cocoa::Graphics::GPUShaderStage::Pixel,
-        .type = Cocoa::Graphics::GPUBindGroupType::Texture
-    };
+    Cocoa::Graphics::BindGroupDesc meshBindGroupDescriptor{meshBindGroupLayout};
+    meshBindGroupDescriptor.Entry(mvpBuffer)
+                .Entry(imageTexture)
+                .Entry(sampler);
+    auto meshBindGroup = renderDevice->CreateBindGroup(meshBindGroupDescriptor);
 
-    Cocoa::Graphics::BindGroupLayoutEntry samplerLayout = {
-        .binding = 2,
-        .visibility = Cocoa::Graphics::GPUShaderStage::Pixel,
-        .type = Cocoa::Graphics::GPUBindGroupType::Sampler
-    };
-
-    Cocoa::Graphics::BindGroupLayoutDesc meshBindGroupLayout = {
-        .entries = {mvpLayout, textureLayout, samplerLayout}
-    };
-
-    Cocoa::Graphics::BindGroupEntry mvpEntry = {
-        .binding = 0,
-        .buffer = mvpBuffer,
-    };
-
-    Cocoa::Graphics::BindGroupEntry textureEntry = {
-        .binding = 1,
-        .texture = imageTexture,
-    };
-
-    Cocoa::Graphics::BindGroupEntry samplerEntry = {
-        .binding = 2,
-        .sampler = sampler,
-    };
-
-    Cocoa::Graphics::BindGroupDesc meshBindGroupDesc = {
-        .layout = &meshBindGroupLayout,
-        .entries = {mvpEntry, textureEntry, samplerEntry}
-    };
-
-    auto mvpBindGroup = renderDevice->CreateBindGroup(meshBindGroupDesc);
-
-    Cocoa::Graphics::PipelineLayoutDesc pipelineLayoutDesc = {
-        .bindGroups = {mvpBindGroup}
-    };
+    Cocoa::Graphics::PipelineLayoutDesc pipelineLayoutDesc{};
+    pipelineLayoutDesc.BindGroup(meshBindGroupLayout);
 
     auto pipelineLayout = renderDevice->CreatePipelineLayout(pipelineLayoutDesc);
     Cocoa::Graphics::PipelineDesc pipelineDescriptor{};
-    pipelineDescriptor.AddShader(Cocoa::Graphics::GPUShaderStage::Vertex, vertexShader);
-    pipelineDescriptor.AddShader(Cocoa::Graphics::GPUShaderStage::Pixel, pixelShader);
-    pipelineDescriptor.Bind(0, sizeof(Cocoa::Graphics::Vertex))
+    pipelineDescriptor.Shader(Cocoa::Graphics::GPUShaderStage::Vertex, vertexShader);
+    pipelineDescriptor.Shader(Cocoa::Graphics::GPUShaderStage::Pixel, pixelShader);
+    pipelineDescriptor.Binding(sizeof(Cocoa::Graphics::Vertex))
                 .Attribute(Cocoa::Graphics::GPUFormat::RGB32Sfloat, offsetof(Cocoa::Graphics::Vertex, pos))
                 .Attribute(Cocoa::Graphics::GPUFormat::RGBA32Sfloat, offsetof(Cocoa::Graphics::Vertex, col))
                 .Attribute(Cocoa::Graphics::GPUFormat::RG32Sfloat, offsetof(Cocoa::Graphics::Vertex, uv));
@@ -304,20 +277,18 @@ int main() {
             .extent = viewport.extent
         };
 
-        encoder->UploadBufferToImage(stagingBuffer, imageTexture);
-        encoder->TransitionTexture(imageTexture, Cocoa::Graphics::GPUTextureLayout::ShaderReadOnly);
-
-        encoder->StartRendering(passDesc);
-        encoder->SetRenderPipeline(renderPipeline);
-        encoder->SetViewport(viewport);
-        encoder->SetScissor(scissor);
-        encoder->SetBindGroup(pipelineLayout, mvpBindGroup);
-        encoder->SetVertexBuffer(vertexBuffer);
-        encoder->SetIndexBuffer(indexBuffer);
-        encoder->DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
-        encoder->EndRendering();
-
-        renderDevice->EndEncoding(std::move(encoder));
+        encoder.StartRendering(passDesc);
+        {
+            encoder.SetRenderPipeline(renderPipeline);
+            encoder.SetViewport(viewport);
+            encoder.SetScissor(scissor);
+            encoder.SetBindGroup(pipelineLayout, meshBindGroup);
+            encoder.SetVertexBuffer(vertexBuffer);
+            encoder.SetIndexBuffer(indexBuffer);
+            encoder.DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
+        }
+        encoder.EndRendering();
+        renderDevice->EndEncoding(encoder);
     }
 
     std::cout << "Hello World!" << std::endl;

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 #include <SDL3/SDL.h>
 
@@ -51,31 +53,41 @@ namespace Cocoa::Graphics {
     };
 
     struct BindGroupLayoutEntry {
-        uint32_t binding;
+        uint32_t binding = UINT32_MAX;
         GPUShaderStage visibility;
         GPUBindGroupType type;
     };
 
-    struct BindGroupEntry {
-        uint32_t binding;
-        union {
-            BufferHandle buffer;
-            TextureHandle texture;
-            SamplerHandle sampler;
-        };
-    };
-
     struct BindGroupLayoutDesc {
         std::vector<BindGroupLayoutEntry> entries;
+        uint32_t nextImplicitBinding = 0;
+
+        BindGroupLayoutDesc& Entry(GPUShaderStage visibility, GPUBindGroupType type, uint32_t binding = UINT32_MAX) {
+            uint32_t actualBinding = (binding == UINT32_MAX) ? nextImplicitBinding : binding;
+            entries.push_back({actualBinding, visibility, type});
+            nextImplicitBinding = std::max(nextImplicitBinding, actualBinding + 1);
+            return *this;
+        }
     };
 
+    using BindGroupEntry = std::variant<BufferHandle, TextureHandle, SamplerHandle>;
     struct BindGroupDesc {
-        BindGroupLayoutDesc* layout;
+        BindGroupLayoutHandle layout;
         std::vector<BindGroupEntry> entries;
+
+        BindGroupDesc& Entry(BindGroupEntry entry) {
+            entries.push_back(entry);
+            return *this;
+        }
     };
 
     struct PipelineLayoutDesc {
-        std::vector<BindGroupHandle> bindGroups;
+        std::vector<BindGroupLayoutHandle> groupLayouts;
+
+        PipelineLayoutDesc& BindGroup(BindGroupLayoutHandle groupLayout) {
+            groupLayouts.push_back(groupLayout);
+            return *this;
+        }
     };
 
     struct PipelineVertexAttribute {
@@ -108,17 +120,20 @@ namespace Cocoa::Graphics {
         GPUFormat depthFormat = GPUFormat::Unknown;
         GPUFormat stencilFormat = GPUFormat::Unknown;
         PipelineLayoutHandle pipelineLayout;
+        uint32_t nextImplicitBinding = 0;
 
-        void AddShader(GPUShaderStage stage, ShaderModuleHandle shaderModule) {
+        void Shader(GPUShaderStage stage, ShaderModuleHandle shaderModule) {
             shaders[stage] = shaderModule;
         }
 
-        PipelineVertexBinding& Bind(uint32_t binding, uint32_t stride) {
+        PipelineVertexBinding& Binding(uint32_t stride, uint32_t binding = UINT32_MAX) {
+            uint32_t actualBinding = (binding == UINT32_MAX) ? nextImplicitBinding : binding;
             vertexLayout.push_back({
-                .binding = binding,
+                .binding = actualBinding,
                 .stride = stride,
                 .attributes = {}
             });
+            nextImplicitBinding = std::max(nextImplicitBinding, actualBinding + 1);
             return vertexLayout.back();
         }
     };

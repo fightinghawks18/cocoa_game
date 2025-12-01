@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -18,6 +19,7 @@
 #include "resources/texture.h"
 #include "resources/sampler.h"
 #include "resources/bind_group.h"
+#include "resources/bind_group_layout.h"
 #include "resources/pipeline_layout.h"
 #include "resources/render_pipeline.h"
 #include "resources/shader_module.h"
@@ -37,6 +39,7 @@ namespace Cocoa::Vulkan {
         Graphics::ShaderModuleHandle CreateShaderModule(Graphics::ShaderModuleDesc shaderModuleDesc);
         Graphics::TextureHandle CreateTexture(Graphics::TextureDesc textureDesc);
         Graphics::BindGroupHandle CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc);
+        Graphics::BindGroupLayoutHandle CreateBindGroupLayout(Graphics::BindGroupLayoutDesc bindGroupLayoutDesc);
 
         void DestroySurface(Graphics::SurfaceHandle surface);
         void DestroySwapchain(Graphics::SwapchainHandle swapchain);
@@ -47,6 +50,7 @@ namespace Cocoa::Vulkan {
         void DestroyShaderModule(Graphics::ShaderModuleHandle shaderModule);
         void DestroyTexture(Graphics::TextureHandle texture);
         void DestroyBindGroup(Graphics::BindGroupHandle bindGroup);
+        void DestroyBindGroupLayout(Graphics::BindGroupLayoutHandle bindGroupLayout);
 
         [[nodiscard]] Surface* GetSurfaceInstance(Graphics::SurfaceHandle surface);
         [[nodiscard]] Swapchain* GetSwapchainInstance(Graphics::SwapchainHandle swapchain);
@@ -57,9 +61,11 @@ namespace Cocoa::Vulkan {
         [[nodiscard]] ShaderModule* GetShaderModuleInstance(Graphics::ShaderModuleHandle shaderModule);
         [[nodiscard]] Texture* GetTextureInstance(Graphics::TextureHandle texture);
         [[nodiscard]] BindGroup* GetBindGroupInstance(Graphics::BindGroupHandle bindGroup);
+        [[nodiscard]] BindGroupLayout* GetBindGroupLayoutInstance(Graphics::BindGroupLayoutHandle bindGroupLayout);
 
-        std::unique_ptr<Encoder> Encode(Graphics::SwapchainHandle swapchain);
-        void EndEncoding(std::unique_ptr<Encoder> encoder);
+        Encoder Encode(Graphics::SwapchainHandle swapchain);
+        void EndEncoding(Encoder encoder);
+        void EncodeImmediateCommands(std::function<void(Encoder& encoder)> encoder, Graphics::GPUQueueType queueType = Graphics::GPUQueueType::Graphics);
 
         [[nodiscard]] std::optional<GPUQueue> GetQueue(Graphics::GPUQueueType queueType);
         [[nodiscard]] vk::Instance GetInstance() { return _instance.get(); }
@@ -78,17 +84,21 @@ namespace Cocoa::Vulkan {
         std::vector<vk::UniqueCommandBuffer> _commandBuffers;
         uint32_t _frame = 0;
 
+        vk::UniqueFence _immediateFence;
+        vk::UniqueCommandBuffer _immediateCommandBuffer;
+
         vk::UniqueDescriptorPool _descriptorPool;
 
-        std::optional<Tools::ResourceManager<Surface>> _surfaceResources;
-        std::optional<Tools::ResourceManager<Swapchain>> _swapchainResources;
-        std::optional<Tools::ResourceManager<Buffer>> _bufferResources;
-        std::optional<Tools::ResourceManager<PipelineLayout>> _pipelineLayoutResources;
-        std::optional<Tools::ResourceManager<RenderPipeline>> _renderPipelineResources;
-        std::optional<Tools::ResourceManager<Sampler>> _samplerResources;
-        std::optional<Tools::ResourceManager<ShaderModule>> _shaderModuleResources;
-        std::optional<Tools::ResourceManager<Texture>> _textureResources;
-        std::optional<Tools::ResourceManager<BindGroup>> _bindGroupResources;
+        std::optional<Tools::ResourceManager<Graphics::SurfaceHandle, Surface>> _surfaceResources;
+        std::optional<Tools::ResourceManager<Graphics::SwapchainHandle, Swapchain>> _swapchainResources;
+        std::optional<Tools::ResourceManager<Graphics::BufferHandle, Buffer>> _bufferResources;
+        std::optional<Tools::ResourceManager<Graphics::PipelineLayoutHandle, PipelineLayout>> _pipelineLayoutResources;
+        std::optional<Tools::ResourceManager<Graphics::RenderPipelineHandle, RenderPipeline>> _renderPipelineResources;
+        std::optional<Tools::ResourceManager<Graphics::SamplerHandle, Sampler>> _samplerResources;
+        std::optional<Tools::ResourceManager<Graphics::ShaderModuleHandle, ShaderModule>> _shaderModuleResources;
+        std::optional<Tools::ResourceManager<Graphics::TextureHandle, Texture>> _textureResources;
+        std::optional<Tools::ResourceManager<Graphics::BindGroupHandle, BindGroup>> _bindGroupResources;
+        std::optional<Tools::ResourceManager<Graphics::BindGroupLayoutHandle, BindGroupLayout>> _bindGroupLayoutResources;
 
         void CreateInstance();
         void GetPhysicalDevice(Graphics::DeviceDesc desc);
@@ -98,6 +108,7 @@ namespace Cocoa::Vulkan {
         void CreateAllocator();
         void CreateCommandPool();
         void CreateCommandBuffers();
+        void CreateImmediateResources();
         void CreateDescriptorPool();
     };
 }

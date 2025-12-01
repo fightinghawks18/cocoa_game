@@ -29,12 +29,14 @@ namespace Cocoa::Vulkan {
         void SetScissor(Graphics::Rect scissor);
         void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t vertexOffset, uint32_t firstInstance);
         void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+        void End();
 
         [[nodiscard]] Graphics::SwapchainHandle GetTargetSwapchain() { return _swapchain; }
         [[nodiscard]] vk::CommandBuffer GetCommandBuffer() { return _cmd; }
     private:
         Device* _device;
 
+        bool _active = false;
         vk::CommandBuffer _cmd;
         Graphics::SwapchainHandle _swapchain;
     };

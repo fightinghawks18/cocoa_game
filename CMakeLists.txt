@@ -38,6 +38,7 @@ add_executable(Cocoa
     src/vulkan/resources/texture.cpp
     src/vulkan/resources/texture_view.cpp
     src/vulkan/resources/bind_group.cpp
+    src/vulkan/resources/bind_group_layout.cpp
 )
 
 target_include_directories(Cocoa

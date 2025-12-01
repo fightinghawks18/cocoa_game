@@ -16,12 +16,10 @@ namespace Cocoa::Vulkan {
         BindGroup& operator=(const BindGroup& other) = delete;
         BindGroup& operator=(BindGroup&& other) noexcept = default;
 
-        [[nodiscard]] vk::DescriptorSetLayout GetLayout() { return _layout.get(); }
         [[nodiscard]] vk::DescriptorSet GetBinding() { return _set.get(); }
     private:
         Device* _device;
 
-        vk::UniqueDescriptorSetLayout _layout;
         vk::UniqueDescriptorSet _set;
     };
 }

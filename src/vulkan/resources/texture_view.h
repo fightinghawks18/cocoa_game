@@ -15,7 +15,6 @@ namespace Cocoa::Vulkan {
         [[nodiscard]] Graphics::GPUTextureAspect GetAspect() { return _aspect; }
     private:
         Device* _device;
-        Texture* _texture;
 
         vk::UniqueImageView _view;
         Graphics::GPUTextureAspect _aspect;
