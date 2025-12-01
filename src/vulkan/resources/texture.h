@@ -1,9 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <vulkan/vulkan.hpp>
-#include "../vma.h"
 
+#include "../vma.h"
 #include "texture_view.h"
+
 namespace Cocoa::Vulkan {
     class Device;
     class Texture {

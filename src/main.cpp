@@ -1,10 +1,11 @@
+#include <filesystem>
 #include <iostream>
 #include <memory>
 
 #include <vulkan/vulkan.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
@@ -70,10 +71,11 @@ int main() {
     auto mvpBuffer = renderDevice->CreateBuffer(mvpBufferDescriptor);
 
     // Image sampled
+    auto path = (std::filesystem::current_path() / "content" / "texture.png");
     int width, height, channels;
-    stbi_uc* pixels = stbi_load((std::filesystem::current_path() / "content" / "texture.png").c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
     if (!pixels) {
-        PANIC("Failed to load image: %s %s", stbi_failure_reason(), (std::filesystem::current_path() / "content" / "texture.png").c_str());
+        PANIC("Failed to load image: %s %s", stbi_failure_reason(), path.string().c_str());
     }
 
     uint64_t imageSize = width * height * 4;
