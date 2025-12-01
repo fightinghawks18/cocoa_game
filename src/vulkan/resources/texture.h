@@ -25,6 +25,7 @@ namespace Cocoa::Vulkan {
         [[nodiscard]] Graphics::GPUTextureLayout GetLayout() { return _layout; }
         [[nodiscard]] uint32_t GetLevels() { return _levels; }
         [[nodiscard]] uint32_t GetLayers() { return _layers; }
+        [[nodiscard]] Graphics::Extent3D GetExtent() { return _extent; }
     private:
         Device* _device;
 
@@ -33,7 +34,7 @@ namespace Cocoa::Vulkan {
         vk::Image _image;
         VmaAllocation _allocation;
         Graphics::GPUTextureLayout _layout = Graphics::GPUTextureLayout::Unknown;
-
+        Graphics::Extent3D _extent;
         uint32_t _levels;
         uint32_t _layers;
     };

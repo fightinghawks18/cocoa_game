@@ -2,18 +2,32 @@
 #include "../device.h"
 
 #include "../../macros.h"
+#include "../internal/helpers/enums.h"
+#include "../internal/helpers/flags.h"
 
 namespace Cocoa::Vulkan {
-    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device), _layout(desc.initialLayout), _levels(desc.levels), _layers(desc.layers) {
+    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device), _layout(desc.initialLayout), _extent(desc.extent), _levels(desc.levels), _layers(desc.layers) {
         if (!desc.external) {
             VmaAllocationCreateInfo allocationDescriptor = {0};
             allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;
             allocationDescriptor.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
+            vk::ImageCreateInfo imageDescriptor{};
+            imageDescriptor.setImageType(GPUTextureDimensionToVk(desc.dimension))
+                        .setArrayLayers(desc.layers)
+                        .setExtent(vk::Extent3D{desc.extent.w, desc.extent.h, desc.extent.d})
+                        .setFormat(GPUFormatToVk(desc.format))
+                        .setInitialLayout(GPUTextureLayoutToVk(desc.initialLayout))
+                        .setMipLevels(desc.levels)
+                        .setSamples(vk::SampleCountFlagBits::e1)
+                        .setSharingMode(vk::SharingMode::eExclusive)
+                        .setUsage(GPUTextureUsageToVk(desc.usage))
+                        .setTiling(vk::ImageTiling::eLinear);
+
             VkImage image;
             VkResult createImage = vmaCreateImage(
                 device->GetAllocator(), 
-                reinterpret_cast<const VkImageCreateInfo*>(&desc), 
+                reinterpret_cast<const VkImageCreateInfo*>(&imageDescriptor), 
                 &allocationDescriptor, 
                 &image, 
                 &_allocation, 

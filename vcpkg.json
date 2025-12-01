@@ -6,6 +6,7 @@
             "features": [ "vulkan" ]
         },
         "vulkan-memory-allocator",
-        "discord-rpc"
+        "discord-rpc",
+        "stb"
     ]
 }

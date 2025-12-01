@@ -23,6 +23,8 @@ namespace Cocoa::Graphics {
         Index = 1 << 1,
         Uniform = 1 << 2,
         Storage = 1 << 3,
+        TransferSrc = 1 << 4,
+        TransferDst = 1 << 5
     };
 
     inline bool operator&(GPUBufferUsage a, GPUBufferUsage b) {
@@ -38,7 +40,9 @@ namespace Cocoa::Graphics {
         RenderTarget = 1 << 0,
         DepthStencil = 1 << 1,
         ShaderUsage = 1 << 2,
-        Storage = 1 << 3
+        Storage = 1 << 3,
+        TransferSrc = 1 << 4,
+        TransferDst = 1 << 5
     };
 
     inline bool operator&(GPUTextureUsage a, GPUTextureUsage b) {

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+
+#include "../../vma.h"
 #include "../../../graphics/enums.h"
 
 namespace Cocoa::Vulkan {
@@ -28,12 +30,16 @@ namespace Cocoa::Vulkan {
         switch (format) {
             case Graphics::GPUFormat::Unknown:
                 return vk::Format::eUndefined;
-            case Graphics::GPUFormat::BGRA8_SRGB:
+            case Graphics::GPUFormat::BGRA8Srgb:
                 return vk::Format::eB8G8R8A8Srgb;
-            case Graphics::GPUFormat::RGB32_SFLOAT:
+            case Graphics::GPUFormat::RG32Sfloat:
+                return vk::Format::eR32G32Sfloat;
+            case Graphics::GPUFormat::RGB32Sfloat:
                 return vk::Format::eR32G32B32Sfloat;
-            case Graphics::GPUFormat::RGBA32_SFLOAT:
+            case Graphics::GPUFormat::RGBA32Sfloat:
                 return vk::Format::eR32G32B32A32Sfloat;
+            case Graphics::GPUFormat::RGBA8Unorm:
+                return vk::Format::eR8G8B8A8Unorm;
         }
     }
 
@@ -43,6 +49,17 @@ namespace Cocoa::Vulkan {
                 return vk::Filter::eLinear;
             case Graphics::GPUFilter::Nearest:
                 return vk::Filter::eNearest;
+        }
+    }
+
+    inline vk::ImageType GPUTextureDimensionToVk(Graphics::GPUTextureDimension dimension) {
+        switch (dimension) {
+            case Graphics::GPUTextureDimension::One:
+                return vk::ImageType::e1D;
+            case Graphics::GPUTextureDimension::Two:
+                return vk::ImageType::e2D;
+            case Graphics::GPUTextureDimension::Three:
+                return vk::ImageType::e3D;
         }
     }
 
@@ -96,11 +113,13 @@ namespace Cocoa::Vulkan {
             case vk::Format::eUndefined:
                 return Graphics::GPUFormat::Unknown;
             case vk::Format::eB8G8R8A8Srgb:
-                return Graphics::GPUFormat::BGRA8_SRGB;
+                return Graphics::GPUFormat::BGRA8Srgb;
             case vk::Format::eR32G32B32Sfloat:
-                return Graphics::GPUFormat::RGB32_SFLOAT;
+                return Graphics::GPUFormat::RGB32Sfloat;
             case vk::Format::eR32G32B32A32Sfloat:
-                return Graphics::GPUFormat::RGBA32_SFLOAT;
+                return Graphics::GPUFormat::RGBA32Sfloat;
+            case vk::Format::eR8G8B8A8Unorm:
+                return Graphics::GPUFormat::RGBA8Unorm;
             default: return Graphics::GPUFormat::Unknown;
         }
     }
@@ -150,9 +169,26 @@ namespace Cocoa::Vulkan {
             case Graphics::GPUBindGroupType::StorageBuffer:
                 return vk::DescriptorType::eStorageBuffer;
             case Graphics::GPUBindGroupType::Texture:
-                return vk::DescriptorType::eUniformTexelBuffer;
+                return vk::DescriptorType::eSampledImage;
             case Graphics::GPUBindGroupType::Sampler:
                 return vk::DescriptorType::eSampler;
+        }
+    }
+
+    inline VmaAllocationCreateFlags GPUBufferAccessToVma(Graphics::GPUBufferAccess access) {
+        switch(access) {
+            case Graphics::GPUBufferAccess::GPUOnly:
+                return 0;
+            case Graphics::GPUBufferAccess::CPUToGPU:
+                return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+                       VMA_ALLOCATION_CREATE_MAPPED_BIT;
+            case Graphics::GPUBufferAccess::GPUToCPU:
+                return VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT |
+                       VMA_ALLOCATION_CREATE_MAPPED_BIT;
+            case Graphics::GPUBufferAccess::CPUOnly:
+                return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+                       VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT |
+                       VMA_ALLOCATION_CREATE_MAPPED_BIT;
         }
     }
 }

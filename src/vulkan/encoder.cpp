@@ -42,6 +42,39 @@ namespace Cocoa::Vulkan {
         textureInstance->SetLayout(newLayout);
     }
 
+    void Encoder::UploadBufferToImage(Graphics::BufferHandle srcBuffer, Graphics::TextureHandle dstTexture) {
+        auto bufferInstance = _device->GetBufferInstance(srcBuffer);
+        auto textureInstance = _device->GetTextureInstance(dstTexture);
+        auto textureExtent = textureInstance->GetExtent();
+
+        auto oldTextureLayout = textureInstance->GetLayout();
+        TransitionTexture(dstTexture, Graphics::GPUTextureLayout::TransferDst);
+
+        vk::BufferImageCopy region;
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.layerCount = 1;
+        region.imageOffset = vk::Offset3D{0, 0, 0};
+        region.imageExtent = vk::Extent3D{textureExtent.w, textureExtent.h, textureExtent.d};
+        
+        _cmd.copyBufferToImage(
+            bufferInstance->Get(),
+            textureInstance->Get(),
+            vk::ImageLayout::eTransferDstOptimal,
+            1, &region
+        );
+
+        if (oldTextureLayout == Graphics::GPUTextureLayout::Unknown) {
+            oldTextureLayout = Graphics::GPUTextureLayout::General;
+        }
+
+        TransitionTexture(dstTexture, oldTextureLayout);
+    }
+
     void Encoder::StartRendering(Graphics::GPUPassDesc passDesc) {
         std::vector<vk::RenderingAttachmentInfo> renderColorDescs;
         renderColorDescs.reserve(passDesc.colorPasses.size());

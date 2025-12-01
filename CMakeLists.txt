@@ -6,11 +6,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
 include(cmake/shaders.cmake)
+include(cmake/content.cmake)
 
 find_package(Vulkan REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 
 find_package(SDL3 CONFIG REQUIRED)
+find_package(Stb REQUIRED)
 
 find_library(DISCORD_RPC_LIB 
     NAMES discord-rpc libdiscord-rpc
@@ -38,6 +40,10 @@ add_executable(Cocoa
     src/vulkan/resources/bind_group.cpp
 )
 
+target_include_directories(Cocoa
+    PRIVATE ${Stb_INCLUDE_DIR}
+)
+
 target_link_libraries(Cocoa
     PRIVATE Vulkan::Vulkan
     PRIVATE GPUOpen::VulkanMemoryAllocator
@@ -55,7 +61,8 @@ elseif(WIN32)
     )
 endif()
 
-compile_glsl_dir_to_spirv(content content)
+compile_glsl_dir_to_spirv(shaders shaders)
+copy_content_directory(content)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
     add_custom_target(Copy_Compiled_Commands ALL

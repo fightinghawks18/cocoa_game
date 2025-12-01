@@ -15,6 +15,7 @@ namespace Cocoa::Graphics {
     struct Vertex {
         std::array<float, 3> pos;
         std::array<float, 4> col;
+        std::array<float, 2> uv;
     };
 
     struct MeshData {

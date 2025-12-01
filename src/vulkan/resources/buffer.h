@@ -26,6 +26,7 @@ namespace Cocoa::Vulkan {
         Device* _device;
 
         vk::Buffer _buffer;
+        void* _mapped = nullptr;
         uint64_t _size;
         VmaAllocation _allocation;
     };

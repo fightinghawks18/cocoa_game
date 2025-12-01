@@ -11,9 +11,9 @@
 
 namespace Cocoa::Graphics {
     struct DeviceDesc {
-        SDL_Window* window;
+        SDL_Window* window = nullptr;
         std::vector<GPUQueueType> desiredQueues;
-        GPUPowerPreference powerPreference;
+        GPUPowerPreference powerPreference = GPUPowerPreference::HighPerformance;
     };
 
     struct SwapchainDesc {
@@ -21,32 +21,33 @@ namespace Cocoa::Graphics {
     };
 
     struct BufferDesc {
-        GPUBufferUsage usage;
-        uint64_t size;
-        void* mapped;
+        GPUBufferUsage usage = GPUBufferUsage::Unknown;
+        GPUBufferAccess access = GPUBufferAccess::CPUToGPU;
+        uint64_t size = 0;
+        void* mapped = nullptr;
     };
 
     struct GPUColorPassDesc {
         TextureHandle texture;
-        std::array<float, 4> clearColor;
-        GPUPassLoadOp loadOp;
-        GPUPassStoreOp storeOp;
+        std::array<float, 4> clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        GPUPassLoadOp loadOp = GPUPassLoadOp::Clear;
+        GPUPassStoreOp storeOp = GPUPassStoreOp::Store;
     };
 
     struct GPUDepthPassDesc {
         TextureHandle texture;
-        float depth;
-        uint32_t stencil;
-        GPUPassLoadOp loadOp;
-        GPUPassStoreOp storeOp;
+        float depth = 1.0f;
+        uint32_t stencil = 1;
+        GPUPassLoadOp loadOp = GPUPassLoadOp::Clear;
+        GPUPassStoreOp storeOp = GPUPassStoreOp::Store;
     };
 
     struct GPUPassDesc {
         std::vector<GPUColorPassDesc> colorPasses;
         const GPUDepthPassDesc* depthPass = nullptr;
         Rect renderArea;
-        uint32_t viewMask;
-        uint32_t layerCount;
+        uint32_t viewMask = 0;
+        uint32_t layerCount = 1;
     };
 
     struct BindGroupLayoutEntry {
@@ -103,7 +104,7 @@ namespace Cocoa::Graphics {
         GPUCullMode cullMode = GPUCullMode::Backside;
         GPUPolygonMode polygonMode = GPUPolygonMode::Fill;
         GPUFrontFace frontFace = GPUFrontFace::CounterClockwise;
-        GPUFormat colorFormat = GPUFormat::BGRA8_SRGB;
+        GPUFormat colorFormat = GPUFormat::BGRA8Srgb;
         GPUFormat depthFormat = GPUFormat::Unknown;
         GPUFormat stencilFormat = GPUFormat::Unknown;
         PipelineLayoutHandle pipelineLayout;

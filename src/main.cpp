@@ -3,6 +3,9 @@
 
 #include <vulkan/vulkan.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 
@@ -50,12 +53,12 @@ int main() {
     auto swapchainInstance = renderDevice->GetSwapchainInstance(swapchain);
 
     Cocoa::Graphics::ShaderModuleDesc vertexShaderDescriptor = {
-        .shaderPath = "content/vertex.vert.spv"
+        .shaderPath = "shaders/vertex.vert.spv"
     };
     auto vertexShader = renderDevice->CreateShaderModule(vertexShaderDescriptor);
 
     Cocoa::Graphics::ShaderModuleDesc pixelShaderDescriptor = {
-        .shaderPath = "content/vertex.frag.spv"
+        .shaderPath = "shaders/vertex.frag.spv"
     };
     auto pixelShader = renderDevice->CreateShaderModule(pixelShaderDescriptor);
     
@@ -66,14 +69,72 @@ int main() {
     };
     auto mvpBuffer = renderDevice->CreateBuffer(mvpBufferDescriptor);
 
+    // Image sampled
+    int width, height, channels;
+    stbi_uc* pixels = stbi_load((std::filesystem::current_path() / "content" / "texture.png").c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    if (!pixels) {
+        PANIC("Failed to load image: %s %s", stbi_failure_reason(), (std::filesystem::current_path() / "content" / "texture.png").c_str());
+    }
+
+    uint64_t imageSize = width * height * 4;
+
+    Cocoa::Graphics::BufferDesc stagingBufferDescriptor = {
+        .usage = Cocoa::Graphics::GPUBufferUsage::TransferSrc,
+        .size = imageSize,
+        .mapped = pixels
+    };
+    auto stagingBuffer = renderDevice->CreateBuffer(stagingBufferDescriptor);  
+
+    Cocoa::Graphics::Extent3D extent;
+    extent.w = width;
+    extent.h = height;
+    extent.d = 1;
+
+    Cocoa::Graphics::TextureDesc imageTextureDescriptor = {
+        .dimension = Cocoa::Graphics::GPUTextureDimension::Two,
+        .usage = Cocoa::Graphics::GPUTextureUsage::ShaderUsage | Cocoa::Graphics::GPUTextureUsage::TransferDst,
+        .format = Cocoa::Graphics::GPUFormat::RGBA8Unorm,
+        .initialLayout = Cocoa::Graphics::GPUTextureLayout::Unknown,
+        .samples = Cocoa::Graphics::GPUSamplingCount::None,
+        extent,
+        .levels = 1,
+        .layers = 1,
+    };
+
+    Cocoa::Graphics::TextureViewDesc imageViewTextureDescriptor = {
+        .type = Cocoa::Graphics::GPUTextureViewType::TwoDimensional,
+        .format = Cocoa::Graphics::GPUFormat::RGBA8Unorm,
+        .aspect = Cocoa::Graphics::GPUTextureAspect::Color,
+        0, 1,
+        0, 1
+    };
+
+    auto imageTexture = renderDevice->CreateTexture(imageTextureDescriptor);
+    renderDevice->GetTextureInstance(imageTexture)->CreateView(imageViewTextureDescriptor);
+
+    Cocoa::Graphics::SamplerDesc samplerDescriptor = {};
+    auto sampler = renderDevice->CreateSampler(samplerDescriptor);
+
     Cocoa::Graphics::BindGroupLayoutEntry mvpLayout = {
         .binding = 0,
         .visibility = Cocoa::Graphics::GPUShaderStage::Vertex,
         .type = Cocoa::Graphics::GPUBindGroupType::UniformBuffer
     };
 
-    Cocoa::Graphics::BindGroupLayoutDesc mvpBindGroupLayout = {
-        .entries = {mvpLayout}
+    Cocoa::Graphics::BindGroupLayoutEntry textureLayout = {
+        .binding = 1,
+        .visibility = Cocoa::Graphics::GPUShaderStage::Pixel,
+        .type = Cocoa::Graphics::GPUBindGroupType::Texture
+    };
+
+    Cocoa::Graphics::BindGroupLayoutEntry samplerLayout = {
+        .binding = 2,
+        .visibility = Cocoa::Graphics::GPUShaderStage::Pixel,
+        .type = Cocoa::Graphics::GPUBindGroupType::Sampler
+    };
+
+    Cocoa::Graphics::BindGroupLayoutDesc meshBindGroupLayout = {
+        .entries = {mvpLayout, textureLayout, samplerLayout}
     };
 
     Cocoa::Graphics::BindGroupEntry mvpEntry = {
@@ -81,12 +142,22 @@ int main() {
         .buffer = mvpBuffer,
     };
 
-    Cocoa::Graphics::BindGroupDesc mvpBindGroupDesc = {
-        .layout = &mvpBindGroupLayout,
-        .entries = {mvpEntry}
+    Cocoa::Graphics::BindGroupEntry textureEntry = {
+        .binding = 1,
+        .texture = imageTexture,
     };
 
-    auto mvpBindGroup = renderDevice->CreateBindGroup(mvpBindGroupDesc);
+    Cocoa::Graphics::BindGroupEntry samplerEntry = {
+        .binding = 2,
+        .sampler = sampler,
+    };
+
+    Cocoa::Graphics::BindGroupDesc meshBindGroupDesc = {
+        .layout = &meshBindGroupLayout,
+        .entries = {mvpEntry, textureEntry, samplerEntry}
+    };
+
+    auto mvpBindGroup = renderDevice->CreateBindGroup(meshBindGroupDesc);
 
     Cocoa::Graphics::PipelineLayoutDesc pipelineLayoutDesc = {
         .bindGroups = {mvpBindGroup}
@@ -97,8 +168,9 @@ int main() {
     pipelineDescriptor.AddShader(Cocoa::Graphics::GPUShaderStage::Vertex, vertexShader);
     pipelineDescriptor.AddShader(Cocoa::Graphics::GPUShaderStage::Pixel, pixelShader);
     pipelineDescriptor.Bind(0, sizeof(Cocoa::Graphics::Vertex))
-                .Attribute(Cocoa::Graphics::GPUFormat::RGB32_SFLOAT, offsetof(Cocoa::Graphics::Vertex, pos))
-                .Attribute(Cocoa::Graphics::GPUFormat::RGBA32_SFLOAT, offsetof(Cocoa::Graphics::Vertex, col));
+                .Attribute(Cocoa::Graphics::GPUFormat::RGB32Sfloat, offsetof(Cocoa::Graphics::Vertex, pos))
+                .Attribute(Cocoa::Graphics::GPUFormat::RGBA32Sfloat, offsetof(Cocoa::Graphics::Vertex, col))
+                .Attribute(Cocoa::Graphics::GPUFormat::RG32Sfloat, offsetof(Cocoa::Graphics::Vertex, uv));
     pipelineDescriptor.cullMode = Cocoa::Graphics::GPUCullMode::None;
     pipelineDescriptor.pipelineLayout = pipelineLayout;
 
@@ -118,7 +190,7 @@ int main() {
         .size = sizeof(uint16_t) * plane.indices.size(),
         .mapped = plane.indices.data()
     };
-    auto indexBuffer = renderDevice->CreateBuffer(indexBufferDescriptor);
+    auto indexBuffer = renderDevice->CreateBuffer(indexBufferDescriptor);  
 
     Cocoa::Graphics::MVP mvpData;
     
@@ -204,7 +276,7 @@ int main() {
 
         Cocoa::Graphics::GPUColorPassDesc colorPassDesc = {
             .texture = backBuffer,
-            .clearColor = {0.6f, 0.21f, 0.36f, 1.0f},
+            .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
             .loadOp = Cocoa::Graphics::GPUPassLoadOp::Clear,
             .storeOp = Cocoa::Graphics::GPUPassStoreOp::Store
         };
@@ -229,6 +301,9 @@ int main() {
             .offset = viewport.offset,
             .extent = viewport.extent
         };
+
+        encoder->UploadBufferToImage(stagingBuffer, imageTexture);
+        encoder->TransitionTexture(imageTexture, Cocoa::Graphics::GPUTextureLayout::ShaderReadOnly);
 
         encoder->StartRendering(passDesc);
         encoder->SetRenderPipeline(renderPipeline);

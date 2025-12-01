@@ -444,14 +444,26 @@ namespace Cocoa::Vulkan {
     }
 
     void Device::CreateDescriptorPool() {
-        vk::DescriptorPoolSize poolSize{};
-        poolSize.setType(vk::DescriptorType::eUniformBuffer)
+        vk::DescriptorPoolSize bufferPoolSize{};
+        bufferPoolSize.setType(vk::DescriptorType::eUniformBuffer)
                 .setDescriptorCount(1000);
+
+        vk::DescriptorPoolSize imagePoolSize{};
+        imagePoolSize.setType(vk::DescriptorType::eSampledImage)
+                .setDescriptorCount(1000);
+        
+        vk::DescriptorPoolSize samplerPoolSize{};
+        samplerPoolSize.setType(vk::DescriptorType::eSampler)
+                .setDescriptorCount(1000);
+
+        std::vector poolSizes = {
+            bufferPoolSize, imagePoolSize, samplerPoolSize
+        };
         
         vk::DescriptorPoolCreateInfo descriptorPoolDescriptor{};
         descriptorPoolDescriptor.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
                     .setMaxSets(1000)
-                    .setPoolSizes(poolSize);
+                    .setPoolSizes(poolSizes);
         _descriptorPool = _device->createDescriptorPoolUnique(descriptorPoolDescriptor);
     }
 }

@@ -54,9 +54,11 @@ namespace Cocoa::Graphics {
 
     enum class GPUFormat {
         Unknown = 0,
-        BGRA8_SRGB,
-        RGB32_SFLOAT,
-        RGBA32_SFLOAT
+        BGRA8Srgb,
+        RG32Sfloat,
+        RGB32Sfloat,
+        RGBA32Sfloat,
+        RGBA8Unorm
     };
 
     enum class GPUTextureDimension {
@@ -99,5 +101,12 @@ namespace Cocoa::Graphics {
         ClampToEdge,
         ClampToBorder,
         MirroredRepeat
+    };
+
+    enum class GPUBufferAccess {
+        CPUOnly,
+        CPUToGPU,
+        GPUToCPU,
+        GPUOnly
     };
 }

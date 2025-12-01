@@ -3,6 +3,7 @@
 
 #include "../../macros.h"
 #include "../internal/helpers/flags.h"
+#include "../internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
     Buffer::Buffer(Device* device, Graphics::BufferDesc desc) : _device(device) {
@@ -12,8 +13,9 @@ namespace Cocoa::Vulkan {
                     .setSize(desc.size);
         VmaAllocationCreateInfo allocationDescriptor = {0};
         allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;
-        allocationDescriptor.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        allocationDescriptor.flags = GPUBufferAccessToVma(desc.access);
 
+        VmaAllocationInfo allocationInfo;
         VkBuffer buffer;
         VkResult result = vmaCreateBuffer(
             _device->GetAllocator(), 
@@ -21,7 +23,7 @@ namespace Cocoa::Vulkan {
             &allocationDescriptor, 
             &buffer, 
             &_allocation, 
-            nullptr
+            &allocationInfo
         );
         if (result != VK_SUCCESS) {
             PANIC("Failed to create a vulkan buffer");
@@ -29,6 +31,7 @@ namespace Cocoa::Vulkan {
         
         _buffer = buffer;
         _size = desc.size;
+        _mapped = allocationInfo.pMappedData;
 
         if (desc.mapped != nullptr) {
             MapTo(desc.mapped, desc.size, 0);
@@ -41,9 +44,6 @@ namespace Cocoa::Vulkan {
     }
 
     void Buffer::MapTo(void* mapped, uint64_t size, uint64_t offset) {
-        void* data;
-        vmaMapMemory(_device->GetAllocator(), _allocation, &data);
-        memcpy(static_cast<char*>(data) + offset, mapped, size);
-        vmaUnmapMemory(_device->GetAllocator(), _allocation);
+        memcpy(static_cast<char*>(_mapped) + offset, mapped, size);
     }
 }

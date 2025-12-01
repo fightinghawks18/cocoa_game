@@ -33,6 +33,10 @@ namespace Cocoa::Vulkan {
         std::vector<vk::DescriptorBufferInfo> bufferDescriptors;
         std::vector<vk::DescriptorImageInfo> imageDescriptors;
 
+        writes.reserve(desc.entries.size());
+        bufferDescriptors.reserve(desc.entries.size());
+        imageDescriptors.reserve(desc.entries.size());
+
         for (const auto& entry : desc.entries) {
             vk::WriteDescriptorSet descriptorWrite{};
             descriptorWrite.setDstSet(_set.get())
@@ -63,8 +67,10 @@ namespace Cocoa::Vulkan {
                     break;
                 }
                 case Graphics::GPUBindGroupType::Texture: {
+                    auto image = device->GetTextureInstance(entry.texture);
+                    auto imageView = image->GetView(0);
                     vk::DescriptorImageInfo imageDescriptor{};
-                    imageDescriptor.setImageView(device->GetTextureInstance(entry.texture)->GetView(0)->Get())
+                    imageDescriptor.setImageView(imageView->Get())
                                 .setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
                     imageDescriptors.push_back(imageDescriptor);
 

@@ -18,6 +18,7 @@ namespace Cocoa::Vulkan {
         ~Encoder();
 
         void TransitionTexture(Graphics::TextureHandle texture, Graphics::GPUTextureLayout newLayout);
+        void UploadBufferToImage(Graphics::BufferHandle srcBuffer, Graphics::TextureHandle dstTexture);
         void StartRendering(Graphics::GPUPassDesc passDesc);
         void EndRendering();
         void SetRenderPipeline(Graphics::RenderPipelineHandle renderPipeline);
