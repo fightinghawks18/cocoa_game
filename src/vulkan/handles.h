@@ -13,13 +13,13 @@ namespace Cocoa::Vulkan {
     class RenderPipeline;
     class ShaderModule;
 
-    using SwapchainHandle = Tools::Handle<Swapchain>;
-    using SurfaceHandle = Tools::Handle<Surface>;
-    using BufferHandle = Tools::Handle<Buffer>;
-    using TextureHandle = Tools::Handle<Texture>;
-    using SamplerHandle = Tools::Handle<Sampler>;
-    using BindGroupHandle = Tools::Handle<BindGroup>;
-    using PipelineLayoutHandle = Tools::Handle<PipelineLayout>;
-    using RenderPipelineHandle = Tools::Handle<RenderPipeline>;
-    using ShaderModuleHandle = Tools::Handle<ShaderModule>;
+    using SwapchainHandle = Tools::Handle;
+    using SurfaceHandle = Tools::Handle;
+    using BufferHandle = Tools::Handle;
+    using TextureHandle = Tools::Handle;
+    using SamplerHandle = Tools::Handle;
+    using BindGroupHandle = Tools::Handle;
+    using PipelineLayoutHandle = Tools::Handle;
+    using RenderPipelineHandle = Tools::Handle;
+    using ShaderModuleHandle = Tools::Handle;
 }

@@ -1,24 +1,23 @@
 #include "device.h"
 
-#include <cmath>
 #include <iostream>
-#include <map>
-#include <ranges>
 
 #include <SDL3/SDL_vulkan.h>
+#include <map>
+#include <ranges>
 
 #include "../macros.h"
 namespace Cocoa::Vulkan {
     Device::Device(DeviceDesc desc) {
-        _swapchainResources = std::make_unique<Tools::ResourceManager<Swapchain>>();
-        _surfaceResources = std::make_unique<Tools::ResourceManager<Surface>>();
-        _textureResources = std::make_unique<Tools::ResourceManager<Texture>>();
-        _bindGroupResources = std::make_unique<Tools::ResourceManager<BindGroup>>();
-        _shaderModuleResources = std::make_unique<Tools::ResourceManager<ShaderModule>>();
-        _samplerResources = std::make_unique<Tools::ResourceManager<Sampler>>();
-        _pipelineLayoutResources = std::make_unique<Tools::ResourceManager<PipelineLayout>>();
-        _renderPipelineResources = std::make_unique<Tools::ResourceManager<RenderPipeline>>();
-        _bufferResources = std::make_unique<Tools::ResourceManager<Buffer>>();
+        _swapchainResources.emplace(1024);
+        _surfaceResources.emplace(1024);
+        _textureResources.emplace(1024);
+        _bindGroupResources.emplace(1024);
+        _shaderModuleResources.emplace(1024);
+        _samplerResources.emplace(1024);
+        _pipelineLayoutResources.emplace(1024);
+        _renderPipelineResources.emplace(1024);
+        _bufferResources.emplace(1024);
 
         CreateInstance();
         GetPhysicalDevice(desc);
@@ -56,75 +55,75 @@ namespace Cocoa::Vulkan {
     }
 
     SurfaceHandle Device::CreateSurface(SDL_Window* window) {
-        return _surfaceResources->Create(this, window);
+        return _surfaceResources->Emplace(this, window);
     }
 
     SwapchainHandle Device::CreateSwapchain(SwapchainDesc swapchainDesc) {
-        return _swapchainResources->Create(this, swapchainDesc);
+        return _swapchainResources->Emplace(this, swapchainDesc);
     }
 
     BufferHandle Device::CreateBuffer(BufferDesc bufferDesc) {
-        return _bufferResources->Create(this, bufferDesc);
+        return _bufferResources->Emplace(this, bufferDesc);
     }
 
     PipelineLayoutHandle Device::CreatePipelineLayout(vk::PipelineLayoutCreateInfo pipelineLayoutDesc) {
-        return _pipelineLayoutResources->Create(this, pipelineLayoutDesc);
+        return _pipelineLayoutResources->Emplace(this, pipelineLayoutDesc);
     }
 
     RenderPipelineHandle Device::CreateRenderPipeline(vk::GraphicsPipelineCreateInfo renderPipelineDesc) {
-        return _renderPipelineResources->Create(this, renderPipelineDesc);
+        return _renderPipelineResources->Emplace(this, renderPipelineDesc);
     }
 
     SamplerHandle Device::CreateSampler(vk::SamplerCreateInfo samplerDesc) {
-        return _samplerResources->Create(this, samplerDesc);
+        return _samplerResources->Emplace(this, samplerDesc);
     }
 
     ShaderModuleHandle Device::CreateShaderModule(vk::ShaderModuleCreateInfo shaderModuleDesc) {
-        return _shaderModuleResources->Create(this, shaderModuleDesc);
+        return _shaderModuleResources->Emplace(this, shaderModuleDesc);
     }
 
     TextureHandle Device::CreateTexture(vk::ImageCreateInfo textureDesc, vk::ImageViewCreateInfo* textureViewDesc) {
-        return _textureResources->Create(this, textureDesc, textureViewDesc);
+        return _textureResources->Emplace(this, textureDesc, textureViewDesc);
     }
 
     BindGroupHandle Device::CreateBindGroup(BindGroupDesc bindGroupDesc) {
-        return _bindGroupResources->Create(this, bindGroupDesc);
+        return _bindGroupResources->Emplace(this, bindGroupDesc);
     }
 
     void Device::DestroySurface(SurfaceHandle surface) {
-        _surfaceResources->Free(surface);
+        _surfaceResources->Remove(surface);
     }
 
     void Device::DestroySwapchain(SwapchainHandle swapchain) {
-        _swapchainResources->Free(swapchain);
+        _swapchainResources->Remove(swapchain);
     }
 
     void Device::DestroyBuffer(BufferHandle buffer) {
-        _bufferResources->Free(buffer);
+        _bufferResources->Remove(buffer);
     }
 
     void Device::DestroyPipelineLayout(PipelineLayoutHandle pipelineLayout) {
-        _pipelineLayoutResources->Free(pipelineLayout);
+        _pipelineLayoutResources->Remove(pipelineLayout);
     }
 
     void Device::DestroyRenderPipeline(RenderPipelineHandle renderPipeline) {
-        _renderPipelineResources->Free(renderPipeline);
+        _renderPipelineResources->Remove(renderPipeline);
     }
 
     void Device::DestroySampler(SamplerHandle sampler) {
-        _samplerResources->Free(sampler);
+        _samplerResources->Remove(sampler);
     }
 
     void Device::DestroyShaderModule(ShaderModuleHandle shaderModule) {
-        _shaderModuleResources->Free(shaderModule);
+        _shaderModuleResources->Remove(shaderModule);
     }
 
     void Device::DestroyTexture(TextureHandle texture) {
-        _textureResources->Free(texture);
+        _textureResources->Remove(texture);
     }
 
     void Device::DestroyBindGroup(BindGroupHandle bindGroup) {
-        _bindGroupResources->Free(bindGroup);
+        _bindGroupResources->Remove(bindGroup);
     }
 
     Surface* Device::GetSurfaceInstance(SurfaceHandle surface) {
@@ -400,7 +399,7 @@ namespace Cocoa::Vulkan {
         // Vulkan requires unique queue families, it's possible
         // we may have same family indices so we must accumulate queue count to avoid this
         std::map<uint32_t, uint32_t> uniqueFamilies;
-        for (const auto& queue : _queues | std::views::values) {
+        for (const auto& queue : _queues | std::ranges::views::values) {
             uniqueFamilies[queue.family]++;
         }
 

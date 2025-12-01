@@ -20,8 +20,6 @@
 #include "resources/render_pipeline.h"
 #include "resources/shader_module.h"
 
-#include "../tools/resource_manager.h"
-
 namespace Cocoa::Vulkan {
     struct DeviceDesc {
         SDL_Window* window;
@@ -86,15 +84,15 @@ namespace Cocoa::Vulkan {
 
         vk::UniqueDescriptorPool _descriptorPool;
 
-        std::unique_ptr<Tools::ResourceManager<Surface>> _surfaceResources;
-        std::unique_ptr<Tools::ResourceManager<Swapchain>> _swapchainResources;
-        std::unique_ptr<Tools::ResourceManager<Buffer>> _bufferResources;
-        std::unique_ptr<Tools::ResourceManager<PipelineLayout>> _pipelineLayoutResources;
-        std::unique_ptr<Tools::ResourceManager<RenderPipeline>> _renderPipelineResources;
-        std::unique_ptr<Tools::ResourceManager<Sampler>> _samplerResources;
-        std::unique_ptr<Tools::ResourceManager<ShaderModule>> _shaderModuleResources;
-        std::unique_ptr<Tools::ResourceManager<Texture>> _textureResources;
-        std::unique_ptr<Tools::ResourceManager<BindGroup>> _bindGroupResources;
+        std::optional<Tools::ResourceManager<Surface>> _surfaceResources;
+        std::optional<Tools::ResourceManager<Swapchain>> _swapchainResources;
+        std::optional<Tools::ResourceManager<Buffer>> _bufferResources;
+        std::optional<Tools::ResourceManager<PipelineLayout>> _pipelineLayoutResources;
+        std::optional<Tools::ResourceManager<RenderPipeline>> _renderPipelineResources;
+        std::optional<Tools::ResourceManager<Sampler>> _samplerResources;
+        std::optional<Tools::ResourceManager<ShaderModule>> _shaderModuleResources;
+        std::optional<Tools::ResourceManager<Texture>> _textureResources;
+        std::optional<Tools::ResourceManager<BindGroup>> _bindGroupResources;
 
         void CreateInstance();
         void GetPhysicalDevice(DeviceDesc desc);
