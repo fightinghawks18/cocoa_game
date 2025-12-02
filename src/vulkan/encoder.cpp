@@ -72,7 +72,7 @@ namespace Cocoa::Vulkan {
             finalLayout = Graphics::GPUTextureLayout::ShaderReadOnly;
         }
 
-        TransitionTexture(dstTexture, oldTextureLayout);
+        TransitionTexture(dstTexture, finalLayout);
     }
 
     void Encoder::StartRendering(Graphics::GPUPassDesc passDesc) {

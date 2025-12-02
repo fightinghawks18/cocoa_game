@@ -156,6 +156,7 @@ int main() {
                 .Attribute(Cocoa::Graphics::GPUColorFormat::RG32_Float, offsetof(Cocoa::Graphics::Vertex, uv));
     pipelineDescriptor.depthStencilFormat = Cocoa::Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil;
     pipelineDescriptor.cullMode = Cocoa::Graphics::GPUCullMode::None;
+    pipelineDescriptor.polygonMode = Cocoa::Graphics::GPUPolygonMode::Line;
     pipelineDescriptor.pipelineLayout = pipelineLayout;
 
     auto renderPipeline = renderDevice->CreateRenderPipeline(pipelineDescriptor);

@@ -431,8 +431,15 @@ namespace Cocoa::Vulkan {
             "VK_KHR_synchronization2"
         };
 
+        vk::PhysicalDeviceFeatures vkFeatures{};
+        vkFeatures.setFillModeNonSolid(true);
+
+        vk::PhysicalDeviceFeatures2 vkFeatures2{};
+        vkFeatures2.setFeatures(vkFeatures);
+
         vk::PhysicalDeviceVulkan13Features vulkan13Features{};
-        vulkan13Features.setDynamicRendering(true)
+        vulkan13Features.setPNext(&vkFeatures2)
+                        .setDynamicRendering(true)
                         .setSynchronization2(true);
 
         vk::DeviceCreateInfo deviceDescriptor{};
