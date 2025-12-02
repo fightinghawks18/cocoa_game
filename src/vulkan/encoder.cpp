@@ -67,8 +67,9 @@ namespace Cocoa::Vulkan {
             1, &region
         );
 
-        if (oldTextureLayout == Graphics::GPUTextureLayout::Unknown) {
-            oldTextureLayout = Graphics::GPUTextureLayout::General;
+        auto finalLayout = oldTextureLayout;
+        if (finalLayout == Graphics::GPUTextureLayout::Unknown) {
+            finalLayout = Graphics::GPUTextureLayout::ShaderReadOnly;
         }
 
         TransitionTexture(dstTexture, oldTextureLayout);
@@ -104,6 +105,7 @@ namespace Cocoa::Vulkan {
                         .setImageLayout(passDesc.depthPass->useStencil ? vk::ImageLayout::eDepthStencilAttachmentOptimal : vk::ImageLayout::eDepthAttachmentOptimal)
                         .setLoadOp(GPUPassLoadOpToVk(passDesc.depthPass->loadOp))
                         .setStoreOp(GPUPassStoreOpToVk(passDesc.depthPass->storeOp))
+                        .setResolveMode(vk::ResolveModeFlagBits::eNone)
                         .setImageView(_device->GetTextureInstance(passDesc.depthPass->texture)->GetView(passDesc.depthPass->viewSlot)->Get());
             renderDepthDesc = depthAttachment;
         }

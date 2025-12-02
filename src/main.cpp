@@ -216,8 +216,8 @@ int main() {
     Cocoa::Objects::Camera camera;
     camera.GetTransform().Translate(Cocoa::Math::Vector3(0, 0, 5));
     camera.SetFieldOfView(95);
-    camera.SetClipFarBounds(100);
-    camera.SetClipNearBounds(0.1);
+    camera.SetClipFarBounds(20);
+    camera.SetClipNearBounds(0.5);
 
     // Rich presence (for fun)
     Cocoa::Tools::RichPresenceDesc rpcDescriptor = {
@@ -324,6 +324,8 @@ int main() {
         Cocoa::Graphics::Viewport viewport = {
             .offset = {0},
             .extent = newSwapchainExtent,
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f
         };
 
         Cocoa::Graphics::Rect scissor = {

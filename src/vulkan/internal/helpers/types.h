@@ -16,7 +16,6 @@ namespace Cocoa::Vulkan {
                     vk::AccessFlagBits2::eNone
                 };
             case vk::ImageLayout::eGeneral:
-                // Conservative - can be used for anything
                 return {
                     vk::PipelineStageFlagBits2::eAllCommands,
                     vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite
@@ -38,7 +37,9 @@ namespace Cocoa::Vulkan {
                 };
             case vk::ImageLayout::eShaderReadOnlyOptimal:
                 return {
-                    vk::PipelineStageFlagBits2::eFragmentShader | vk::PipelineStageFlagBits2::eComputeShader,
+                    vk::PipelineStageFlagBits2::eVertexShader | 
+                    vk::PipelineStageFlagBits2::eFragmentShader | 
+                    vk::PipelineStageFlagBits2::eComputeShader,
                     vk::AccessFlagBits2::eShaderRead
                 };
             case vk::ImageLayout::eTransferSrcOptimal:
@@ -59,12 +60,15 @@ namespace Cocoa::Vulkan {
             case vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal:
                 return {
                     vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-                    vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite
+                    vk::AccessFlagBits2::eDepthStencilAttachmentRead | 
+                    vk::AccessFlagBits2::eDepthStencilAttachmentWrite
                 };
+
             case vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal:
                 return {
                     vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-                    vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite
+                    vk::AccessFlagBits2::eDepthStencilAttachmentRead | 
+                    vk::AccessFlagBits2::eDepthStencilAttachmentWrite
                 };
             default:
                 return {

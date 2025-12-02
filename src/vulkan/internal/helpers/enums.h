@@ -104,24 +104,15 @@ namespace Cocoa::Vulkan {
 
     inline vk::ImageLayout GPUTextureLayoutToVk(Graphics::GPUTextureLayout textureLayout) {
         switch (textureLayout) {
-            case Graphics::GPUTextureLayout::Unknown:
-                return vk::ImageLayout::eUndefined;
-            case Graphics::GPUTextureLayout::General:
-                return vk::ImageLayout::eGeneral;
-            case Graphics::GPUTextureLayout::ColorAttachment:
-                return vk::ImageLayout::eColorAttachmentOptimal;
-            case Graphics::GPUTextureLayout::DepthStencilAttachment:
-                return vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal;
-            case Graphics::GPUTextureLayout::DepthStencilReadOnly:
-                return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
-            case Graphics::GPUTextureLayout::ShaderReadOnly:
-                return vk::ImageLayout::eShaderReadOnlyOptimal;
-            case Graphics::GPUTextureLayout::Present:
-                return vk::ImageLayout::ePresentSrcKHR;
-            case Graphics::GPUTextureLayout::TransferDst:
-                return vk::ImageLayout::eTransferDstOptimal;
-            case Graphics::GPUTextureLayout::TransferSrc:
-                return vk::ImageLayout::eTransferSrcOptimal;
+            case Graphics::GPUTextureLayout::Unknown:                   return vk::ImageLayout::eUndefined;
+            case Graphics::GPUTextureLayout::General:                   return vk::ImageLayout::eGeneral;
+            case Graphics::GPUTextureLayout::ColorAttachment:           return vk::ImageLayout::eColorAttachmentOptimal;
+            case Graphics::GPUTextureLayout::DepthStencilAttachment:    return vk::ImageLayout::eDepthStencilAttachmentOptimal;
+            case Graphics::GPUTextureLayout::DepthStencilReadOnly:      return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+            case Graphics::GPUTextureLayout::ShaderReadOnly:            return vk::ImageLayout::eShaderReadOnlyOptimal;
+            case Graphics::GPUTextureLayout::Present:                   return vk::ImageLayout::ePresentSrcKHR;
+            case Graphics::GPUTextureLayout::TransferDst:               return vk::ImageLayout::eTransferDstOptimal;
+            case Graphics::GPUTextureLayout::TransferSrc:               return vk::ImageLayout::eTransferSrcOptimal;
         }
     }
 
