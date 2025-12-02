@@ -30,7 +30,7 @@ namespace Cocoa::Vulkan {
                 vk::VertexInputAttributeDescription vertexAttribute(
                     i,
                     binding.binding,
-                    GPUFormatToVk(attribute.format),
+                    GPUColorFormatToVk(attribute.format),
                     attribute.offset
                 );
                 i++;
@@ -109,27 +109,59 @@ namespace Cocoa::Vulkan {
             dynamicStates.data()
         );
 
+        vk::StencilOpState frontFaceState(
+                GPUStencilOpToVk(desc.stencilFrontFace.failOp),
+                GPUStencilOpToVk(desc.stencilFrontFace.passOp),
+                GPUStencilOpToVk(desc.stencilFrontFace.depthFailOp),
+                GPUCompareOpToVk(desc.stencilFrontFace.compareOp),
+                desc.stencilFrontFace.compareMask,
+                desc.stencilFrontFace.writeMask,
+                desc.stencilFrontFace.reference
+        );
+
+        vk::StencilOpState backFaceState(
+                GPUStencilOpToVk(desc.stencilBackFace.failOp),
+                GPUStencilOpToVk(desc.stencilBackFace.passOp),
+                GPUStencilOpToVk(desc.stencilBackFace.depthFailOp),
+                GPUCompareOpToVk(desc.stencilBackFace.compareOp),
+                desc.stencilBackFace.compareMask,
+                desc.stencilBackFace.writeMask,
+                desc.stencilBackFace.reference
+        );
+
         vk::PipelineDepthStencilStateCreateInfo depthStencil(
             {},
-            VK_TRUE,
-            VK_TRUE,
-            vk::CompareOp::eLess,
-            VK_FALSE,
-            VK_FALSE,
-            {},
-            {},
+            desc.depthTest,
+            desc.depthWrite,
+            GPUCompareOpToVk(desc.depthCompareOp),
+            false,
+            desc.stencilTest,
+            frontFaceState,
+            backFaceState,
             0.0f, 1.0f
         );
 
-        auto colorFormat = GPUFormatToVk(desc.colorFormat);
-        auto depthFormat = GPUFormatToVk(desc.depthFormat);
-        auto stencilFormat = GPUFormatToVk(desc.stencilFormat);
+        auto colorFormat = GPUColorFormatToVk(desc.colorFormat);
+        auto depthStencilFormat = GPUDepthStencilFormatToVk(desc.depthStencilFormat);
+        vk::Format stencilFormat;
+        switch (desc.depthStencilFormat) {
+            case Graphics::GPUDepthStencilFormat::Unknown:
+            case Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil:
+            case Graphics::GPUDepthStencilFormat::DepthUnorm16_NoStencil:
+                stencilFormat = vk::Format::eUndefined;
+                break;
+            case Graphics::GPUDepthStencilFormat::DepthUnorm24_StencilUint8:
+            case Graphics::GPUDepthStencilFormat::DepthFloat32_StencilUint8:
+            case Graphics::GPUDepthStencilFormat::DepthUnorm16_StencilUint8:
+                stencilFormat = depthStencilFormat;
+                break;
+        }
 
         vk::PipelineRenderingCreateInfo pipelineRenderingInfo(
             0,
             1,
             &colorFormat,
-            depthFormat,
+            depthStencilFormat,
             stencilFormat
         );
 

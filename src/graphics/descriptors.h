@@ -24,13 +24,14 @@ namespace Cocoa::Graphics {
 
     struct BufferDesc {
         GPUBufferUsage usage = GPUBufferUsage::Unknown;
-        GPUBufferAccess access = GPUBufferAccess::CPUToGPU;
+        GPUMemoryAccess access = GPUMemoryAccess::CPUToGPU;
         uint64_t size = 0;
         void* mapped = nullptr;
     };
 
     struct GPUColorPassDesc {
         TextureHandle texture;
+        uint32_t viewSlot = 0;
         std::array<float, 4> clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
         GPUPassLoadOp loadOp = GPUPassLoadOp::Clear;
         GPUPassStoreOp storeOp = GPUPassStoreOp::Store;
@@ -38,8 +39,10 @@ namespace Cocoa::Graphics {
 
     struct GPUDepthPassDesc {
         TextureHandle texture;
+        uint32_t viewSlot = 0;
         float depth = 1.0f;
-        uint32_t stencil = 1;
+        uint32_t stencil = 0;
+        bool useStencil = false;
         GPUPassLoadOp loadOp = GPUPassLoadOp::Clear;
         GPUPassStoreOp storeOp = GPUPassStoreOp::Store;
     };
@@ -91,7 +94,7 @@ namespace Cocoa::Graphics {
     };
 
     struct PipelineVertexAttribute {
-        GPUFormat format;
+        GPUColorFormat format;
         uint32_t offset;
     };
 
@@ -100,7 +103,7 @@ namespace Cocoa::Graphics {
         uint32_t stride;
         std::vector<PipelineVertexAttribute> attributes;
 
-        PipelineVertexBinding& Attribute(GPUFormat format, uint32_t offset) {
+        PipelineVertexBinding& Attribute(GPUColorFormat format, uint32_t offset) {
             attributes.push_back({
                 .format = format,
                 .offset = offset
@@ -109,16 +112,35 @@ namespace Cocoa::Graphics {
         }
     };
 
+    struct PipelineStencilOpState {
+        GPUStencilOp failOp = GPUStencilOp::Keep;
+        GPUStencilOp passOp = GPUStencilOp::Keep;
+        GPUStencilOp depthFailOp = GPUStencilOp::Keep;
+        GPUCompareOp compareOp = GPUCompareOp::Always;
+        uint32_t compareMask = 0xFF;
+        uint32_t writeMask = 0xFF;
+        uint32_t reference = 0;
+    };
+
     struct PipelineDesc {
         std::unordered_map<GPUShaderStage, ShaderModuleHandle> shaders;
         std::vector<PipelineVertexBinding> vertexLayout;
+
         GPUTopology topology = GPUTopology::TriangleList;
         GPUCullMode cullMode = GPUCullMode::Backside;
         GPUPolygonMode polygonMode = GPUPolygonMode::Fill;
         GPUFrontFace frontFace = GPUFrontFace::CounterClockwise;
-        GPUFormat colorFormat = GPUFormat::BGRA8Srgb;
-        GPUFormat depthFormat = GPUFormat::Unknown;
-        GPUFormat stencilFormat = GPUFormat::Unknown;
+
+        bool depthTest = true;
+        bool depthWrite = true;
+        GPUCompareOp depthCompareOp = GPUCompareOp::Less;
+
+        bool stencilTest = false;
+        PipelineStencilOpState stencilFrontFace;
+        PipelineStencilOpState stencilBackFace;
+
+        GPUColorFormat colorFormat = GPUColorFormat::BGRA8_SRGB;
+        GPUDepthStencilFormat depthStencilFormat = GPUDepthStencilFormat::Unknown;
         PipelineLayoutHandle pipelineLayout;
         uint32_t nextImplicitBinding = 0;
 
@@ -141,7 +163,8 @@ namespace Cocoa::Graphics {
     struct TextureDesc {
         GPUTextureDimension dimension = GPUTextureDimension::Two;
         GPUTextureUsage usage = GPUTextureUsage::Unknown;
-        GPUFormat format = GPUFormat::Unknown;
+        GPUMemoryAccess access = GPUMemoryAccess::CPUToGPU;
+        std::variant<GPUColorFormat, GPUDepthStencilFormat> format;
         GPUTextureLayout initialLayout = GPUTextureLayout::Unknown;
         GPUSamplingCount samples = GPUSamplingCount::None;
         Extent3D extent = {};
@@ -152,7 +175,7 @@ namespace Cocoa::Graphics {
 
     struct TextureViewDesc {
         GPUTextureViewType type = GPUTextureViewType::TwoDimensional;
-        GPUFormat format = GPUFormat::Unknown;
+        std::variant<GPUColorFormat, GPUDepthStencilFormat> format;
         GPUTextureAspect aspect = GPUTextureAspect::Color;
         uint32_t firstLevel = 0;
         uint32_t levels = 1;

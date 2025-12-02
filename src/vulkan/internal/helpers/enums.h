@@ -26,20 +26,37 @@ namespace Cocoa::Vulkan {
         }
     }
 
-    inline vk::Format GPUFormatToVk(Graphics::GPUFormat format) {
+    inline vk::Format GPUColorFormatToVk(Graphics::GPUColorFormat format) {
         switch (format) {
-            case Graphics::GPUFormat::Unknown:
+            case Graphics::GPUColorFormat::Unknown:
                 return vk::Format::eUndefined;
-            case Graphics::GPUFormat::BGRA8Srgb:
+            case Graphics::GPUColorFormat::BGRA8_SRGB:
                 return vk::Format::eB8G8R8A8Srgb;
-            case Graphics::GPUFormat::RG32Sfloat:
+            case Graphics::GPUColorFormat::RG32_Float:
                 return vk::Format::eR32G32Sfloat;
-            case Graphics::GPUFormat::RGB32Sfloat:
+            case Graphics::GPUColorFormat::RGB32_Float:
                 return vk::Format::eR32G32B32Sfloat;
-            case Graphics::GPUFormat::RGBA32Sfloat:
+            case Graphics::GPUColorFormat::RGBA32_Float:
                 return vk::Format::eR32G32B32A32Sfloat;
-            case Graphics::GPUFormat::RGBA8Unorm:
+            case Graphics::GPUColorFormat::RGBA8_Unorm:
                 return vk::Format::eR8G8B8A8Unorm;
+        }
+    }
+
+    inline vk::Format GPUDepthStencilFormatToVk(Graphics::GPUDepthStencilFormat format) {
+        switch (format) {
+            case Graphics::GPUDepthStencilFormat::Unknown:
+                return vk::Format::eUndefined;
+            case Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil:
+                return vk::Format::eD32Sfloat;
+            case Graphics::GPUDepthStencilFormat::DepthUnorm16_NoStencil:
+                return vk::Format::eD16Unorm;
+            case Graphics::GPUDepthStencilFormat::DepthFloat32_StencilUint8:
+                return vk::Format::eD32SfloatS8Uint;
+            case Graphics::GPUDepthStencilFormat::DepthUnorm24_StencilUint8:
+                return vk::Format::eD24UnormS8Uint;
+            case Graphics::GPUDepthStencilFormat::DepthUnorm16_StencilUint8:
+                return vk::Format::eD16UnormS8Uint;
         }
     }
 
@@ -108,19 +125,19 @@ namespace Cocoa::Vulkan {
         }
     }
 
-    inline Graphics::GPUFormat VkToGPUFormat(vk::Format format) {
+    inline Graphics::GPUColorFormat VkToGPUFormat(vk::Format format) {
         switch (format) {
             case vk::Format::eUndefined:
-                return Graphics::GPUFormat::Unknown;
+                return Graphics::GPUColorFormat::Unknown;
             case vk::Format::eB8G8R8A8Srgb:
-                return Graphics::GPUFormat::BGRA8Srgb;
+                return Graphics::GPUColorFormat::BGRA8_SRGB;
             case vk::Format::eR32G32B32Sfloat:
-                return Graphics::GPUFormat::RGB32Sfloat;
+                return Graphics::GPUColorFormat::RGB32_Float;
             case vk::Format::eR32G32B32A32Sfloat:
-                return Graphics::GPUFormat::RGBA32Sfloat;
+                return Graphics::GPUColorFormat::RGBA32_Float;
             case vk::Format::eR8G8B8A8Unorm:
-                return Graphics::GPUFormat::RGBA8Unorm;
-            default: return Graphics::GPUFormat::Unknown;
+                return Graphics::GPUColorFormat::RGBA8_Unorm;
+            default: return Graphics::GPUColorFormat::Unknown;
         }
     }
 
@@ -137,6 +154,19 @@ namespace Cocoa::Vulkan {
                 return vk::PolygonMode::eFill;
             case Graphics::GPUPolygonMode::Line:
                 return vk::PolygonMode::eLine;
+        }
+    }
+
+    inline vk::ImageViewType GPUTextureViewTypeToVk(Graphics::GPUTextureViewType type) {
+        switch (type) {
+            case Graphics::GPUTextureViewType::OneDimensional:
+                return vk::ImageViewType::e1D;
+            case Graphics::GPUTextureViewType::TwoDimensional:
+                return vk::ImageViewType::e2D;
+            case Graphics::GPUTextureViewType::ThreeDimensional:
+                return vk::ImageViewType::e3D;
+            case Graphics::GPUTextureViewType::Cube:
+                return vk::ImageViewType::eCube;
         }
     }
 
@@ -175,20 +205,62 @@ namespace Cocoa::Vulkan {
         }
     }
 
-    inline VmaAllocationCreateFlags GPUBufferAccessToVma(Graphics::GPUBufferAccess access) {
+    inline VmaAllocationCreateFlags GPUMemoryAccessToVma(Graphics::GPUMemoryAccess access) {
         switch(access) {
-            case Graphics::GPUBufferAccess::GPUOnly:
+            case Graphics::GPUMemoryAccess::GPUOnly:
                 return 0;
-            case Graphics::GPUBufferAccess::CPUToGPU:
+            case Graphics::GPUMemoryAccess::CPUToGPU:
                 return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
                        VMA_ALLOCATION_CREATE_MAPPED_BIT;
-            case Graphics::GPUBufferAccess::GPUToCPU:
+            case Graphics::GPUMemoryAccess::GPUToCPU:
                 return VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT |
                        VMA_ALLOCATION_CREATE_MAPPED_BIT;
-            case Graphics::GPUBufferAccess::CPUOnly:
+            case Graphics::GPUMemoryAccess::CPUOnly:
                 return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
                        VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT |
                        VMA_ALLOCATION_CREATE_MAPPED_BIT;
+        }
+    }
+
+    inline vk::CompareOp GPUCompareOpToVk(Graphics::GPUCompareOp op) {
+        switch (op) {
+            case Graphics::GPUCompareOp::Never: 
+                return vk::CompareOp::eNever;
+            case Graphics::GPUCompareOp::Less:
+                return vk::CompareOp::eLess;
+            case Graphics::GPUCompareOp::Equal:
+                return vk::CompareOp::eEqual;
+            case Graphics::GPUCompareOp::LessOrEqual:
+                return vk::CompareOp::eLessOrEqual;
+            case Graphics::GPUCompareOp::Greater:
+                return vk::CompareOp::eGreater;
+            case Graphics::GPUCompareOp::NotEqual:
+                return vk::CompareOp::eNotEqual;
+            case Graphics::GPUCompareOp::GreaterOrEqual:
+                return vk::CompareOp::eGreaterOrEqual;
+            case Graphics::GPUCompareOp::Always:
+                return vk::CompareOp::eAlways;
+        }
+    }
+
+    inline vk::StencilOp GPUStencilOpToVk(Graphics::GPUStencilOp op) {
+        switch (op) {
+            case Graphics::GPUStencilOp::Keep:  
+                return vk::StencilOp::eKeep;
+            case Graphics::GPUStencilOp::Zero:
+                return vk::StencilOp::eZero;
+            case Graphics::GPUStencilOp::Replace:  
+                return vk::StencilOp::eReplace;
+            case Graphics::GPUStencilOp::IncrementAndClamp:
+                return vk::StencilOp::eIncrementAndClamp;
+            case Graphics::GPUStencilOp::DecrementAndClamp:
+                return vk::StencilOp::eDecrementAndClamp;
+            case Graphics::GPUStencilOp::Invert:
+                return vk::StencilOp::eInvert;
+            case Graphics::GPUStencilOp::IncrementAndWrap:
+                return vk::StencilOp::eIncrementAndWrap;
+            case Graphics::GPUStencilOp::DecrementAndWrap:
+                return vk::StencilOp::eDecrementAndWrap;
         }
     }
 }

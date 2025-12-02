@@ -2,6 +2,7 @@
 #include "device.h"
 
 #include "internal/helpers/enums.h"
+#include "internal/helpers/flags.h"
 #include "internal/helpers/types.h"
 
 namespace Cocoa::Vulkan {
@@ -14,13 +15,13 @@ namespace Cocoa::Vulkan {
 
     Encoder::~Encoder() = default;
 
-    void Encoder::TransitionTexture(Graphics::TextureHandle texture, Graphics::GPUTextureLayout newLayout) {
+    void Encoder::TransitionTexture(Graphics::TextureHandle texture, Graphics::GPUTextureLayout newLayout, Graphics::GPUTextureAspect textureAspect) {
         auto textureInstance = _device->GetTextureInstance(texture);
         auto oldLayoutInfo = GetLayoutInfo(GPUTextureLayoutToVk(textureInstance->GetLayout()));
         auto newLayoutInfo = GetLayoutInfo(GPUTextureLayoutToVk(newLayout));
 
         vk::ImageSubresourceRange toColorSubresourceRange{};
-        toColorSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+        toColorSubresourceRange.setAspectMask(GPUTextureAspectToVk(textureAspect))
                     .setBaseArrayLayer(0)
                     .setLayerCount(textureInstance->GetLayers())
                     .setBaseMipLevel(0)
@@ -88,11 +89,11 @@ namespace Cocoa::Vulkan {
                         .setImageLayout(vk::ImageLayout::eColorAttachmentOptimal)
                         .setLoadOp(GPUPassLoadOpToVk(colorPass.loadOp))
                         .setStoreOp(GPUPassStoreOpToVk(colorPass.storeOp))
-                        .setImageView(_device->GetTextureInstance(colorPass.texture)->GetView(0)->Get());
+                        .setImageView(_device->GetTextureInstance(colorPass.texture)->GetView(colorPass.viewSlot)->Get());
             renderColorDescs.push_back(colorAttachment);
         }
 
-        vk::RenderingAttachmentInfo* renderDepthDesc = nullptr;
+        std::optional<vk::RenderingAttachmentInfo> renderDepthDesc;
         if (passDesc.depthPass) {
             vk::RenderingAttachmentInfo depthAttachment{};
 
@@ -100,16 +101,16 @@ namespace Cocoa::Vulkan {
             depthClear.setDepthStencil({passDesc.depthPass->depth, passDesc.depthPass->stencil});
 
             depthAttachment.setClearValue(depthClear)
-                        .setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
+                        .setImageLayout(passDesc.depthPass->useStencil ? vk::ImageLayout::eDepthStencilAttachmentOptimal : vk::ImageLayout::eDepthAttachmentOptimal)
                         .setLoadOp(GPUPassLoadOpToVk(passDesc.depthPass->loadOp))
                         .setStoreOp(GPUPassStoreOpToVk(passDesc.depthPass->storeOp))
-                        .setImageView(_device->GetTextureInstance(passDesc.depthPass->texture)->GetView(0)->Get());
-            renderDepthDesc = &depthAttachment;
+                        .setImageView(_device->GetTextureInstance(passDesc.depthPass->texture)->GetView(passDesc.depthPass->viewSlot)->Get());
+            renderDepthDesc = depthAttachment;
         }
 
         vk::RenderingInfo renderDesc{};
         renderDesc.setColorAttachments(renderColorDescs)
-                .setPDepthAttachment(renderDepthDesc)
+                .setPDepthAttachment(renderDepthDesc.has_value() ? &renderDepthDesc.value() : nullptr)
                 .setRenderArea(vk::Rect2D(
                     {passDesc.renderArea.offset.x, passDesc.renderArea.offset.y},
                     {passDesc.renderArea.extent.w, passDesc.renderArea.extent.h}

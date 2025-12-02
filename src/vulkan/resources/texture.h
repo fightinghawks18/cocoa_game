@@ -37,6 +37,7 @@ namespace Cocoa::Vulkan {
         VmaAllocation _allocation;
         Graphics::GPUTextureLayout _layout = Graphics::GPUTextureLayout::Unknown;
         Graphics::Extent3D _extent;
+        std::variant<Graphics::GPUColorFormat, Graphics::GPUDepthStencilFormat> _format;
         uint32_t _levels;
         uint32_t _layers;
     };

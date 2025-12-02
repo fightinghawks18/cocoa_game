@@ -13,7 +13,7 @@ namespace Cocoa::Vulkan {
                     .setSize(desc.size);
         VmaAllocationCreateInfo allocationDescriptor = {0};
         allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;
-        allocationDescriptor.flags = GPUBufferAccessToVma(desc.access);
+        allocationDescriptor.flags = GPUMemoryAccessToVma(desc.access);
 
         VmaAllocationInfo allocationInfo;
         VkBuffer buffer;

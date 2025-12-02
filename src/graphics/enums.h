@@ -52,13 +52,22 @@ namespace Cocoa::Graphics {
         CounterClockwise
     };
 
-    enum class GPUFormat {
+    enum class GPUColorFormat {
         Unknown = 0,
-        BGRA8Srgb,
-        RG32Sfloat,
-        RGB32Sfloat,
-        RGBA32Sfloat,
-        RGBA8Unorm
+        BGRA8_SRGB,
+        RG32_Float,
+        RGB32_Float,
+        RGBA32_Float,
+        RGBA8_Unorm
+    };
+
+    enum class GPUDepthStencilFormat {
+        Unknown = 0,
+        DepthFloat32_NoStencil,
+        DepthUnorm16_NoStencil,
+        DepthUnorm24_StencilUint8,
+        DepthFloat32_StencilUint8,
+        DepthUnorm16_StencilUint8
     };
 
     enum class GPUTextureDimension {
@@ -103,10 +112,32 @@ namespace Cocoa::Graphics {
         MirroredRepeat
     };
 
-    enum class GPUBufferAccess {
+    enum class GPUMemoryAccess {
         CPUOnly,
         CPUToGPU,
         GPUToCPU,
         GPUOnly
+    };
+
+    enum class GPUCompareOp {
+        Never,
+        Less,
+        Equal,
+        LessOrEqual,
+        Greater,
+        NotEqual,
+        GreaterOrEqual,
+        Always
+    };
+
+    enum class GPUStencilOp {
+        Keep,
+        Zero,
+        Replace,
+        IncrementAndClamp,
+        DecrementAndClamp,
+        Invert,
+        IncrementAndWrap,
+        DecrementAndWrap
     };
 }

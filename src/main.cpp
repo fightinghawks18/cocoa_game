@@ -32,7 +32,7 @@ int main() {
         PANIC("Failed to start SDL3");
     }
 
-    SDL_Window* window = SDL_CreateWindow("Cocoa", 800, 600, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("Cocoa", 800, 600, SDL_WINDOW_VULKAN);
 
     Cocoa::Graphics::DeviceDesc desc = {
         .window = window,
@@ -69,6 +69,7 @@ int main() {
         .mapped = nullptr
     };
     auto mvpBuffer = renderDevice->CreateBuffer(mvpBufferDescriptor);
+    auto mvpBuffer2 = renderDevice->CreateBuffer(mvpBufferDescriptor);
 
     // Image sampled
     auto path = (std::filesystem::current_path() / "content" / "texture.jpg");
@@ -95,7 +96,8 @@ int main() {
     Cocoa::Graphics::TextureDesc imageTextureDescriptor = {
         .dimension = Cocoa::Graphics::GPUTextureDimension::Two,
         .usage = Cocoa::Graphics::GPUTextureUsage::ShaderUsage | Cocoa::Graphics::GPUTextureUsage::TransferDst,
-        .format = Cocoa::Graphics::GPUFormat::RGBA8Unorm,
+        .access = Cocoa::Graphics::GPUMemoryAccess::GPUOnly,
+        .format = Cocoa::Graphics::GPUColorFormat::RGBA8_Unorm,
         .initialLayout = Cocoa::Graphics::GPUTextureLayout::Unknown,
         .samples = Cocoa::Graphics::GPUSamplingCount::None,
         extent,
@@ -105,7 +107,7 @@ int main() {
 
     Cocoa::Graphics::TextureViewDesc imageViewTextureDescriptor = {
         .type = Cocoa::Graphics::GPUTextureViewType::TwoDimensional,
-        .format = Cocoa::Graphics::GPUFormat::RGBA8Unorm,
+        .format = Cocoa::Graphics::GPUColorFormat::RGBA8_Unorm,
         .aspect = Cocoa::Graphics::GPUTextureAspect::Color,
         0, 1,
         0, 1
@@ -135,6 +137,12 @@ int main() {
                 .Entry(sampler);
     auto meshBindGroup = renderDevice->CreateBindGroup(meshBindGroupDescriptor);
 
+    Cocoa::Graphics::BindGroupDesc meshBindGroupDescriptor2{meshBindGroupLayout};
+    meshBindGroupDescriptor2.Entry(mvpBuffer2)
+                .Entry(imageTexture)
+                .Entry(sampler);
+    auto meshBindGroup2 = renderDevice->CreateBindGroup(meshBindGroupDescriptor2);
+
     Cocoa::Graphics::PipelineLayoutDesc pipelineLayoutDesc{};
     pipelineLayoutDesc.BindGroup(meshBindGroupLayout);
 
@@ -143,9 +151,10 @@ int main() {
     pipelineDescriptor.Shader(Cocoa::Graphics::GPUShaderStage::Vertex, vertexShader);
     pipelineDescriptor.Shader(Cocoa::Graphics::GPUShaderStage::Pixel, pixelShader);
     pipelineDescriptor.Binding(sizeof(Cocoa::Graphics::Vertex))
-                .Attribute(Cocoa::Graphics::GPUFormat::RGB32Sfloat, offsetof(Cocoa::Graphics::Vertex, pos))
-                .Attribute(Cocoa::Graphics::GPUFormat::RGBA32Sfloat, offsetof(Cocoa::Graphics::Vertex, col))
-                .Attribute(Cocoa::Graphics::GPUFormat::RG32Sfloat, offsetof(Cocoa::Graphics::Vertex, uv));
+                .Attribute(Cocoa::Graphics::GPUColorFormat::RGB32_Float, offsetof(Cocoa::Graphics::Vertex, pos))
+                .Attribute(Cocoa::Graphics::GPUColorFormat::RGBA32_Float, offsetof(Cocoa::Graphics::Vertex, col))
+                .Attribute(Cocoa::Graphics::GPUColorFormat::RG32_Float, offsetof(Cocoa::Graphics::Vertex, uv));
+    pipelineDescriptor.depthStencilFormat = Cocoa::Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil;
     pipelineDescriptor.cullMode = Cocoa::Graphics::GPUCullMode::None;
     pipelineDescriptor.pipelineLayout = pipelineLayout;
 
@@ -168,9 +177,41 @@ int main() {
     auto indexBuffer = renderDevice->CreateBuffer(indexBufferDescriptor);  
 
     Cocoa::Graphics::MVP mvpData;
+
+    // Scene depth
+    auto swapchainExtent = swapchainInstance->GetExtent();
+
+    Cocoa::Graphics::TextureDesc sceneDepthDescriptor = {
+        .dimension = Cocoa::Graphics::GPUTextureDimension::Two,
+        .usage = Cocoa::Graphics::GPUTextureUsage::DepthStencil,
+        .access = Cocoa::Graphics::GPUMemoryAccess::GPUOnly,
+        .format = Cocoa::Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil,
+        .initialLayout = Cocoa::Graphics::GPUTextureLayout::Unknown,
+        .samples = Cocoa::Graphics::GPUSamplingCount::None,
+        {swapchainExtent.w, swapchainExtent.h, 1},
+        .levels = 1,
+        .layers = 1,
+    };
+
+    Cocoa::Graphics::TextureViewDesc sceneDepthViewDescriptor = {
+        .type = Cocoa::Graphics::GPUTextureViewType::TwoDimensional,
+        .format = Cocoa::Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil,
+        .aspect = Cocoa::Graphics::GPUTextureAspect::Depth,
+        0, 1,
+        0, 1
+    };
+
+    auto sceneDepthTexture = renderDevice->CreateTexture(sceneDepthDescriptor);
+    renderDevice->GetTextureInstance(sceneDepthTexture)->CreateView(sceneDepthViewDescriptor);
+
+    renderDevice->EncodeImmediateCommands([&](Cocoa::Vulkan::Encoder& encoder) {
+        encoder.TransitionTexture(sceneDepthTexture, Cocoa::Graphics::GPUTextureLayout::DepthStencilAttachment, Cocoa::Graphics::GPUTextureAspect::Depth);
+    }, Cocoa::Graphics::GPUQueueType::Transfer);
     
     // Objects
     Cocoa::Objects::Transform transform;
+    Cocoa::Objects::Transform transform2;
+    transform2.Translate(Cocoa::Math::Vector3(0, 0, -1));
 
     Cocoa::Objects::Camera camera;
     camera.GetTransform().Translate(Cocoa::Math::Vector3(0, 0, 5));
@@ -236,9 +277,12 @@ int main() {
         transform.RotateX(0.15);
         transform.RotateY(0.3);
         transform.RotateZ(0.35);
+        transform2.RotateX(-0.15);
+        transform2.RotateY(-0.3);
+        transform2.RotateZ(-0.35);
         
         auto backBuffer = swapchainInstance->GetNextBackBuffer();
-        auto swapchainExtent = swapchainInstance->GetExtent();
+        auto newSwapchainExtent = swapchainInstance->GetExtent();
 
         camera.SetAspectRatio(static_cast<float>(swapchainExtent.w) / static_cast<float>(swapchainExtent.h));
 
@@ -246,6 +290,9 @@ int main() {
         mvpData.projection = camera.GetProjectionMatrix().Transpose();
         mvpData.view = camera.GetViewMatrix().Transpose();
         renderDevice->GetBufferInstance(mvpBuffer)->MapTo(&mvpData, sizeof(Cocoa::Graphics::MVP), 0);
+
+        mvpData.model = transform2.GetModelMatrix().Transpose();
+        renderDevice->GetBufferInstance(mvpBuffer2)->MapTo(&mvpData, sizeof(Cocoa::Graphics::MVP), 0);
         
         auto encoder = renderDevice->Encode(swapchain);
 
@@ -255,13 +302,20 @@ int main() {
             .loadOp = Cocoa::Graphics::GPUPassLoadOp::Clear,
             .storeOp = Cocoa::Graphics::GPUPassStoreOp::Store
         };
+        Cocoa::Graphics::GPUDepthPassDesc depthPassDesc = {
+            .texture = sceneDepthTexture,
+            .depth = 1.0f,
+            .stencil = 0,
+            .loadOp = Cocoa::Graphics::GPUPassLoadOp::Clear,
+            .storeOp = Cocoa::Graphics::GPUPassStoreOp::Store
+        };
 
         Cocoa::Graphics::GPUPassDesc passDesc = {
             .colorPasses = {colorPassDesc},
-            .depthPass = nullptr,
+            .depthPass = &depthPassDesc,
             .renderArea = {
                 .offset = {0},
-                .extent = swapchainExtent
+                .extent = newSwapchainExtent
             },
             .viewMask = 0,
             .layerCount = 1
@@ -269,7 +323,7 @@ int main() {
 
         Cocoa::Graphics::Viewport viewport = {
             .offset = {0},
-            .extent = swapchainExtent,
+            .extent = newSwapchainExtent,
         };
 
         Cocoa::Graphics::Rect scissor = {
@@ -285,6 +339,9 @@ int main() {
             encoder.SetBindGroup(pipelineLayout, meshBindGroup);
             encoder.SetVertexBuffer(vertexBuffer);
             encoder.SetIndexBuffer(indexBuffer);
+            encoder.DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
+
+            encoder.SetBindGroup(pipelineLayout, meshBindGroup2);
             encoder.DrawIndexed(plane.indices.size(), 1, 0, 0, 0);
         }
         encoder.EndRendering();

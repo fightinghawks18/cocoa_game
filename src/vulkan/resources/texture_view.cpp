@@ -3,6 +3,7 @@
 #include "texture.h"
 
 #include "../internal/helpers/enums.h"
+#include "../internal/helpers/flags.h"
 
 namespace Cocoa::Vulkan {
     TextureView::TextureView(Device* device, Texture* texture, Graphics::TextureViewDesc viewDesc) : _device(device), _aspect(viewDesc.aspect) {
@@ -12,17 +13,21 @@ namespace Cocoa::Vulkan {
                     .setB(vk::ComponentSwizzle::eIdentity)
                     .setA(vk::ComponentSwizzle::eIdentity);
         vk::ImageSubresourceRange subresourceRange{};
-        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)
+        subresourceRange.setAspectMask(GPUTextureAspectToVk(viewDesc.aspect))
                     .setBaseArrayLayer(viewDesc.firstLayer)
                     .setLayerCount(viewDesc.layers)
                     .setBaseMipLevel(viewDesc.firstLevel)
                     .setLevelCount(viewDesc.levels);
         vk::ImageViewCreateInfo imageViewDescriptor{};
         imageViewDescriptor.setImage(texture->Get())
-                    .setViewType(vk::ImageViewType::e2D)
+                    .setViewType(GPUTextureViewTypeToVk(viewDesc.type))
                     .setComponents(components)
-                    .setFormat(GPUFormatToVk(viewDesc.format))
                     .setSubresourceRange(subresourceRange);
+        if (std::holds_alternative<Graphics::GPUColorFormat>(viewDesc.format)) {
+            imageViewDescriptor.setFormat(GPUColorFormatToVk(std::get<Graphics::GPUColorFormat>(viewDesc.format)));
+        } else {
+            imageViewDescriptor.setFormat(GPUDepthStencilFormatToVk(std::get<Graphics::GPUDepthStencilFormat>(viewDesc.format)));
+        }
         _view = _device->GetDevice().createImageViewUnique(imageViewDescriptor);
     }
 }

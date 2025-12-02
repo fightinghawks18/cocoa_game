@@ -10,19 +10,25 @@ namespace Cocoa::Vulkan {
         if (!desc.external) {
             VmaAllocationCreateInfo allocationDescriptor = {0};
             allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;
-            allocationDescriptor.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            allocationDescriptor.flags = GPUMemoryAccessToVma(desc.access);
 
             vk::ImageCreateInfo imageDescriptor{};
             imageDescriptor.setImageType(GPUTextureDimensionToVk(desc.dimension))
                         .setArrayLayers(desc.layers)
                         .setExtent(vk::Extent3D{desc.extent.w, desc.extent.h, desc.extent.d})
-                        .setFormat(GPUFormatToVk(desc.format))
                         .setInitialLayout(GPUTextureLayoutToVk(desc.initialLayout))
                         .setMipLevels(desc.levels)
                         .setSamples(vk::SampleCountFlagBits::e1)
                         .setSharingMode(vk::SharingMode::eExclusive)
                         .setUsage(GPUTextureUsageToVk(desc.usage))
-                        .setTiling(vk::ImageTiling::eLinear);
+                        .setTiling(vk::ImageTiling::eOptimal);
+            if (std::holds_alternative<Graphics::GPUColorFormat>(desc.format)) {
+                imageDescriptor.setFormat(GPUColorFormatToVk(std::get<Graphics::GPUColorFormat>(desc.format)));
+                _format = desc.format;
+            } else {
+                imageDescriptor.setFormat(GPUDepthStencilFormatToVk(std::get<Graphics::GPUDepthStencilFormat>(desc.format)));
+                _format = desc.format;
+            }
 
             VkImage image;
             VkResult createImage = vmaCreateImage(
