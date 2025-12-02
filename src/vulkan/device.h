@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <vulkan/vulkan.hpp>
