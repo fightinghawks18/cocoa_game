@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "../math/matrix4x4.h"
+#include "../../math/matrix4x4.h"
 
 namespace Cocoa::Graphics {
     struct MVP {
