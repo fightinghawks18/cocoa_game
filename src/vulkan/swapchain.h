@@ -25,7 +25,7 @@ namespace Cocoa::Vulkan {
 
         Graphics::TextureHandle GetNextBackBuffer();
         [[nodiscard]] Graphics::TextureHandle GetCurrentBackBuffer();
-        [[nodiscard]] Graphics::Extent GetExtent() { return _swapchainExtent; }
+        [[nodiscard]] Graphics::Scale GetExtent() { return _swapchainExtent; }
         [[nodiscard]] vk::Format GetFormat() { return _swapchainFormat; }
         [[nodiscard]] vk::SwapchainKHR Get() { return _swapchain.get(); }
     private:
@@ -34,7 +34,7 @@ namespace Cocoa::Vulkan {
 
         vk::UniqueSwapchainKHR _swapchain;
         vk::Format _swapchainFormat;
-        Graphics::Extent _swapchainExtent;
+        Graphics::Scale _swapchainExtent;
         std::vector<Graphics::TextureHandle> _swapchainImages;
         uint32_t _imageIndex;
 

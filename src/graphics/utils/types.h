@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../../math/matrix4x4.h"
+#include "../../common.h"
 
 namespace Cocoa::Graphics {
     struct MVP {
@@ -13,9 +14,9 @@ namespace Cocoa::Graphics {
     };
 
     struct Vertex {
-        std::array<float, 3> pos;
-        std::array<float, 4> col;
-        std::array<float, 2> uv;
+        std::array<f32, 3> pos;
+        std::array<f32, 4> col;
+        std::array<f32, 2> uv;
     };
 
     struct MeshData {
@@ -27,22 +28,24 @@ namespace Cocoa::Graphics {
         int x, y;
     };
 
-    struct Extent {
-        uint32_t w, h;
+    struct Scale {
+        u32 w, h;
     };
 
-    struct Extent3D {
-        uint32_t w, h, d;
+    struct Scale3D {
+        u32 w, h, d;
     };
 
     struct Viewport {
         Offset offset;
-        Extent extent;
-        float minDepth, maxDepth;
+        Scale scale;
+        f32 minDepth, maxDepth;
     };
+    using OutputTransform = Viewport;
 
     struct Rect {
         Offset offset;
-        Extent extent;
+        Scale scale;
     };
+    using RenderArea = Rect;
 }

@@ -2,7 +2,7 @@
 #include "../device.h"
 
 namespace Cocoa::Vulkan {
-    PipelineLayout::PipelineLayout(Device* device, Graphics::PipelineLayoutDesc desc) : _device(device) {
+    PipelineLayout::PipelineLayout(Device* device, Graphics::GFXPipelineLayoutDesc desc) : _device(device) {
         std::vector<vk::DescriptorSetLayout> setLayouts;
         setLayouts.reserve(desc.groupLayouts.size());
         for (const auto& groupLayoutHandle : desc.groupLayouts) {

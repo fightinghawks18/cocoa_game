@@ -8,7 +8,7 @@ namespace Cocoa::Vulkan {
     class Device;
     class BindGroup {
     public:
-        BindGroup(Device* device, Graphics::BindGroupDesc desc);
+        BindGroup(Device* device, Graphics::GFXBindGroupDesc desc);
         ~BindGroup() = default;
 
         BindGroup(const BindGroup& other) = delete;

@@ -6,7 +6,7 @@
 #include "../internal/helpers/flags.h"
 
 namespace Cocoa::Vulkan {
-    TextureView::TextureView(Device* device, Texture* texture, Graphics::TextureViewDesc viewDesc) : _device(device), _aspect(viewDesc.aspect) {
+    TextureView::TextureView(Device* device, Texture* texture, Graphics::GPUTextureViewDesc viewDesc) : _device(device), _aspect(viewDesc.aspect) {
         vk::ComponentMapping components{};
         components.setR(vk::ComponentSwizzle::eIdentity)
                     .setG(vk::ComponentSwizzle::eIdentity)

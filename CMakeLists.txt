@@ -24,23 +24,22 @@ add_executable(Cocoa
 
     src/tools/rich_presence.cpp
     
-    src/vulkan/device.cpp
-    src/vulkan/encoder.cpp
-    src/vulkan/surface.cpp
-    src/vulkan/swapchain.cpp
-    src/vulkan/vma.cpp
+    #src/vulkan/device.cpp
+    #src/vulkan/encoder.cpp
+    #src/vulkan/surface.cpp
+    #src/vulkan/swapchain.cpp
+    #src/vulkan/vma.cpp
+    #src/vulkan/resources/buffer.cpp
+    #src/vulkan/resources/sampler.cpp
+    #src/vulkan/resources/shader_module.cpp
+    #src/vulkan/resources/render_pipeline.cpp
+    #src/vulkan/resources/pipeline_layout.cpp
+    #src/vulkan/resources/texture.cpp
+    #src/vulkan/resources/texture_view.cpp
+    #src/vulkan/resources/bind_group.cpp
+    #src/vulkan/resources/bind_group_layout.cpp
 
-    src/vulkan/resources/buffer.cpp
-    src/vulkan/resources/sampler.cpp
-    src/vulkan/resources/shader_module.cpp
-    src/vulkan/resources/render_pipeline.cpp
-    src/vulkan/resources/pipeline_layout.cpp
-    src/vulkan/resources/texture.cpp
-    src/vulkan/resources/texture_view.cpp
-    src/vulkan/resources/bind_group.cpp
-    src/vulkan/resources/bind_group_layout.cpp
-
-        src/tools/stb.h
+    src/tools/stb.h
     src/tools/stb.cpp
 )
 

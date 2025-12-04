@@ -1,16 +1,15 @@
 #pragma once
 
-#include "../../tools/resource_manager.h"
+#include "../core/resource_manager.h"
 
 namespace Cocoa::Graphics {
-    using SwapchainHandle = Tools::Handle<struct SwapchainTag>;
-    using SurfaceHandle = Tools::Handle<struct SurfaceTag>;
-    using BufferHandle = Tools::Handle<struct BufferTag>;
-    using TextureHandle = Tools::Handle<struct TextureTag>;
-    using SamplerHandle = Tools::Handle<struct SamplerTag>;
-    using BindGroupHandle = Tools::Handle<struct BindGroupTag>;
-    using BindGroupLayoutHandle = Tools::Handle<struct BindGroupLayoutTag>;
-    using PipelineLayoutHandle = Tools::Handle<struct PipelineLayoutTag>;
-    using RenderPipelineHandle = Tools::Handle<struct RenderPipelineTag>;
-    using ShaderModuleHandle = Tools::Handle<struct ShaderModuleTag>;
+    using GFXWindowHandle = Handle<struct SwapchainTag>;
+    using GFXBufferHandle = Handle<struct BufferTag>;
+    using GFXTextureHandle = Handle<struct TextureTag>;
+    using GFXSamplerHandle = Handle<struct SamplerTag>;
+    using GFXBindGroupHandle = Handle<struct BindGroupTag>;
+    using GFXBindGroupLayoutHandle = Handle<struct BindGroupLayoutTag>;
+    using GFXPipelineLayoutHandle = Handle<struct PipelineLayoutTag>;
+    using GFXRenderPipelineHandle = Handle<struct RenderPipelineTag>;
+    using GFXShaderModuleHandle = Handle<struct ShaderModuleTag>;
 }

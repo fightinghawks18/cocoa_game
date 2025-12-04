@@ -1,18 +1,18 @@
 #pragma once
 
-#include <cstdint>
 #include "matrix3x3.h"
 #include "vector3.h"
+#include "../common.h"
 
 namespace Cocoa::Math {
     struct Matrix4x4 {
-        float m[4][4];
+        f32 m[4][4];
 
-        float& operator()(int row, int col) {
+        f32& operator()(int row, int col) {
             return m[row][col];
         }
 
-        const float& operator()(int row, int col) const {
+        const f32& operator()(int row, int col) const {
             return m[row][col];
         }
         
@@ -29,15 +29,15 @@ namespace Cocoa::Math {
             r(1, 0) = m[1][0]; r(1, 1) = m[1][1]; r(1, 2) = m[1][2];
             r(2, 0) = m[2][0]; r(2, 1) = m[2][1]; r(2, 2) = m[2][2];
 
-            float tx = m[0][3];
-            float ty = m[1][3];
-            float tz = m[2][3];
+            f32 tx = m[0][3];
+            f32 ty = m[1][3];
+            f32 tz = m[2][3];
 
             Matrix3x3 rInverse = r.Inverse();
 
-            float new_tx = -(rInverse(0,0)*tx + rInverse(0,1)*ty + rInverse(0,2)*tz);
-            float new_ty = -(rInverse(1,0)*tx + rInverse(1,1)*ty + rInverse(1,2)*tz);
-            float new_tz = -(rInverse(2,0)*tx + rInverse(2,1)*ty + rInverse(2,2)*tz);
+            f32 new_tx = -(rInverse(0,0)*tx + rInverse(0,1)*ty + rInverse(0,2)*tz);
+            f32 new_ty = -(rInverse(1,0)*tx + rInverse(1,1)*ty + rInverse(1,2)*tz);
+            f32 new_tz = -(rInverse(2,0)*tx + rInverse(2,1)*ty + rInverse(2,2)*tz);
 
             Matrix4x4 result;
             result(0,0) = rInverse(0,0); result(0,1) = rInverse(0,1); 
@@ -52,7 +52,7 @@ namespace Cocoa::Math {
             return result;
         }
 
-        float Determinant() const {
+        f32 Determinant() const {
             return    m[0][0] * Minor(0, 0)
                     - m[0][1] * Minor(0, 1)
                     + m[0][2] * Minor(0, 2)
@@ -70,8 +70,8 @@ namespace Cocoa::Math {
         }
 
         Matrix4x4& operator+=(const Matrix4x4& other) {
-            for (uint32_t r = 0; r < 4; r++) {
-                for (uint32_t c = 0; c < 4; c++) {
+            for (u32 r = 0; r < 4; r++) {
+                for (u32 c = 0; c < 4; c++) {
                     m[r][c] += other(r, c);
                 }
             }
@@ -79,8 +79,8 @@ namespace Cocoa::Math {
         }
 
         Matrix4x4& operator-=(const Matrix4x4& other) {
-            for (uint32_t r = 0; r < 4; r++) {
-                for (uint32_t c = 0; c < 4; c++) {
+            for (u32 r = 0; r < 4; r++) {
+                for (u32 c = 0; c < 4; c++) {
                     m[r][c] -= other(r, c);
                 }
             }
@@ -89,10 +89,10 @@ namespace Cocoa::Math {
 
         Matrix4x4& operator*=(const Matrix4x4& other) {
             Matrix4x4 result;
-            for (uint32_t r = 0; r < 4; r++) {
-                for (uint32_t c = 0; c < 4; c++) {
+            for (u32 r = 0; r < 4; r++) {
+                for (u32 c = 0; c < 4; c++) {
                     result(r, c) = 0.0f;
-                    for (uint32_t s = 0; s < 4; s++) {
+                    for (u32 s = 0; s < 4; s++) {
                         result(r, c) += m[r][s] * other(s, c);
                     }
                 }
@@ -101,7 +101,7 @@ namespace Cocoa::Math {
             return *this;
         }
 
-        Matrix4x4& operator*=(float scalar) {
+        Matrix4x4& operator*=(f32 scalar) {
             Matrix4x4 result;
             for (int r = 0; r < 4; r++) {
                 for (int c = 0; c < 4; c++) {
@@ -113,7 +113,7 @@ namespace Cocoa::Math {
         }
 
     private:
-        float Cofactor(int row, int col) const {
+        f32 Cofactor(int row, int col) const {
             int sign = ((row + col) % 2 == 0) ? 1 : -1;
             return sign * Minor(row, col);
         }
@@ -123,7 +123,7 @@ namespace Cocoa::Math {
         /// @param row The specified row that should be removed
         /// @param col The specified column that should be removed
         /// @returns The determinant of the extracted Matrix3x3
-        float Minor(int row, int col) const {
+        f32 Minor(int row, int col) const {
             Matrix3x3 sub;
             int sub_r = 0;
 
@@ -179,7 +179,7 @@ namespace Cocoa::Math {
         return result;
     }
 
-    inline Matrix4x4 operator*(const Matrix4x4& a, float scalar) {
+    inline Matrix4x4 operator*(const Matrix4x4& a, f32 scalar) {
         Matrix4x4 result = a;
         result *= scalar;
         return result;

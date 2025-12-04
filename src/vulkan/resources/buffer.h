@@ -10,7 +10,7 @@ namespace Cocoa::Vulkan {
     class Device;
     class Buffer {
     public:
-        Buffer(Device* device, Graphics::BufferDesc desc);
+        Buffer(Device* device, Graphics::GFXBufferDesc desc);
         ~Buffer();
 
         Buffer(const Buffer& other) = delete;

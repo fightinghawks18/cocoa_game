@@ -208,7 +208,7 @@ int main() {
 
         Cocoa::Graphics::Rect scissor = {
             .offset = viewport.offset,
-            .extent = viewport.extent
+            .scale = viewport.scale
         };
 
         encoder.StartRendering(passDesc);

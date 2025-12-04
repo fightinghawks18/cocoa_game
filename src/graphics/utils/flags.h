@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "../../common.h"
 
 namespace Cocoa::Graphics {
     enum class GPUShaderStage {
@@ -10,11 +10,11 @@ namespace Cocoa::Graphics {
     };
 
     inline bool operator&(GPUShaderStage a, GPUShaderStage b) {
-        return static_cast<GPUShaderStage>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)) != GPUShaderStage::Unknown;
+        return static_cast<GPUShaderStage>(static_cast<u32>(a) & static_cast<u32>(b)) != GPUShaderStage::Unknown;
     }
 
     inline GPUShaderStage operator|(GPUShaderStage a, GPUShaderStage b) {
-        return static_cast<GPUShaderStage>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+        return static_cast<GPUShaderStage>(static_cast<u32>(a) | static_cast<u32>(b));
     }
 
     enum class GPUBufferUsage {
@@ -28,11 +28,11 @@ namespace Cocoa::Graphics {
     };
 
     inline bool operator&(GPUBufferUsage a, GPUBufferUsage b) {
-        return static_cast<GPUBufferUsage>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)) != GPUBufferUsage::Unknown;
+        return static_cast<GPUBufferUsage>(static_cast<u32>(a) & static_cast<u32>(b)) != GPUBufferUsage::Unknown;
     }
 
     inline GPUBufferUsage operator|(GPUBufferUsage a, GPUBufferUsage b) {
-        return static_cast<GPUBufferUsage>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+        return static_cast<GPUBufferUsage>(static_cast<u32>(a) | static_cast<u32>(b));
     }
 
     enum class GPUTextureUsage {
@@ -46,11 +46,11 @@ namespace Cocoa::Graphics {
     };
 
     inline bool operator&(GPUTextureUsage a, GPUTextureUsage b) {
-        return static_cast<GPUTextureUsage>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)) != GPUTextureUsage::Unknown;
+        return static_cast<GPUTextureUsage>(static_cast<u32>(a) & static_cast<u32>(b)) != GPUTextureUsage::Unknown;
     }
 
     inline GPUTextureUsage operator|(GPUTextureUsage a, GPUTextureUsage b) {
-        return static_cast<GPUTextureUsage>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+        return static_cast<GPUTextureUsage>(static_cast<u32>(a) | static_cast<u32>(b));
     }
 
     enum class GPUSamplingCount {
@@ -65,11 +65,11 @@ namespace Cocoa::Graphics {
     };
 
     inline bool operator&(GPUSamplingCount a, GPUSamplingCount b) {
-        return static_cast<GPUSamplingCount>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)) != GPUSamplingCount::None;
+        return static_cast<GPUSamplingCount>(static_cast<u32>(a) & static_cast<u32>(b)) != GPUSamplingCount::None;
     }
 
     inline GPUSamplingCount operator|(GPUSamplingCount a, GPUSamplingCount b) {
-        return static_cast<GPUSamplingCount>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+        return static_cast<GPUSamplingCount>(static_cast<u32>(a) | static_cast<u32>(b));
     }
 
     enum class GPUTextureAspect {
@@ -80,10 +80,10 @@ namespace Cocoa::Graphics {
     };
 
     inline bool operator&(GPUTextureAspect a, GPUTextureAspect b) {
-        return static_cast<GPUTextureAspect>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)) != GPUTextureAspect::None;
+        return static_cast<GPUTextureAspect>(static_cast<u32>(a) & static_cast<u32>(b)) != GPUTextureAspect::None;
     }
 
     inline GPUTextureAspect operator|(GPUTextureAspect a, GPUTextureAspect b) {
-        return static_cast<GPUTextureAspect>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+        return static_cast<GPUTextureAspect>(static_cast<u32>(a) | static_cast<u32>(b));
     }
 }

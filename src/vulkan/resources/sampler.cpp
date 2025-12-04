@@ -4,7 +4,7 @@
 #include "../internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
-    Sampler::Sampler(Device* device, Graphics::SamplerDesc desc) : _device(device) {
+    Sampler::Sampler(Device* device, Graphics::GPUSamplerDesc desc) : _device(device) {
         vk::SamplerCreateInfo samplerDescriptor{};
         samplerDescriptor.setMagFilter(GPUFilterToVk(desc.magnification))
                     .setMinFilter(GPUFilterToVk(desc.minification))

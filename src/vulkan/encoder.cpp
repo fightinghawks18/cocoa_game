@@ -115,7 +115,7 @@ namespace Cocoa::Vulkan {
                 .setPDepthAttachment(renderDepthDesc.has_value() ? &renderDepthDesc.value() : nullptr)
                 .setRenderArea(vk::Rect2D(
                     {passDesc.renderArea.offset.x, passDesc.renderArea.offset.y},
-                    {passDesc.renderArea.extent.w, passDesc.renderArea.extent.h}
+                    {passDesc.renderArea.scale.w, passDesc.renderArea.scale.h}
                 ))
                 .setViewMask(passDesc.viewMask)
                 .setLayerCount(passDesc.layerCount);
@@ -150,8 +150,8 @@ namespace Cocoa::Vulkan {
         _cmd.setViewport(0, vk::Viewport(
             viewport.offset.x,
             viewport.offset.y,
-            viewport.extent.w,
-            viewport.extent.h,
+            viewport.scale.w,
+            viewport.scale.h,
             viewport.minDepth,
             viewport.maxDepth
         ));
@@ -160,7 +160,7 @@ namespace Cocoa::Vulkan {
     void Encoder::SetScissor(Graphics::Rect scissor) {
         _cmd.setScissor(0, vk::Rect2D(
             {scissor.offset.x, scissor.offset.y},
-            {scissor.extent.w, scissor.extent.h}
+            {scissor.scale.w, scissor.scale.h}
         ));
     }
 

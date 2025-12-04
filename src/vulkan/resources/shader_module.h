@@ -27,7 +27,7 @@ namespace Cocoa::Vulkan {
     class Device;
     class ShaderModule {
     public:
-        ShaderModule(Device* device, Graphics::ShaderModuleDesc desc);
+        ShaderModule(Device* device, Graphics::GPUShaderModuleDesc desc);
         ~ShaderModule();
 
         ShaderModule(const ShaderModule& other) = delete;

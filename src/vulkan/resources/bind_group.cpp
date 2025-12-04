@@ -4,7 +4,7 @@
 #include "../internal/helpers/enums.h"
 #include "../internal/helpers/flags.h"
 namespace Cocoa::Vulkan {
-    BindGroup::BindGroup(Device* device, Graphics::BindGroupDesc desc) : _device(device) {
+    BindGroup::BindGroup(Device* device, Graphics::GFXBindGroupDesc desc) : _device(device) {
         auto groupLayoutInstance = device->GetBindGroupLayoutInstance(desc.layout);
         auto layouts = { groupLayoutInstance->GetLayout() };
 
@@ -37,7 +37,7 @@ namespace Cocoa::Vulkan {
             switch (layoutEntry.type) {
                 case Graphics::GPUBindGroupType::UniformBuffer:
                 case Graphics::GPUBindGroupType::StorageBuffer: {
-                    auto bufferHandle = std::get<Graphics::BufferHandle>(resource);
+                    auto bufferHandle = std::get<Graphics::GFXBufferHandle>(resource);
                     auto bufferInstance = device->GetBufferInstance(bufferHandle);
 
                     vk::DescriptorBufferInfo bufferInfo;
@@ -53,7 +53,7 @@ namespace Cocoa::Vulkan {
                     break;
                 }
                 case Graphics::GPUBindGroupType::Texture: {
-                    auto textureHandle = std::get<Graphics::TextureHandle>(resource);
+                    auto textureHandle = std::get<Graphics::GFXTextureHandle>(resource);
                     auto image = device->GetTextureInstance(textureHandle);
                     auto imageView = image->GetView(0);
                     vk::DescriptorImageInfo imageDescriptor{};
@@ -66,7 +66,7 @@ namespace Cocoa::Vulkan {
                     break;
                 }
                 case Graphics::GPUBindGroupType::Sampler: {
-                    auto samplerHandle = std::get<Graphics::SamplerHandle>(resource);
+                    auto samplerHandle = std::get<Graphics::GFXSamplerHandle>(resource);
                     auto sampler = device->GetSamplerInstance(samplerHandle);
                     auto samplerObject = sampler->Get();
                     vk::DescriptorImageInfo imageDescriptor{};

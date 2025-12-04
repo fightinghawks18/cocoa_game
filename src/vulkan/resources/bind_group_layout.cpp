@@ -5,7 +5,7 @@
 #include "../internal/helpers/flags.h"
 
 namespace Cocoa::Vulkan {
-    BindGroupLayout::BindGroupLayout(Device* device, Graphics::BindGroupLayoutDesc desc) : _device(device), _desc(desc) {
+    BindGroupLayout::BindGroupLayout(Device* device, Graphics::GFXBindGroupLayoutDesc desc) : _device(device), _desc(desc) {
         std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
         for (const auto& entry : desc.entries) {
             vk::DescriptorSetLayoutBinding binding;

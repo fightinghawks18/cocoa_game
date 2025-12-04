@@ -9,7 +9,7 @@
 #include "internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
-    Swapchain::Swapchain(Device* device, Graphics::SwapchainDesc desc) : _device(device), _surface(device->GetSurfaceInstance(desc.surface)) {
+    Swapchain::Swapchain(Device* device, Graphics::GFXWindowDesc desc) : _device(device), _surface(device->GetSurfaceInstance(desc.surface)) {
         CreateSwapchain();
         CreateSemaphores();
         CreateFences();
@@ -62,7 +62,7 @@ namespace Cocoa::Vulkan {
         _frame = (_frame + 1) % 2;
     }
 
-    Graphics::TextureHandle Swapchain::GetNextBackBuffer() {
+    Graphics::GFXTextureHandle Swapchain::GetNextBackBuffer() {
         vk::Result waitForPreviousOperations = _device->GetDevice().waitForFences(1, &_fences[_frame].get(), true, UINT64_MAX);
         if (waitForPreviousOperations != vk::Result::eSuccess) {
             PANIC("Failed to wait for previous operations");
@@ -80,7 +80,7 @@ namespace Cocoa::Vulkan {
         return _swapchainImages[_imageIndex];
     }
 
-    Graphics::TextureHandle Swapchain::GetCurrentBackBuffer() {
+    Graphics::GFXTextureHandle Swapchain::GetCurrentBackBuffer() {
         return _swapchainImages[_imageIndex];
     }
 
@@ -132,11 +132,11 @@ namespace Cocoa::Vulkan {
 
         auto vkSwapchainImages = _device->GetDevice().getSwapchainImagesKHR(_swapchain.get());
         for (auto& image : vkSwapchainImages) {
-            Graphics::TextureDesc textureDescriptor = {
+            Graphics::GPUTextureDesc textureDescriptor = {
                 .external = image
             };
 
-            Graphics::TextureViewDesc viewDescriptor = {
+            Graphics::GPUTextureViewDesc viewDescriptor = {
                 .format = VkToGPUFormat(chosenFormat.format)
             };
 

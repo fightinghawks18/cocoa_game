@@ -6,7 +6,7 @@
 #include "../internal/helpers/flags.h"
 
 namespace Cocoa::Vulkan {
-    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device), _layout(desc.initialLayout), _extent(desc.extent), _levels(desc.levels), _layers(desc.layers) {
+    Texture::Texture(Device* device, Graphics::TextureDesc desc) : _device(device), _layout(desc.initialLayout), _extent(desc.scale), _levels(desc.levels), _layers(desc.layers) {
         if (!desc.external) {
             VmaAllocationCreateInfo allocationDescriptor = {0};
             allocationDescriptor.usage = VMA_MEMORY_USAGE_AUTO;
@@ -15,7 +15,7 @@ namespace Cocoa::Vulkan {
             vk::ImageCreateInfo imageDescriptor{};
             imageDescriptor.setImageType(GPUTextureDimensionToVk(desc.dimension))
                         .setArrayLayers(desc.layers)
-                        .setExtent(vk::Extent3D{desc.extent.w, desc.extent.h, desc.extent.d})
+                        .setExtent(vk::Extent3D{desc.scale.w, desc.scale.h, desc.scale.d})
                         .setInitialLayout(GPUTextureLayoutToVk(desc.initialLayout))
                         .setMipLevels(desc.levels)
                         .setSamples(vk::SampleCountFlagBits::e1)

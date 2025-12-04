@@ -8,7 +8,7 @@ namespace Cocoa::Vulkan {
     class Texture;
     class TextureView {
     public:
-        TextureView(Device* device, Texture* texture, Graphics::TextureViewDesc viewDesc);
+        TextureView(Device* device, Texture* texture, Graphics::GPUTextureViewDesc viewDesc);
         ~TextureView() = default;
     
         [[nodiscard]] vk::ImageView Get() { return _view.get(); }

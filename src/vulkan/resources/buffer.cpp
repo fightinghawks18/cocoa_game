@@ -6,7 +6,7 @@
 #include "../internal/helpers/enums.h"
 
 namespace Cocoa::Vulkan {
-    Buffer::Buffer(Device* device, Graphics::BufferDesc desc) : _device(device) {
+    Buffer::Buffer(Device* device, Graphics::GFXBufferDesc desc) : _device(device) {
         vk::BufferCreateInfo bufferDescriptor{};
         bufferDescriptor.setUsage(GPUBufferUsageToVk(desc.usage))
                     .setSharingMode(vk::SharingMode::eExclusive)

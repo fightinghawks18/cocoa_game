@@ -7,7 +7,7 @@ namespace Cocoa::Vulkan {
     class Device;
     class Sampler {
     public:
-        Sampler(Device* device, Graphics::SamplerDesc desc);
+        Sampler(Device* device, Graphics::GPUSamplerDesc desc);
         ~Sampler();
 
         Sampler(const Sampler& other) = delete;

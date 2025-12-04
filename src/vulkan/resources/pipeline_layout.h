@@ -7,7 +7,7 @@ namespace Cocoa::Vulkan {
     class Device;
     class PipelineLayout {
     public:
-        PipelineLayout(Device* device, Graphics::PipelineLayoutDesc desc);
+        PipelineLayout(Device* device, Graphics::GFXPipelineLayoutDesc desc);
         ~PipelineLayout();
 
         PipelineLayout(const PipelineLayout& other) = delete;

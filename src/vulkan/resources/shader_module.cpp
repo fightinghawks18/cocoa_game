@@ -4,7 +4,7 @@
 #include "../device.h"
 
 namespace Cocoa::Vulkan {
-    ShaderModule::ShaderModule(Device* device, Graphics::ShaderModuleDesc desc) : _device(device) {
+    ShaderModule::ShaderModule(Device* device, Graphics::GPUShaderModuleDesc desc) : _device(device) {
         auto currentDirectory = std::filesystem::current_path();
         auto vertexShaderCode = Cocoa::Vulkan::ReadFile((currentDirectory / desc.shaderPath).string());
         vk::ShaderModuleCreateInfo vertexShaderDescriptor;

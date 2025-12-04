@@ -9,7 +9,7 @@
 #include "../graphics/helpers.h"
 #include "../macros.h"
 namespace Cocoa::Vulkan {
-    Device::Device(Graphics::DeviceDesc desc) {
+    Device::Device(Graphics::GFXDeviceDesc desc) {
         _swapchainResources.emplace(1024);
         _surfaceResources.emplace(1024);
         _textureResources.emplace(1024);
@@ -64,39 +64,39 @@ namespace Cocoa::Vulkan {
         return _surfaceResources->Emplace(this, window);
     }
 
-    Graphics::SwapchainHandle Device::CreateSwapchain(Graphics::SwapchainDesc swapchainDesc) {
+    Graphics::GFXWindowHandle Device::CreateSwapchain(Graphics::GFXWindowDesc swapchainDesc) {
         return _swapchainResources->Emplace(this, swapchainDesc);
     }
 
-    Graphics::BufferHandle Device::CreateBuffer(Graphics::BufferDesc bufferDesc) {
+    Graphics::GFXBufferHandle Device::CreateBuffer(Graphics::GFXBufferDesc bufferDesc) {
         return _bufferResources->Emplace(this, bufferDesc);
     }
 
-    Graphics::PipelineLayoutHandle Device::CreatePipelineLayout(Graphics::PipelineLayoutDesc pipelineLayoutDesc) {
+    Graphics::GFXPipelineLayoutHandle Device::CreatePipelineLayout(Graphics::GFXPipelineLayoutDesc pipelineLayoutDesc) {
         return _pipelineLayoutResources->Emplace(this, pipelineLayoutDesc);
     }
 
-    Graphics::RenderPipelineHandle Device::CreateRenderPipeline(Graphics::PipelineDesc renderPipelineDesc) {
+    Graphics::GFXRenderPipelineHandle Device::CreateRenderPipeline(Graphics::GFXPipelineDesc renderPipelineDesc) {
         return _renderPipelineResources->Emplace(this, renderPipelineDesc);
     }
 
-    Graphics::SamplerHandle Device::CreateSampler(Graphics::SamplerDesc samplerDesc) {
+    Graphics::GFXSamplerHandle Device::CreateSampler(Graphics::GPUSamplerDesc samplerDesc) {
         return _samplerResources->Emplace(this, samplerDesc);
     }
 
-    Graphics::ShaderModuleHandle Device::CreateShaderModule(Graphics::ShaderModuleDesc shaderModuleDesc) {
+    Graphics::GFXShaderModuleHandle Device::CreateShaderModule(Graphics::GPUShaderModuleDesc shaderModuleDesc) {
         return _shaderModuleResources->Emplace(this, shaderModuleDesc);
     }
 
-    Graphics::TextureHandle Device::CreateTexture(Graphics::TextureDesc textureDesc) {
+    Graphics::GFXTextureHandle Device::CreateTexture(Graphics::GPUTextureDesc textureDesc) {
         return _textureResources->Emplace(this, textureDesc);
     }
 
-    Graphics::BindGroupHandle Device::CreateBindGroup(Graphics::BindGroupDesc bindGroupDesc) {
+    Graphics::GFXBindGroupHandle Device::CreateBindGroup(Graphics::GFXBindGroupDesc bindGroupDesc) {
         return _bindGroupResources->Emplace(this, bindGroupDesc);
     }
 
-    Graphics::BindGroupLayoutHandle Device::CreateBindGroupLayout(Graphics::BindGroupLayoutDesc bindGroupLayoutDesc) {
+    Graphics::GFXBindGroupLayoutHandle Device::CreateBindGroupLayout(Graphics::GFXBindGroupLayoutDesc bindGroupLayoutDesc) {
         return _bindGroupLayoutResources->Emplace(this, bindGroupLayoutDesc);
     }
 
@@ -104,39 +104,39 @@ namespace Cocoa::Vulkan {
         _surfaceResources->Remove(surface);
     }
 
-    void Device::DestroySwapchain(Graphics::SwapchainHandle swapchain) {
+    void Device::DestroySwapchain(Graphics::GFXWindowHandle swapchain) {
         _swapchainResources->Remove(swapchain);
     }
 
-    void Device::DestroyBuffer(Graphics::BufferHandle buffer) {
+    void Device::DestroyBuffer(Graphics::GFXBufferHandle buffer) {
         _bufferResources->Remove(buffer);
     }
 
-    void Device::DestroyPipelineLayout(Graphics::PipelineLayoutHandle pipelineLayout) {
+    void Device::DestroyPipelineLayout(Graphics::GFXPipelineLayoutHandle pipelineLayout) {
         _pipelineLayoutResources->Remove(pipelineLayout);
     }
 
-    void Device::DestroyRenderPipeline(Graphics::RenderPipelineHandle renderPipeline) {
+    void Device::DestroyRenderPipeline(Graphics::GFXRenderPipelineHandle renderPipeline) {
         _renderPipelineResources->Remove(renderPipeline);
     }
 
-    void Device::DestroySampler(Graphics::SamplerHandle sampler) {
+    void Device::DestroySampler(Graphics::GFXSamplerHandle sampler) {
         _samplerResources->Remove(sampler);
     }
 
-    void Device::DestroyShaderModule(Graphics::ShaderModuleHandle shaderModule) {
+    void Device::DestroyShaderModule(Graphics::GFXShaderModuleHandle shaderModule) {
         _shaderModuleResources->Remove(shaderModule);
     }
 
-    void Device::DestroyTexture(Graphics::TextureHandle texture) {
+    void Device::DestroyTexture(Graphics::GFXTextureHandle texture) {
         _textureResources->Remove(texture);
     }
 
-    void Device::DestroyBindGroup(Graphics::BindGroupHandle bindGroup) {
+    void Device::DestroyBindGroup(Graphics::GFXBindGroupHandle bindGroup) {
         _bindGroupResources->Remove(bindGroup);
     }
 
-    void Device::DestroyBindGroupLayout(Graphics::BindGroupLayoutHandle bindGroupLayout) {
+    void Device::DestroyBindGroupLayout(Graphics::GFXBindGroupLayoutHandle bindGroupLayout) {
         _bindGroupLayoutResources->Remove(bindGroupLayout);
     }
 
@@ -144,43 +144,43 @@ namespace Cocoa::Vulkan {
         return _surfaceResources->Get(surface);
     }
 
-    Swapchain* Device::GetSwapchainInstance(Graphics::SwapchainHandle swapchain) {
+    Swapchain* Device::GetSwapchainInstance(Graphics::GFXWindowHandle swapchain) {
         return _swapchainResources->Get(swapchain);
     }
 
-    Buffer* Device::GetBufferInstance(Graphics::BufferHandle buffer) {
+    Buffer* Device::GetBufferInstance(Graphics::GFXBufferHandle buffer) {
         return _bufferResources->Get(buffer);
     }
 
-    PipelineLayout* Device::GetPipelineLayoutInstance(Graphics::PipelineLayoutHandle pipelineLayout) {
+    PipelineLayout* Device::GetPipelineLayoutInstance(Graphics::GFXPipelineLayoutHandle pipelineLayout) {
         return _pipelineLayoutResources->Get(pipelineLayout);
     }
 
-    RenderPipeline* Device::GetRenderPipelineInstance(Graphics::RenderPipelineHandle renderPipeline) {
+    RenderPipeline* Device::GetRenderPipelineInstance(Graphics::GFXRenderPipelineHandle renderPipeline) {
         return _renderPipelineResources->Get(renderPipeline);
     }
 
-    Sampler* Device::GetSamplerInstance(Graphics::SamplerHandle sampler) {
+    Sampler* Device::GetSamplerInstance(Graphics::GFXSamplerHandle sampler) {
         return _samplerResources->Get(sampler);
     }
 
-    ShaderModule* Device::GetShaderModuleInstance(Graphics::ShaderModuleHandle shaderModule) {
+    ShaderModule* Device::GetShaderModuleInstance(Graphics::GFXShaderModuleHandle shaderModule) {
         return _shaderModuleResources->Get(shaderModule);
     }
 
-    Texture* Device::GetTextureInstance(Graphics::TextureHandle texture) {
+    Texture* Device::GetTextureInstance(Graphics::GFXTextureHandle texture) {
         return _textureResources->Get(texture);
     }
 
-    BindGroup* Device::GetBindGroupInstance(Graphics::BindGroupHandle bindGroup) {
+    BindGroup* Device::GetBindGroupInstance(Graphics::GFXBindGroupHandle bindGroup) {
         return _bindGroupResources->Get(bindGroup);
     }
 
-    BindGroupLayout* Device::GetBindGroupLayoutInstance(Graphics::BindGroupLayoutHandle bindGroupLayout) {
+    BindGroupLayout* Device::GetBindGroupLayoutInstance(Graphics::GFXBindGroupLayoutHandle bindGroupLayout) {
         return _bindGroupLayoutResources->Get(bindGroupLayout);
     }
 
-    Encoder Device::Encode(Graphics::SwapchainHandle swapchain) {
+    Encoder Device::Encode(Graphics::GFXWindowHandle swapchain) {
         auto swapchainInstance = GetSwapchainInstance(swapchain);
         auto backBuffer = swapchainInstance->GetCurrentBackBuffer();
         
@@ -274,7 +274,7 @@ namespace Cocoa::Vulkan {
         _instance = vk::createInstanceUnique(instanceDescriptor);
     }
 
-    void Device::GetPhysicalDevice(Graphics::DeviceDesc desc) {
+    void Device::GetPhysicalDevice(Graphics::GFXDeviceDesc desc) {
         auto physicalDevices = _instance->enumeratePhysicalDevices();
         
         std::map<int32_t, vk::PhysicalDevice> physicalDevicesRanked;
@@ -345,7 +345,7 @@ namespace Cocoa::Vulkan {
         };
     }
 
-    void Device::DiscoverQueues(Graphics::DeviceDesc desc) {
+    void Device::DiscoverQueues(Graphics::GFXDeviceDesc desc) {
         auto queueFamilies = _gpu.getQueueFamilyProperties();
 
         for (const auto& queueType : desc.desiredQueues) {

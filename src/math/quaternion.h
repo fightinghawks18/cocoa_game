@@ -3,16 +3,17 @@
 #include <cmath>
 #include "vector3.h"
 #include "matrix3x3.h"
+#include "../common.h"
 
 namespace Cocoa::Math {
     struct Quaternion {
-        float x, y, z, w;
+        f32 x, y, z, w;
 
         Quaternion() : x(0), y(0), z(0), w(1) {}
-        explicit Quaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+        explicit Quaternion(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w) {}
 
         Quaternion& Normalize() {
-            float len = sqrt(x * x + y * y + z * z + w * w);
+            f32 len = sqrt(x * x + y * y + z * z + w * w);
             if (len > 0.0f) {
                 x /= len;
                 y /= len;
@@ -23,10 +24,10 @@ namespace Cocoa::Math {
         }
         
         Quaternion& operator*=(const Quaternion& other) {
-            float ox = x;
-            float oy = y;
-            float oz = z;
-            float ow = w;
+            f32 ox = x;
+            f32 oy = y;
+            f32 oz = z;
+            f32 ow = w;
 
             x = ow * other.x + ox * other.w + oy * other.z - oz * other.y;
             y = ow * other.y - ox * other.z + oy * other.w + oz * other.x;
@@ -40,15 +41,15 @@ namespace Cocoa::Math {
     inline Matrix3x3 ToMatrix3x3(const Quaternion& quaternion) {
         Matrix3x3 result;
 
-        float xx = quaternion.x * quaternion.x;
-        float yy = quaternion.y * quaternion.y;
-        float zz = quaternion.z * quaternion.z;
-        float xy = quaternion.x * quaternion.y;
-        float xz = quaternion.x * quaternion.z;
-        float yz = quaternion.y * quaternion.z;
-        float wx = quaternion.w * quaternion.x;
-        float wy = quaternion.w * quaternion.y;
-        float wz = quaternion.w * quaternion.z;
+        f32 xx = quaternion.x * quaternion.x;
+        f32 yy = quaternion.y * quaternion.y;
+        f32 zz = quaternion.z * quaternion.z;
+        f32 xy = quaternion.x * quaternion.y;
+        f32 xz = quaternion.x * quaternion.z;
+        f32 yz = quaternion.y * quaternion.z;
+        f32 wx = quaternion.w * quaternion.x;
+        f32 wy = quaternion.w * quaternion.y;
+        f32 wz = quaternion.w * quaternion.z;
         
         result(0, 0) = 1.0f - 2.0f * (yy + zz);
         result(0, 1) = 2.0f * (xy - wz);
@@ -77,13 +78,13 @@ namespace Cocoa::Math {
         return b + ((uv * a.w) + uuv) * 2.0f;
     }
 
-    inline Quaternion FromEuler(float pitch, float yaw, float roll) {
-        float cy = cos(yaw * 0.5f);
-        float sy = sin(yaw * 0.5f);
-        float cp = cos(pitch * 0.5f);
-        float sp = sin(pitch * 0.5f);
-        float cr = cos(roll * 0.5f);
-        float sr = sin(roll * 0.5f);
+    inline Quaternion FromEuler(f32 pitch, f32 yaw, f32 roll) {
+        f32 cy = cos(yaw * 0.5f);
+        f32 sy = sin(yaw * 0.5f);
+        f32 cp = cos(pitch * 0.5f);
+        f32 sp = sin(pitch * 0.5f);
+        f32 cr = cos(roll * 0.5f);
+        f32 sr = sin(roll * 0.5f);
 
         return Quaternion(
             sr * cp * cy - cr * sp * sy,
@@ -93,9 +94,9 @@ namespace Cocoa::Math {
         );
     }
 
-    inline Quaternion FromAxisAngle(Vector3 axis, float angle) {
-        float halfAngle = angle * 0.5f;
-        float s = sin(halfAngle);
+    inline Quaternion FromAxisAngle(Vector3 axis, f32 angle) {
+        f32 halfAngle = angle * 0.5f;
+        f32 s = sin(halfAngle);
         
         return Quaternion(
             axis.x * s,

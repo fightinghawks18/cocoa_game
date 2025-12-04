@@ -1,17 +1,18 @@
 #pragma once
 
 #include <cmath>
+#include "../common.h"
 
 namespace Cocoa::Math {
     struct Vector3 {
-        float x, y, z;
+        f32 x, y, z;
 
         Vector3() : x(0), y(0), z(0) {}
-        explicit Vector3(float scalar) : x(scalar), y(scalar), z(scalar) {}
-        explicit Vector3(float x, float y) : x(x), y(y), z(0) {}
-        explicit Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
+        explicit Vector3(f32 scalar) : x(scalar), y(scalar), z(scalar) {}
+        explicit Vector3(f32 x, f32 y) : x(x), y(y), z(0) {}
+        explicit Vector3(f32 x, f32 y, f32 z) : x(x), y(y), z(z) {}
 
-        float Dot(const Vector3& other) const {
+        f32 Dot(const Vector3& other) const {
             return x * other.x + y * other.y + z * other.z;
         }
 
@@ -23,16 +24,16 @@ namespace Cocoa::Math {
             );
         }
 
-        float Length() const {
+        f32 Length() const {
             return sqrt(x * x + y * y + z * z);
         }
 
-        float LengthSquared() const {
+        f32 LengthSquared() const {
             return x * x + y * y + z * z;
         }
     
         Vector3 Normalize() const {
-            float len = Length();
+            f32 len = Length();
             if (len > 0.0f) {
                 return Vector3(x / len, y / len, z / len);
             }
@@ -92,15 +93,15 @@ namespace Cocoa::Math {
         return result;
     }
 
-    inline Vector3 operator*(const Vector3& v, float scalar) {
+    inline Vector3 operator*(const Vector3& v, f32 scalar) {
         return Vector3(v.x * scalar, v.y * scalar, v.z * scalar);
     }
 
-    inline Vector3 operator*(float scalar, const Vector3& v) {
+    inline Vector3 operator*(f32 scalar, const Vector3& v) {
         return v * scalar;
     }
 
-    inline Vector3 operator/(const Vector3& v, float scalar) {
+    inline Vector3 operator/(const Vector3& v, f32 scalar) {
         return Vector3(v.x / scalar, v.y / scalar, v.z / scalar);
     }
 
