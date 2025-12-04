@@ -6,8 +6,8 @@
 namespace Cocoa::Graphics {
     class GFXDevice;
     struct GFXWindowImpl {
-        GFXWindowImpl(GFXDevice& device, GFXWindowDesc desc);
-        virtual ~GFXWindowImpl() {}
+        GFXWindowImpl(GFXDevice& device, GFXWindowDesc desc) : _device(device) {}
+        virtual ~GFXWindowImpl() = default;
         virtual void AcquireNextBuffer() = 0;
         virtual void Present() = 0;
         virtual void Submit() = 0;
@@ -17,17 +17,23 @@ namespace Cocoa::Graphics {
 
     class GFXWindow {
     public:
-        GFXWindow(GFXDevice& device, GFXWindowDesc desc);
+        GFXWindow(std::unique_ptr<GFXWindowImpl> impl) : _impl(std::move(impl)) {}
         ~GFXWindow();
 
-        void AcquireNewBuffer();
-        void Present();
-        void Submit();
+        void AcquireNewBuffer() {
+            _impl->AcquireNextBuffer();
+        }
+
+        void Present() {
+            _impl->Present();
+        }
+
+        void Submit() {
+            _impl->Submit();
+        }
         
         [[nodiscard]] GFXWindowImpl* GetImpl() { return _impl.get(); }
     private:
-        GFXDevice& _device;
-
         std::unique_ptr<GFXWindowImpl> _impl;
     };
 }

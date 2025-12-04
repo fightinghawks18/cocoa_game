@@ -8,25 +8,24 @@ namespace Cocoa::Graphics {
     class GFXEncoder;
     class GFXDevice;
     struct GFXEncoderImpl {
-        GFXEncoderImpl(GFXEncoderDesc desc, GFXDevice& device) : _device(device), _desc(desc) {}
-        virtual ~GFXEncoderImpl() {}
+        GFXEncoderImpl(GFXDevice& device) : _device(device) {}
+        virtual ~GFXEncoderImpl() = default;
         virtual void StartRenderPass(const GPUPassDesc& renderPassDescriptor) = 0;
         virtual void SetRenderPipeline(const GFXRenderPipelineHandle& renderPipeline) = 0;
         virtual void SetOutputTransform(const OutputTransform& outputTransform) = 0;
         virtual void SetRenderArea(const RenderArea& renderArea) = 0;
-        virtual void SetVertexBuffer(const GFXBufferHandle& vertexBuffer) = 0;
-        virtual void SetIndexBuffer(const GFXBufferHandle& indexBuffer) = 0;
-        virtual void SetBindGroup(const GFXBindGroupHandle& bindGroup) = 0;
+        virtual void SetVertexBuffer(const GPUBufferHandle& vertexBuffer) = 0;
+        virtual void SetIndexBuffer(const GPUBufferHandle& indexBuffer) = 0;
+        virtual void SetBindGroup(const GPUBindGroupHandle& bindGroup) = 0;
         virtual void EndRenderPass() = 0;
         virtual void Stop() = 0;
     protected:
         GFXDevice& _device;
-        GFXEncoderDesc _desc;
     };
 
     class GFXEncoder {
     public:
-        GFXEncoder(GFXDevice& device);
+        GFXEncoder(std::unique_ptr<GFXEncoderImpl> impl) : _impl(std::move(impl)) {}
         ~GFXEncoder();
         
         void StartRenderPass(const GPUPassDesc& renderPassDescriptor) {
@@ -45,15 +44,15 @@ namespace Cocoa::Graphics {
             _impl->SetRenderArea(renderArea);
         }
 
-        void SetVertexBuffer(const GFXBufferHandle& vertexBuffer) {
+        void SetVertexBuffer(const GPUBufferHandle& vertexBuffer) {
             _impl->SetVertexBuffer(vertexBuffer);
         }
 
-        void SetIndexBuffer(const GFXBufferHandle& indexBuffer) {
+        void SetIndexBuffer(const GPUBufferHandle& indexBuffer) {
             _impl->SetIndexBuffer(indexBuffer);
         }
 
-        void SetBindGroup(const GFXBindGroupHandle& bindGroup) {
+        void SetBindGroup(const GPUBindGroupHandle& bindGroup) {
             _impl->SetBindGroup(bindGroup);
         }
 
@@ -67,8 +66,6 @@ namespace Cocoa::Graphics {
 
         [[nodiscard]] GFXEncoderImpl* GetImpl() { return _impl.get(); }
     private:
-        GFXDevice& _device;
-
         std::unique_ptr<GFXEncoderImpl> _impl;
     };
 }

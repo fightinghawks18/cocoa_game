@@ -4,7 +4,6 @@
 #include "../../common.h"
 
 namespace Cocoa::Graphics {
-    template <typename T>
     struct Handle {
         uint64_t id = UINT64_MAX;
 
@@ -33,7 +32,7 @@ namespace Cocoa::Graphics {
         ~GFXResourceManager() = default;
 
         template <typename... Args>
-        Handle<T> Create(Args&&... args) {
+        Handle Create(Args&&... args) {
             usize index;
             if (_freedList.empty()) {
                 index = _slots.size();
@@ -51,7 +50,7 @@ namespace Cocoa::Graphics {
             return {slot.id};
         }
 
-        void Destroy(Handle<T>& handle) {
+        void Destroy(Handle& handle) {
             if (!ValidateHandle(handle)) {
                 handle.Invalidate();
                 return;
@@ -66,7 +65,7 @@ namespace Cocoa::Graphics {
             handle.Invalidate();
         }
 
-        T* Get(Handle<T>& handle) {
+        T* Get(Handle& handle) {
             if (!ValidateHandle(handle)) {
                 handle.Invalidate();
                 return;
@@ -79,7 +78,7 @@ namespace Cocoa::Graphics {
         std::vector<ResourceSlot<T>> _slots;
         std::vector<size_t> _freedList;
 
-        bool ValidateHandle(Handle<T>& handle) {
+        bool ValidateHandle(Handle& handle) {
             if (!handle.IsValid()) return false;
             auto idx = GetHandleIndex(handle.id);
             if (idx >= _slots.size()) return false;

@@ -28,7 +28,7 @@ namespace Cocoa::Graphics {
         GPUQueueType submitQueue = GPUQueueType::Graphics;
     };
 
-    struct GFXBufferDesc {
+    struct GPUBufferDesc {
         GPUBufferUsage usage = GPUBufferUsage::Unknown;
         GPUMemoryAccess access = GPUMemoryAccess::CPUToGPU;
         u64 size = 0;
@@ -36,7 +36,7 @@ namespace Cocoa::Graphics {
     };
 
     struct GPUColorPassDesc {
-        GFXTextureHandle texture;
+        GPUTextureHandle texture;
         u32 viewSlot = 0;
         std::array<f32, 4> clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
         GPUPassLoadOp loadOp = GPUPassLoadOp::Clear;
@@ -44,7 +44,7 @@ namespace Cocoa::Graphics {
     };
 
     struct GPUDepthPassDesc {
-        GFXTextureHandle texture;
+        GPUTextureHandle texture;
         u32 viewSlot = 0;
         f32 depth = 1.0f;
         u32 stencil = 0;
@@ -61,17 +61,17 @@ namespace Cocoa::Graphics {
         u32 layerCount = 1;
     };
 
-    struct GFXBindGroupLayoutEntry {
+    struct GPUBindGroupLayoutEntry {
         u32 binding = UINT32_MAX;
         GPUShaderStage visibility;
         GPUBindGroupType type;
     };
 
-    struct GFXBindGroupLayoutDesc {
-        std::vector<GFXBindGroupLayoutEntry> entries;
+    struct GPUBindGroupLayoutDesc {
+        std::vector<GPUBindGroupLayoutEntry> entries;
         u32 nextImplicitBinding = 0;
 
-        GFXBindGroupLayoutDesc& Entry(GPUShaderStage visibility, GPUBindGroupType type, u32 binding = UINT32_MAX) {
+        GPUBindGroupLayoutDesc& Entry(GPUShaderStage visibility, GPUBindGroupType type, u32 binding = UINT32_MAX) {
             u32 actualBinding = (binding == UINT32_MAX) ? nextImplicitBinding : binding;
             entries.push_back({actualBinding, visibility, type});
             nextImplicitBinding = std::max(nextImplicitBinding, actualBinding + 1);
@@ -79,21 +79,21 @@ namespace Cocoa::Graphics {
         }
     };
 
-    using GFXBindGroupEntry = std::variant<GFXBufferHandle, GFXTextureHandle, GFXSamplerHandle>;
-    struct GFXBindGroupDesc {
-        GFXBindGroupLayoutHandle layout;
-        std::vector<GFXBindGroupEntry> entries;
+    using GPUBindGroupEntry = std::variant<GPUBufferHandle, GPUTextureHandle, GPUSamplerHandle>;
+    struct GPUBindGroupDesc {
+        GPUBindGroupLayoutHandle layout;
+        std::vector<GPUBindGroupEntry> entries;
 
-        GFXBindGroupDesc& Entry(GFXBindGroupEntry entry) {
+        GPUBindGroupDesc& Entry(GPUBindGroupEntry entry) {
             entries.push_back(entry);
             return *this;
         }
     };
 
     struct GFXPipelineLayoutDesc {
-        std::vector<GFXBindGroupLayoutHandle> groupLayouts;
+        std::vector<GPUBindGroupLayoutHandle> groupLayouts;
 
-        GFXPipelineLayoutDesc& BindGroup(GFXBindGroupLayoutHandle groupLayout) {
+        GFXPipelineLayoutDesc& BindGroup(GPUBindGroupLayoutHandle groupLayout) {
             groupLayouts.push_back(groupLayout);
             return *this;
         }
@@ -189,7 +189,7 @@ namespace Cocoa::Graphics {
         u32 layers = 1;
     };
 
-    struct GPUShaderModuleDesc {
+    struct GFXShaderModuleDesc {
         std::string shaderPath;
     };
 
