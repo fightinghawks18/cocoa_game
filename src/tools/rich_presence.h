@@ -50,6 +50,6 @@ namespace Cocoa::Tools {
         /// @param tip The message to display
         void SetSmallImageTip(const std::string& tip);
     private:
-        DiscordRichPresence _richPresence;
+        DiscordRichPresence p_RichPresence;
     };
 }

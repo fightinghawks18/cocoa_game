@@ -1,58 +1,69 @@
 #pragma once
 
-namespace Cocoa::Graphics {
-    enum class GPUPowerPreference {
+namespace Cocoa::Graphics
+{
+    enum class GPUPowerPreference
+    {
         HighPerformance,
         LowPower,
     };
 
-    enum class GPUQueueType {
+    enum class GPUQueueType
+    {
         Unknown = 0,
         Graphics,
         Compute,
         Transfer
     };
 
-    enum class GPUPassLoadOp {
+    enum class GPUPassLoadOp
+    {
         Clear,
         Load,
         DontCare
     };
 
-    enum class GPUPassStoreOp {
+    enum class GPUPassStoreOp
+    {
         Store,
         DontCare
     };
 
-    enum class GPUBindGroupType {
+    enum class GPUBindGroupType
+    {
         UniformBuffer,
         StorageBuffer,
         Texture,
         Sampler
     };
 
-    enum class GPUTopology {
+    enum class GPUTopology
+    {
         TriangleList
     };
 
-    enum class GPUPolygonMode {
+    enum class GPUPolygonMode
+    {
         Fill,
         Line
     };
 
-    enum class GPUCullMode {
+    enum class GPUCullMode
+    {
         None = 0,
         Frontside,
         Backside,
         Both
     };
-    
-    enum class GPUFrontFace {
+
+    enum class GPUFrontFace
+    {
         Clockwise,
         CounterClockwise
     };
 
-    enum class GPUColorFormat {
+    enum class GPUColorFormat
+    {
         Unknown = 0,
         BGRA8_SRGB,
         RG32_Float,
@@ -61,7 +72,8 @@ namespace Cocoa::Graphics {
         RGBA8_Unorm
     };
 
-    enum class GPUDepthStencilFormat {
+    enum class GPUDepthStencilFormat
+    {
         Unknown = 0,
         DepthFloat32_NoStencil,
         DepthUnorm16_NoStencil,
@@ -70,13 +82,15 @@ namespace Cocoa::Graphics {
         DepthUnorm16_StencilUint8
     };
 
-    enum class GPUTextureDimension {
+    enum class GPUTextureDimension
+    {
         One,
         Two,
         Three
     };
 
-    enum class GPUTextureLayout {
+    enum class GPUTextureLayout
+    {
         Unknown = 0,
         General,
         ColorAttachment,
@@ -88,38 +102,44 @@ namespace Cocoa::Graphics {
         Present
     };
 
-    enum class GPUTextureViewType {
+    enum class GPUTextureViewType
+    {
         OneDimensional,
         TwoDimensional,
         ThreeDimensional,
         Cube
     };
 
-    enum class GPUFilter {
+    enum class GPUFilter
+    {
         Linear,
         Nearest
     };
 
-    enum class GPUMipmapMode {
+    enum class GPUMipmapMode
+    {
         Linear,
         Nearest
     };
 
-    enum class GPUWrappingMode {
+    enum class GPUWrappingMode
+    {
         Repeat,
         ClampToEdge,
         ClampToBorder,
         MirroredRepeat
     };
 
-    enum class GPUMemoryAccess {
+    enum class GPUMemoryAccess
+    {
         CPUOnly,
         CPUToGPU,
         GPUToCPU,
         GPUOnly
     };
 
-    enum class GPUCompareOp {
+    enum class GPUCompareOp
+    {
         Never,
         Less,
         Equal,
@@ -130,7 +150,8 @@ namespace Cocoa::Graphics {
         Always
     };
 
-    enum class GPUStencilOp {
+    enum class GPUStencilOp
+    {
         Keep,
         Zero,
         Replace,

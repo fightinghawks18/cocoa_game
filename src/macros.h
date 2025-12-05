@@ -20,7 +20,12 @@
 #endif
 
 #define PANIC(str, ...) \
+    do { \
         PUSH_ERR(str __VA_OPT__(,) __VA_ARGS__); \
         fprintf(stderr, "Cocoa hit an unrecoverable exception!\n"); \
         fprintf(stderr, str "\n" __VA_OPT__(,) __VA_ARGS__); \
-        throw std::runtime_error("Cocoa hit an unrecoverable exception!");
+        throw std::runtime_error("Cocoa hit an unrecoverable exception!"); \
+    } while ( 0 )
+
+#define THROW_IF_FAILED(cond, ...) \
+    if (cond) PANIC( __VA_ARGS__ )

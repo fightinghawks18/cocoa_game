@@ -4,65 +4,91 @@
 #include "../utils/types.h"
 #include "../utils/handles.h"
 
-namespace Cocoa::Graphics {
-    class GFXEncoder;
-    class GFXDevice;
-    struct GFXEncoderImpl {
-        virtual ~GFXEncoderImpl() = default;
-        virtual void StartRenderPass(const GPUPassDesc& renderPassDescriptor) = 0;
-        virtual void SetRenderPipeline(const GFXRenderPipelineHandle& renderPipeline) = 0;
-        virtual void SetOutputTransform(const OutputTransform& outputTransform) = 0;
-        virtual void SetRenderArea(const RenderArea& renderArea) = 0;
-        virtual void SetVertexBuffer(const GPUBufferHandle& vertexBuffer) = 0;
-        virtual void SetIndexBuffer(const GPUBufferHandle& indexBuffer) = 0;
-        virtual void SetBindGroup(const GPUBindGroupHandle& bindGroup) = 0;
+namespace Cocoa::Graphics
+{
+    class RenderEncoder;
+    class RenderDevice;
+
+    struct RenderEncoderImpl
+    {
+        virtual ~RenderEncoderImpl() = default;
+
+        virtual void StartRenderPass( const GPUPassDesc& renderPassDescriptor ) = 0;
+
+        virtual void SetRenderPipeline( const GFXRenderPipelineHandle& renderPipeline ) = 0;
+
+        virtual void SetOutputTransform( const OutputTransform& outputTransform ) = 0;
+
+        virtual void SetRenderArea( const RenderArea& renderArea ) = 0;
+
+        virtual void SetVertexBuffer( const GPUBufferHandle& vertexBuffer ) = 0;
+
+        virtual void SetIndexBuffer( const GPUBufferHandle& indexBuffer ) = 0;
+
+        virtual void SetBindGroup( const GPUBindGroupHandle& bindGroup ) = 0;
+
         virtual void EndRenderPass() = 0;
+
         virtual void Stop() = 0;
     };
 
-    class GFXEncoder {
-    public:
-        GFXEncoder(std::unique_ptr<GFXEncoderImpl> impl) : _impl(std::move(impl)) {}
-        ~GFXEncoder();
-        
-        void StartRenderPass(const GPUPassDesc& renderPassDescriptor) {
-            _impl->StartRenderPass(renderPassDescriptor);
-        }
+    class RenderEncoder
+    {
+        public:
+            RenderEncoder( std::unique_ptr<RenderEncoderImpl> impl ) : _impl( std::move( impl ) )
+            {
+            }
 
-        void SetRenderPipeline(const GFXRenderPipelineHandle& renderPipeline) {
-            _impl->SetRenderPipeline(renderPipeline);
-        }
+            ~RenderEncoder();
 
-        void SetOutputTransform(const OutputTransform& outputTransform) {
-            _impl->SetOutputTransform(outputTransform);
-        }
+            void StartRenderPass( const GPUPassDesc& renderPassDescriptor )
+            {
+                _impl->StartRenderPass( renderPassDescriptor );
+            }
 
-        void SetRenderArea(const RenderArea& renderArea) {
-            _impl->SetRenderArea(renderArea);
-        }
+            void SetRenderPipeline( const GFXRenderPipelineHandle& renderPipeline )
+            {
+                _impl->SetRenderPipeline( renderPipeline );
+            }
 
-        void SetVertexBuffer(const GPUBufferHandle& vertexBuffer) {
-            _impl->SetVertexBuffer(vertexBuffer);
-        }
+            void SetOutputTransform( const OutputTransform& outputTransform )
+            {
+                _impl->SetOutputTransform( outputTransform );
+            }
 
-        void SetIndexBuffer(const GPUBufferHandle& indexBuffer) {
-            _impl->SetIndexBuffer(indexBuffer);
-        }
+            void SetRenderArea( const RenderArea& renderArea )
+            {
+                _impl->SetRenderArea( renderArea );
+            }
 
-        void SetBindGroup(const GPUBindGroupHandle& bindGroup) {
-            _impl->SetBindGroup(bindGroup);
-        }
+            void SetVertexBuffer( const GPUBufferHandle& vertexBuffer )
+            {
+                _impl->SetVertexBuffer( vertexBuffer );
+            }
 
-        void EndRenderPass() {
-            _impl->EndRenderPass();
-        }
+            void SetIndexBuffer( const GPUBufferHandle& indexBuffer )
+            {
+                _impl->SetIndexBuffer( indexBuffer );
+            }
 
-        void Stop() {
-            _impl->Stop();
-        }
+            void SetBindGroup( const GPUBindGroupHandle& bindGroup )
+            {
+                _impl->SetBindGroup( bindGroup );
+            }
 
-        [[nodiscard]] GFXEncoderImpl* GetImpl() { return _impl.get(); }
-    private:
-        std::unique_ptr<GFXEncoderImpl> _impl;
+            void EndRenderPass()
+            {
+                _impl->EndRenderPass();
+            }
+
+            void Stop()
+            {
+                _impl->Stop();
+            }
+
+            [[nodiscard]] RenderEncoderImpl* GetImpl() { return _impl.get(); }
+
+        private:
+            std::unique_ptr<RenderEncoderImpl> _impl;
     };
 }
