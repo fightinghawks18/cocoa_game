@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <vector>
 #include "../../common.h"
 
@@ -13,8 +14,9 @@ namespace Cocoa::Graphics {
 
     template <typename T>
     struct ResourceSlot {
+        ResourceSlot(uint64_t id) { this->id = id; }
         bool active = false;
-        T resource;
+        std::optional<T> resource;
         uint64_t id;
     };
 
@@ -26,7 +28,7 @@ namespace Cocoa::Graphics {
     template <typename T>
     class GFXResourceManager : public IGFXResourceManager {
     public:
-        GFXResourceManager(usize poolSize) {
+        GFXResourceManager(usize poolSize = 1000) {
             _slots.reserve(poolSize);
         }
         ~GFXResourceManager() = default;
@@ -36,16 +38,15 @@ namespace Cocoa::Graphics {
             usize index;
             if (_freedList.empty()) {
                 index = _slots.size();
-                _slots.push_back({
-                    .id = CreateHandleID(0, index)
-                });
+                auto id = CreateHandleID(0, index);
+                _slots.emplace_back(id);
             } else {
                 index = _freedList.back();
                 _freedList.pop_back();
             }
 
             ResourceSlot<T>& slot = _slots[index];
-            new (&slot.resource) T(std::forward<Args>(args)...);
+            slot.resource.emplace(std::forward<Args>(args)...);
             slot.active = true;
             return {slot.id};
         }
@@ -57,7 +58,7 @@ namespace Cocoa::Graphics {
             }
 
             ResourceSlot<T>& slot = _slots[GetHandleIndex(handle.id)];
-            slot.resource.~T();
+            slot.resource.reset();
             slot.active = false;
 
             auto newGen = GetHandleGeneration(slot.id) + 1;

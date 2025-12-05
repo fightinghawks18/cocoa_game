@@ -8,7 +8,6 @@ namespace Cocoa::Graphics {
     class GFXEncoder;
     class GFXDevice;
     struct GFXEncoderImpl {
-        GFXEncoderImpl(GFXDevice& device) : _device(device) {}
         virtual ~GFXEncoderImpl() = default;
         virtual void StartRenderPass(const GPUPassDesc& renderPassDescriptor) = 0;
         virtual void SetRenderPipeline(const GFXRenderPipelineHandle& renderPipeline) = 0;
@@ -19,8 +18,6 @@ namespace Cocoa::Graphics {
         virtual void SetBindGroup(const GPUBindGroupHandle& bindGroup) = 0;
         virtual void EndRenderPass() = 0;
         virtual void Stop() = 0;
-    protected:
-        GFXDevice& _device;
     };
 
     class GFXEncoder {

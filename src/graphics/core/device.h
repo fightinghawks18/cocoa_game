@@ -39,17 +39,53 @@ namespace Cocoa::Graphics {
         virtual GFXEncoder Encode(GFXEncoderDesc encoderDesc) = 0;
         virtual void EndEncoding(GFXEncoder& encoder) = 0;
         virtual void EncodeImmediateCommands(EncodeImmediateFun encodeFun, GFXEncoderDesc encoderDesc) = 0;
+    protected:
+        std::unordered_map<std::type_index, std::unique_ptr<IGFXResourceManager>> _resourceManagers;
+
+        template <typename T, typename DescType>
+        Handle* CreateResource(const DescType& desc) {
+            GFXResourceManager<T>* manager = GetManager<T>();
+            if (!manager) return nullptr;
+            return manager->Create(desc);
+        }
+
+        template <typename T>
+        void DestroyResource(Handle& handle) {
+            GFXResourceManager<T>* manager = GetManager<T>();
+            if (!manager) return;
+            return manager->Destroy(handle);
+        }
+
+        template <typename ResType, typename T>
+        [[nodiscard]] ResType* ResolveResource(Handle& handle) {
+            GFXResourceManager<T>* manager = GetManager<T>();
+            if (!manager) return nullptr;
+            return manager->Get(handle);
+        }
+
+        template <typename T>
+        void AddManager() {
+            const auto& typeId = typeid(T);
+            if (_resourceManagers.contains(typeId)) return;
+            _resourceManagers[typeId] = std::make_unique<GFXResourceManager<T>>();
+        }
+
+        template <typename T>
+        [[nodiscard]] GFXResourceManager<T>* GetManager() {
+            const auto& typeId = typeid(T);
+            if (!_resourceManagers.contains(typeId)) return nullptr;
+            return static_cast<GFXResourceManager<T>*>(_resourceManagers[typeId].get());
+        }
     };
 
     class GFXDevice {
     public:
-        GFXDevice(std::unique_ptr<GFXDeviceImpl> impl) : _impl(std::move(impl)) {
+        explicit GFXDevice(std::unique_ptr<GFXDeviceImpl> impl) : _impl(std::move(impl)) {
             _impl->RegisterResources(*this);
         }
 
         ~GFXDevice() {
             _impl.reset();
-            _resourceManagers.clear();
         }
 
         GFXWindowHandle ConnectWindow(const GFXWindowDesc& desc) {
@@ -147,42 +183,6 @@ namespace Cocoa::Graphics {
         [[nodiscard]] GFXDeviceImpl* GetImpl() { return _impl.get(); }
     private:
         std::unique_ptr<GFXDeviceImpl> _impl;
-        std::unordered_map<std::type_index, std::unique_ptr<IGFXResourceManager>> _resourceManagers;
-
-        template <typename T, typename DescType>
-        Handle* CreateResource(const DescType& desc) {
-            GFXResourceManager<T>* manager = GetManager<T>();
-            if (!manager) return nullptr;
-            return manager->Create(desc);
-        }
-
-        template <typename T>
-        void DestroyResource(Handle& handle) {
-            GFXResourceManager<T>* manager = GetManager<T>();
-            if (!manager) return;
-            return manager->Destroy(handle);
-        }
-        
-        template <typename ResType, typename T>
-        [[nodiscard]] ResType* ResolveResource(Handle& handle) {
-            GFXResourceManager<T>* manager = GetManager<T>();
-            if (!manager) return nullptr;
-            return manager->Get(handle);
-        }
-
-        template <typename T>
-        void AddManager() {
-            const auto& typeId = typeid(T);
-            if (_resourceManagers.contains(typeId)) return;
-            _resourceManagers[typeId] = std::make_unique<T>();
-        }
-
-        template <typename T>
-        [[nodiscard]] GFXResourceManager<T>* GetManager() {
-            const auto& typeId = typeid(T);
-            if (!_resourceManagers.contains(typeId)) return nullptr;
-            return static_cast<GFXResourceManager<T>*>(_resourceManagers[typeId].get());
-        }
 
         friend struct GFXDeviceImpl;
     };
