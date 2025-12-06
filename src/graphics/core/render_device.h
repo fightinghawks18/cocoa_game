@@ -61,16 +61,38 @@ namespace Cocoa::Graphics
 
         virtual void DestroyShaderModule( GFXShaderModuleHandle& handle ) = 0;
 
-        virtual RenderEncoder Encode( RenderEncoderDesc encoderDesc ) = 0;
+        virtual void* GetWindowImpl( RenderWindowHandle& handle ) = 0;
+
+        virtual void* GetBufferImpl( GPUBufferHandle& handle ) = 0;
+
+        virtual void* GetTextureImpl( GPUTextureHandle& handle ) = 0;
+
+        virtual void* GetTextureViewImpl( GPUTextureViewHandle& handle ) = 0;
+
+        virtual void* GetSamplerImpl( GPUSamplerHandle& handle ) = 0;
+
+        virtual void* GetBindGroupImpl( GPUBindGroupHandle& handle ) = 0;
+
+        virtual void* GetBindGroupLayoutImpl( GPUBindGroupLayoutHandle& handle ) = 0;
+
+        virtual void* GetRenderPipelineImpl( GFXRenderPipelineHandle& handle ) = 0;
+
+        virtual void* GetPipelineLayoutImpl( GFXPipelineLayoutHandle& handle ) = 0;
+
+        virtual void* GetShaderModuleImpl( GFXShaderModuleHandle& handle ) = 0;
+
+        virtual void WaitForIdle() = 0;
+
+        virtual RenderEncoder Encode( const RenderEncoderDesc& encoderDesc ) = 0;
 
         virtual void EndEncoding( RenderEncoder& encoder ) = 0;
 
-        virtual void EncodeImmediateCommands( EncodeImmediateFun encodeFun, RenderEncoderDesc encoderDesc ) = 0;
+        virtual void EncodeImmediateCommands( EncodeImmediateFun encodeFun, const RenderEncoderDesc& encoderDesc ) = 0;
 
         protected:
-            std::unordered_map<std::type_index ,std::unique_ptr<IResourceManager>> _resourceManagers;
+            std::unordered_map<std::type_index, std::unique_ptr<IResourceManager>> _resourceManagers;
 
-            template<typename T , typename DescType>
+            template<typename T, typename DescType>
             Handle* CreateResource( const DescType& desc )
             {
                 ResourceManager<T>* manager = GetManager<T>();
@@ -86,8 +108,8 @@ namespace Cocoa::Graphics
                 return manager->Destroy( handle );
             }
 
-            template<typename ResType , typename T>
-            [[nodiscard]] ResType* ResolveResource( Handle& handle )
+            template<typename T>
+            [[nodiscard]] T* ResolveResource( Handle& handle )
             {
                 ResourceManager<T>* manager = GetManager<T>();
                 if ( !manager ) return nullptr;
@@ -224,7 +246,12 @@ namespace Cocoa::Graphics
                 _impl->DestroyShaderModule( handle );
             }
 
-            RenderEncoder Encode( RenderEncoderDesc encoderDesc )
+            void WaitForIdle()
+            {
+                _impl->WaitForIdle();
+            }
+
+            [[nodiscard]] RenderEncoder Encode( const RenderEncoderDesc& encoderDesc ) const
             {
                 return _impl->Encode( encoderDesc );
             }
@@ -234,7 +261,7 @@ namespace Cocoa::Graphics
                 _impl->EndEncoding( encoder );
             }
 
-            void EncodeImmediateCommands( EncodeImmediateFun encodeFun, RenderEncoderDesc encoderDesc )
+            void EncodeImmediateCommands( const EncodeImmediateFun& encodeFun, const RenderEncoderDesc& encoderDesc )
             {
                 _impl->EncodeImmediateCommands( encodeFun , encoderDesc );
             }

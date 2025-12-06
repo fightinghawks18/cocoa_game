@@ -19,16 +19,21 @@ int main()
         PANIC( "Failed to start SDL3" );
     }
 
-    SDL_Window* window = SDL_CreateWindow( "Cocoa" , 800 , 600 , SDL_WINDOW_VULKAN );
+    SDL_Window* window = SDL_CreateWindow(  "Cocoa" , 800 , 600 , 0 );
 
-    auto directX12Impl = std::make_unique<Cocoa::D3D12::RenderDeviceImpl>();
-    const auto renderDevice = std::make_unique<Cocoa::Graphics::RenderDevice>( std::move(directX12Impl) );
-    const auto renderWindow = renderDevice->ConnectWindow( {
+    Cocoa::Graphics::RenderDeviceDesc deviceDesc = {
+        .desiredQueues = {
+            Cocoa::Graphics::GPUQueueType::Graphics
+        }
+    };
+    auto directX12Impl = std::make_unique<Cocoa::D3D12::RenderDeviceImpl>( deviceDesc );
+    auto renderDevice = std::make_unique<Cocoa::Graphics::RenderDevice>( std::move(directX12Impl) );
+    auto renderWindow = renderDevice->ConnectWindow( {
         .window = window
     } );
 
     // Rich presence (for fun)
-    Cocoa::Tools::RichPresenceDesc rpcDescriptor = {
+    const Cocoa::Tools::RichPresenceDesc rpcDescriptor = {
         .appID = "1444737693090316409"
     };
     Cocoa::Tools::RichPresence rpc( rpcDescriptor );
@@ -50,9 +55,21 @@ int main()
 
         // Update RPC
         rpc.Update();
+
+        Cocoa::Graphics::RenderEncoderDesc encoderDesc = {
+            .swapChain = &renderWindow ,
+            .submitQueue = Cocoa::Graphics::GPUQueueType::Graphics
+        };
+
+        auto encoder = renderDevice->Encode( encoderDesc );
+        encoder.StartRenderPass( { .renderArea = {{0, 0}, {1, 1}} } );
+        encoder.EndRenderPass();
+        renderDevice->EndEncoding( encoder );
+
     }
 
-    std::cout << "Hello World!" << std::endl;
+    renderDevice->WaitForIdle();
+    renderDevice.reset();
     SDL_Quit();
     return 0;
 }

@@ -3,15 +3,19 @@
 #include <optional>
 #include <vector>
 #include "../../common.h"
+#include "../../macros.h"
 
 namespace Cocoa::Graphics
 {
     struct Handle
     {
-        uint64_t id = UINT64_MAX;
+        uint64_t id = u64Max;
 
-        [[nodiscard]] bool IsValid() const { return id != UINT64_MAX; }
-        void Invalidate() { id = UINT64_MAX; }
+        Handle() : id( 0 ) {}
+        explicit Handle( const u64 id ) : id( id ) {}
+
+        [[nodiscard]] bool IsValid() const { return id != u64Max; }
+        void Invalidate() { id = u64Max; }
     };
 
     template<typename T>
@@ -58,7 +62,7 @@ namespace Cocoa::Graphics
                 ResourceSlot<T>& slot = _slots[ index ];
                 slot.resource.emplace( std::forward<Args>( args ) ... );
                 slot.active = true;
-                return { slot.id };
+                return Handle( slot.id );
             }
 
             void Destroy( Handle& handle )
@@ -99,7 +103,7 @@ namespace Cocoa::Graphics
                 if ( !handle.IsValid() ) return false;
                 auto idx = GetHandleIndex( handle.id );
                 if ( idx >= _slots.size() ) return false;
-                return _slots[ idx ].id != handle.id;
+                return _slots[ idx ].id == handle.id;
             }
 
             static u64 CreateHandleID( const u32 generation, const u32 index )

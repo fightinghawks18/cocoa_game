@@ -28,6 +28,8 @@ add_executable(Cocoa
 
         src/directX12/core/render_device_impl.cpp
         src/directX12/core/swapchain.cpp
+        src/directX12/core/encoder_impl.cpp
+        src/directX12/core/encoder_impl.h
 )
 
 target_include_directories(Cocoa

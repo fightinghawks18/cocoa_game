@@ -35,11 +35,11 @@ namespace Cocoa::Graphics
     class RenderEncoder
     {
         public:
-            RenderEncoder( std::unique_ptr<RenderEncoderImpl> impl ) : _impl( std::move( impl ) )
+            explicit RenderEncoder( std::unique_ptr<RenderEncoderImpl> impl ) : _impl( std::move( impl ) )
             {
             }
 
-            ~RenderEncoder();
+            ~RenderEncoder() = default;
 
             void StartRenderPass( const GPUPassDesc& renderPassDescriptor )
             {

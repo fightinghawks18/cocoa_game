@@ -1,5 +1,7 @@
 #pragma once
 
+#undef small
+
 #include <string>
 #include <discord_rpc.h>
 

@@ -55,12 +55,34 @@ namespace Cocoa::D3D12 {
 
             void DestroyShaderModule( Graphics::GFXShaderModuleHandle& handle ) override;
 
-            Graphics::RenderEncoder Encode( Graphics::RenderEncoderDesc encoderDesc ) override;
+            void* GetWindowImpl( Graphics::RenderWindowHandle& handle ) override;
+
+            void* GetBufferImpl( Graphics::GPUBufferHandle& handle ) override;
+
+            void* GetTextureImpl( Graphics::GPUTextureHandle& handle ) override;
+
+            void* GetTextureViewImpl( Graphics::GPUTextureViewHandle& handle ) override;
+
+            void* GetSamplerImpl( Graphics::GPUSamplerHandle& handle ) override;
+
+            void* GetBindGroupImpl( Graphics::GPUBindGroupHandle& handle ) override;
+
+            void* GetBindGroupLayoutImpl( Graphics::GPUBindGroupLayoutHandle& handle ) override;
+
+            void* GetRenderPipelineImpl( Graphics::GFXRenderPipelineHandle& handle ) override;
+
+            void* GetPipelineLayoutImpl( Graphics::GFXPipelineLayoutHandle& handle ) override;
+
+            void* GetShaderModuleImpl( Graphics::GFXShaderModuleHandle& handle ) override;
+
+            void WaitForIdle() override;
+
+            Graphics::RenderEncoder Encode( const Graphics::RenderEncoderDesc& encoderDesc ) override;
 
             void EndEncoding( Graphics::RenderEncoder& encoder ) override;
 
             void EncodeImmediateCommands( Graphics::EncodeImmediateFun encodeFun,
-                                          Graphics::RenderEncoderDesc encoderDesc ) override;
+                                          const Graphics::RenderEncoderDesc& encoderDesc ) override;
 
             [[nodiscard]] ID3D12Device* GetD3D12Device() const { return _device.Get(); }
             [[nodiscard]] IDXGIFactory* GetDXGIFactory() const { return _dxgiFactory.Get(); }
@@ -74,12 +96,16 @@ namespace Cocoa::D3D12 {
             ComPtr<IDXGIFactory4> _dxgiFactory;
             std::unordered_map<Graphics::GPUQueueType, ComPtr<ID3D12CommandQueue>> _queues;
             std::vector<ComPtr<ID3D12CommandAllocator>> _commandAllocators;
+            ComPtr<ID3D12GraphicsCommandList> _list;
+            u32 _frameIndex = 0;
 
             void CreateDXGIFactory();
             void FindDXGIAdapter();
             void CreateD3D12Device();
             void CreateCommandQueues( const Graphics::RenderDeviceDesc& desc );
             void CreateCommandAllocators();
+            void CreateCommandList();
+            void DestroyCommandList();
             void DestroyCommandAllocators();
             void DestroyCommandQueues();
             void DestroyD3D12Device();
