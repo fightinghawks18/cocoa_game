@@ -28,7 +28,7 @@ namespace Cocoa::Graphics
 
     struct RenderEncoderDesc
     {
-        RenderWindowHandle* swapChain;
+        RenderWindowHandle* swapChain = nullptr;
         GPUQueueType submitQueue = GPUQueueType::Graphics;
     };
 

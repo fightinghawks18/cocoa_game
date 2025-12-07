@@ -5,13 +5,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
-#include(cmake/shaders.cmake)
-#include(cmake/content.cmake)
+include(cmake/shaders.cmake)
+include(cmake/content.cmake)
 
 find_package(SDL3 CONFIG REQUIRED)
-find_package(directx-headers CONFIG REQUIRED)
-find_package(D3D12MemoryAllocator CONFIG REQUIRED)
-find_package(directx-dxc CONFIG REQUIRED)
+find_package(Vulkan REQUIRED)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 
 find_library(DISCORD_RPC_LIB
@@ -23,13 +22,9 @@ add_executable(Cocoa
         src/main.cpp
 
         src/tools/rich_presence.cpp
-        src/tools/stb.h
         src/tools/stb.cpp
 
-        src/directX12/core/render_device_impl.cpp
-        src/directX12/core/swapchain.cpp
-        src/directX12/core/encoder_impl.cpp
-        src/directX12/core/encoder_impl.h
+        src/vulkan/core/render_device_impl.cpp
 )
 
 target_include_directories(Cocoa
@@ -38,9 +33,8 @@ target_include_directories(Cocoa
 
 target_link_libraries(Cocoa
         PRIVATE SDL3::SDL3
-        PRIVATE Microsoft::DirectX-Headers
-        PRIVATE GPUOpen::D3D12MemoryAllocator
-        PRIVATE Microsoft::DirectXShaderCompiler
+        PRIVATE Vulkan::Vulkan
+        PRIVATE GPUOpen::VulkanMemoryAllocator
         PRIVATE ${DISCORD_RPC_LIB}
 )
 
@@ -54,8 +48,8 @@ elseif (WIN32)
   )
 endif ()
 
-#compile_glsl_dir_to_spirv(shaders shaders)
-#copy_content_directory(content)
+compile_glsl_dir_to_spirv(shaders shaders)
+copy_content_directory(content)
 
 if (CMAKE_EXPORT_COMPILE_COMMANDS)
   add_custom_target(Copy_Compiled_Commands ALL

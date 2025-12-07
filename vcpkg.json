@@ -2,10 +2,11 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
     "builtin-baseline": "74e6536215718009aae747d86d84b78376bf9e09",
     "dependencies": [
-        "sdl3",
-        "directx-headers",
-        "directx-dxc",
-        "d3d12-memory-allocator",
+        {
+            "name": "sdl3",
+            "features": [ "vulkan" ]
+        },
+        "vulkan-memory-allocator",
         "discord-rpc",
         "stb"
     ]

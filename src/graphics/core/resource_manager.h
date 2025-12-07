@@ -37,6 +37,16 @@ namespace Cocoa::Graphics
     class ResourceManager final : public IResourceManager
     {
         public:
+            static u32 GetHandleGeneration( const u64 id )
+            {
+                return static_cast<u32>( id >> 32 );
+            }
+
+            static u32 GetHandleIndex( const u64 id )
+            {
+                return static_cast<u32>( id );
+            }
+
             explicit ResourceManager( usize poolSize = 1000 )
             {
                 _slots.reserve( poolSize );
@@ -93,7 +103,6 @@ namespace Cocoa::Graphics
                 ResourceSlot<T>& slot = _slots[ GetHandleIndex( handle.id ) ];
                 return &*slot.resource;
             }
-
         private:
             std::vector<ResourceSlot<T>> _slots;
             std::vector<size_t> _freedList;
@@ -109,16 +118,6 @@ namespace Cocoa::Graphics
             static u64 CreateHandleID( const u32 generation, const u32 index )
             {
                 return static_cast<u64>( generation ) << 32 | index;
-            }
-
-            static u32 GetHandleGeneration( const u64 id )
-            {
-                return static_cast<u32>( id >> 32 );
-            }
-
-            static u32 GetHandleIndex( const u64 id )
-            {
-                return static_cast<u32>( id );
             }
     };
 }

@@ -4,7 +4,7 @@
 
 #include <SDL3/SDL.h>
 
-#include "directX12/core/render_device_impl.h"
+#include "directX12/core/render_device.h"
 #include "graphics/core/render_device.h"
 #include "tools/rich_presence.h"
 
@@ -19,15 +19,16 @@ int main()
         PANIC( "Failed to start SDL3" );
     }
 
-    SDL_Window* window = SDL_CreateWindow(  "Cocoa" , 800 , 600 , 0 );
+    SDL_Window* window = SDL_CreateWindow(  "Cocoa" , 800 , 600 , SDL_WINDOW_RESIZABLE );
 
     Cocoa::Graphics::RenderDeviceDesc deviceDesc = {
         .desiredQueues = {
-            Cocoa::Graphics::GPUQueueType::Graphics
+            Cocoa::Graphics::GPUQueueType::Graphics,
+            Cocoa::Graphics::GPUQueueType::Transfer
         }
     };
-    auto directX12Impl = std::make_unique<Cocoa::D3D12::RenderDeviceImpl>( deviceDesc );
-    auto renderDevice = std::make_unique<Cocoa::Graphics::RenderDevice>( std::move(directX12Impl) );
+    auto directX12Impl = std::make_unique<Cocoa::D3D12::RenderDevice>( deviceDesc );
+    auto renderDevice = std::unique_ptr<>(  );
     auto renderWindow = renderDevice->ConnectWindow( {
         .window = window
     } );
@@ -37,7 +38,7 @@ int main()
         .appID = "1444737693090316409"
     };
     Cocoa::Tools::RichPresence rpc( rpcDescriptor );
-    rpc.SetState( "Watching a plane" );
+    rpc.SetState( "Watching the void" );
     rpc.StartTimestamp();
 
     bool gameRun = true;
