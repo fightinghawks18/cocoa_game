@@ -14,9 +14,9 @@ namespace Cocoa::Debug {
     class Log
     {
       public:
-        template <typename... A> static inline void Push(LogType type, const std::string& message, A&&... args)
+        template <typename... A> static void Push(const LogType type, const std::string& message, A&&... args)
         {
-            FILE* stream;
+            FILE* stream = nullptr;
             switch (type) {
             case LogType::Info:    stream = stdout; break;
             case LogType::Warning:

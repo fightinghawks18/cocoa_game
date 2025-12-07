@@ -7,7 +7,7 @@
 #include "debug/log.h"
 #define PUSH_INFO(str, ...) Cocoa::Debug::Log::Push(Cocoa::Debug::LogType::Info, str __VA_OPT__(, ) __VA_ARGS__)
 
-#define PUSH_WARN(str, ...) Cocoa::Debug::Log::Push(Cocoa::Debug::LogType::Warn, str __VA_OPT__(, ) __VA_ARGS__)
+#define PUSH_WARN(str, ...) Cocoa::Debug::Log::Push(Cocoa::Debug::LogType::Warning, str __VA_OPT__(, ) __VA_ARGS__)
 
 #define PUSH_ERR(str, ...) Cocoa::Debug::Log::Push(Cocoa::Debug::LogType::Error, str __VA_OPT__(, ) __VA_ARGS__)
 #else

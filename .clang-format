@@ -2,6 +2,8 @@ BasedOnStyle: LLVM
 ColumnLimit: 120
 
 # Alignment
+Cpp11BracedListStyle: true
+AlignAfterOpenBracket: BlockIndent
 AllowShortCaseLabelsOnASingleLine: true
 AlignConsecutiveShortCaseStatements:
   Enabled: true

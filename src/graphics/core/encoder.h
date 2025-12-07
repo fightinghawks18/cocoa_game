@@ -33,4 +33,4 @@ namespace Cocoa::Graphics {
 
         template <typename T> [[nodiscard]] T* As() { return static_cast<T*>(this); }
     };
-} // namespace Cocoa::Graphics
+}

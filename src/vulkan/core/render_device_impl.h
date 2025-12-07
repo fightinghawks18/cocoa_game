@@ -69,16 +69,28 @@ namespace Cocoa::Vulkan {
         void EncodeImmediateCommands(Graphics::EncodeImmediateFun encodeFun,
                                      const Graphics::RenderEncoderDesc& encoderDesc) override;
 
+        [[nodiscard]] std::optional<GPUQueue> GetQueue(Graphics::GPUQueueType queueType);
+        [[nodiscard]] vk::Instance GetInstance() { return _instance.get(); }
+        [[nodiscard]] vk::PhysicalDevice GetGPU() const { return _gpu; }
+        [[nodiscard]] vk::Device GetDevice() { return _device.get(); }
+        [[nodiscard]] VmaAllocator GetAllocator() const { return _allocator; }
+        [[nodiscard]] vk::DescriptorPool GetDescriptorPool() { return _descriptorPool.get(); }
       private:
         vk::UniqueInstance _instance;
         vk::PhysicalDevice _gpu;
         vk::UniqueDevice _device;
         std::unordered_map<Graphics::GPUQueueType, GPUQueue> _queues;
-        VmaAllocator _allocator;
+        VmaAllocator _allocator{};
+        vk::UniqueCommandPool _commandPool;
+        std::vector<vk::UniqueCommandBuffer> _commandBuffers;
+        vk::UniqueFence _immediateFence;
+        vk::UniqueCommandBuffer _immediateCommandBuffer;
+        vk::UniqueDescriptorPool _descriptorPool;
+        uint32_t _frame = 0;
 
         void CreateInstance();
         void GetPhysicalDevice(const Graphics::RenderDeviceDesc& desc);
-        GPUQueue GetSupportedQueue(std::vector<vk::QueueFamilyProperties> queueFamilies, Graphics::GPUQueueType type);
+        static GPUQueue GetSupportedQueue(const std::vector<vk::QueueFamilyProperties>& queueFamilies, Graphics::GPUQueueType type);
         void DiscoverQueues(const Graphics::RenderDeviceDesc& desc);
         void CreateDevice();
         void CreateAllocator();

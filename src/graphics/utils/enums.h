@@ -160,4 +160,14 @@ namespace Cocoa::Graphics {
         IncrementAndWrap,
         DecrementAndWrap
     };
+
+    inline std::string GPUQueueTypeAsString(const GPUQueueType queueType)
+    {
+        switch (queueType) {
+        case GPUQueueType::Graphics: return "Graphics";
+        case GPUQueueType::Compute:  return "Compute";
+        case GPUQueueType::Transfer: return "Transfer";
+        default:                     return "Unknown";
+        }
+    }
 } // namespace Cocoa::Graphics
