@@ -4,11 +4,18 @@
 
 #pragma once
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wall"
+#pragma clang diagnostic ignored "-Weverything"
 #include <vma/vk_mem_alloc.h>
+#pragma clang diagnostic pop
+
 #include <vulkan/vulkan.hpp>
 
 #include "../../graphics/utils/enums.h"
 #include "../../graphics/utils/flags.h"
+
+#include <variant>
 
 namespace Cocoa::Vulkan {
     struct LayoutTransitionInfo
@@ -22,22 +29,31 @@ namespace Cocoa::Vulkan {
         switch (layout) {
         case vk::ImageLayout::eUndefined: return {vk::PipelineStageFlagBits2::eNone, vk::AccessFlagBits2::eNone};
         case vk::ImageLayout::eGeneral:
-            return {vk::PipelineStageFlagBits2::eAllCommands,
-                    vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite};
+            return {
+                vk::PipelineStageFlagBits2::eAllCommands,
+                vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite
+            };
         case vk::ImageLayout::eColorAttachmentOptimal:
-            return {vk::PipelineStageFlagBits2::eColorAttachmentOutput,
-                    vk::AccessFlagBits2::eColorAttachmentWrite | vk::AccessFlagBits2::eColorAttachmentRead};
+            return {
+                vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+                vk::AccessFlagBits2::eColorAttachmentWrite | vk::AccessFlagBits2::eColorAttachmentRead
+            };
         case vk::ImageLayout::eDepthStencilAttachmentOptimal:
-            return {vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-                    vk::AccessFlagBits2::eDepthStencilAttachmentRead |
-                        vk::AccessFlagBits2::eDepthStencilAttachmentWrite};
+            return {
+                vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
+                vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite
+            };
         case vk::ImageLayout::eDepthStencilReadOnlyOptimal:
-            return {vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-                    vk::AccessFlagBits2::eDepthStencilAttachmentRead};
+            return {
+                vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
+                vk::AccessFlagBits2::eDepthStencilAttachmentRead
+            };
         case vk::ImageLayout::eShaderReadOnlyOptimal:
-            return {vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader |
-                        vk::PipelineStageFlagBits2::eComputeShader,
-                    vk::AccessFlagBits2::eShaderRead};
+            return {
+                vk::PipelineStageFlagBits2::eVertexShader | vk::PipelineStageFlagBits2::eFragmentShader |
+                    vk::PipelineStageFlagBits2::eComputeShader,
+                vk::AccessFlagBits2::eShaderRead
+            };
         case vk::ImageLayout::eTransferSrcOptimal:
             return {vk::PipelineStageFlagBits2::eTransfer, vk::AccessFlagBits2::eTransferRead};
         case vk::ImageLayout::eTransferDstOptimal:
@@ -45,17 +61,16 @@ namespace Cocoa::Vulkan {
         case vk::ImageLayout::ePresentSrcKHR:
             return {vk::PipelineStageFlagBits2::eBottomOfPipe, vk::AccessFlagBits2::eNone};
         case vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal:
-            return {vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-                    vk::AccessFlagBits2::eDepthStencilAttachmentRead |
-                        vk::AccessFlagBits2::eDepthStencilAttachmentWrite};
-
         case vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal:
-            return {vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-                    vk::AccessFlagBits2::eDepthStencilAttachmentRead |
-                        vk::AccessFlagBits2::eDepthStencilAttachmentWrite};
+            return {
+                vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
+                vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite
+            };
         default:
-            return {vk::PipelineStageFlagBits2::eAllCommands,
-                    vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite};
+            return {
+                vk::PipelineStageFlagBits2::eAllCommands,
+                vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite
+            };
         }
     }
 
@@ -143,19 +158,19 @@ namespace Cocoa::Vulkan {
         }
     }
 
-    inline vk::ImageLayout GPUTextureLayoutToVk(const Graphics::GPUTextureLayout textureLayout)
+    inline vk::ImageLayout GPUTextureLayoutToVk(const Graphics::GPUTextureState textureLayout)
     {
         switch (textureLayout) {
-        case Graphics::GPUTextureLayout::Unknown:                return vk::ImageLayout::eUndefined;
-        case Graphics::GPUTextureLayout::General:                return vk::ImageLayout::eGeneral;
-        case Graphics::GPUTextureLayout::ColorAttachment:        return vk::ImageLayout::eColorAttachmentOptimal;
-        case Graphics::GPUTextureLayout::DepthStencilAttachment: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-        case Graphics::GPUTextureLayout::DepthStencilReadOnly:
+        case Graphics::GPUTextureState::Unknown:                return vk::ImageLayout::eUndefined;
+        case Graphics::GPUTextureState::General:                return vk::ImageLayout::eGeneral;
+        case Graphics::GPUTextureState::ColorAttachment:        return vk::ImageLayout::eColorAttachmentOptimal;
+        case Graphics::GPUTextureState::DepthStencilAttachment: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
+        case Graphics::GPUTextureState::DepthStencilReadOnly:
             return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
-        case Graphics::GPUTextureLayout::ShaderReadOnly: return vk::ImageLayout::eShaderReadOnlyOptimal;
-        case Graphics::GPUTextureLayout::Present:        return vk::ImageLayout::ePresentSrcKHR;
-        case Graphics::GPUTextureLayout::TransferDst:    return vk::ImageLayout::eTransferDstOptimal;
-        case Graphics::GPUTextureLayout::TransferSrc:    return vk::ImageLayout::eTransferSrcOptimal;
+        case Graphics::GPUTextureState::ShaderReadOnly: return vk::ImageLayout::eShaderReadOnlyOptimal;
+        case Graphics::GPUTextureState::Present:        return vk::ImageLayout::ePresentSrcKHR;
+        case Graphics::GPUTextureState::TransferDst:    return vk::ImageLayout::eTransferDstOptimal;
+        case Graphics::GPUTextureState::TransferSrc:    return vk::ImageLayout::eTransferSrcOptimal;
         default:                                         return vk::ImageLayout::eUndefined;
         }
     }
@@ -215,7 +230,7 @@ namespace Cocoa::Vulkan {
     {
         switch (frontFace) {
         case Graphics::GPUFrontFace::Clockwise:        return vk::FrontFace::eClockwise;
-        case Graphics::GPUFrontFace::CounterClockwise: return vk::FrontFace::eCounterClockwise;
+        case Graphics::GPUFrontFace::CounterClockwise:
         default:                                       return vk::FrontFace::eCounterClockwise;
         }
     }
@@ -274,6 +289,38 @@ namespace Cocoa::Vulkan {
         case Graphics::GPUStencilOp::DecrementAndWrap:  return vk::StencilOp::eDecrementAndWrap;
         default:                                        return vk::StencilOp::eKeep;
         }
+    }
+
+    inline bool IsDepthFormat(const Graphics::GPUDepthStencilFormat depthStencilFormat)
+    {
+        switch (depthStencilFormat) {
+        case Graphics::GPUDepthStencilFormat::DepthFloat32_NoStencil:
+        case Graphics::GPUDepthStencilFormat::DepthUnorm16_NoStencil: return true;
+        default:                                                      return false;
+        }
+    }
+
+    inline bool IsDepthStencilFormat(const Graphics::GPUDepthStencilFormat depthStencilFormat)
+    {
+        switch (depthStencilFormat) {
+        case Graphics::GPUDepthStencilFormat::DepthFloat32_StencilUint8:
+        case Graphics::GPUDepthStencilFormat::DepthUnorm16_StencilUint8: return true;
+        default:                                                         return false;
+        }
+    }
+
+    inline vk::ImageAspectFlags InferAspectMasks(
+        const std::variant<Graphics::GPUColorFormat, Graphics::GPUDepthStencilFormat>& format
+    )
+    {
+        if (std::holds_alternative<Graphics::GPUDepthStencilFormat>(format)) {
+            const auto depthStencilFormat = std::get<Graphics::GPUDepthStencilFormat>(format);
+            if (IsDepthStencilFormat(depthStencilFormat)) {
+                return vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil;
+            }
+            if (IsDepthFormat(depthStencilFormat)) return vk::ImageAspectFlagBits::eDepth;
+        }
+        return vk::ImageAspectFlagBits::eColor;
     }
 
     inline vk::BufferUsageFlags GPUBufferUsageToVk(const Graphics::GPUBufferUsage stage)

@@ -27,7 +27,6 @@ namespace Cocoa::Graphics {
 
     struct RenderEncoderDesc
     {
-        RenderWindowHandle* swapChain = nullptr;
         GPUQueueType submitQueue = GPUQueueType::Graphics;
     };
 
@@ -41,8 +40,7 @@ namespace Cocoa::Graphics {
 
     struct GPUColorPassDesc
     {
-        GPUTextureHandle texture;
-        u32 viewSlot = 0;
+        GPUTextureViewHandle* view;
         std::array<f32, 4> clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
         GPUPassLoadOp loadOp = GPUPassLoadOp::Clear;
         GPUPassStoreOp storeOp = GPUPassStoreOp::Store;
@@ -50,8 +48,7 @@ namespace Cocoa::Graphics {
 
     struct GPUDepthPassDesc
     {
-        GPUTextureHandle texture;
-        u32 viewSlot = 0;
+        GPUTextureViewHandle* view;
         f32 depth = 1.0f;
         u32 stencil = 0;
         bool useStencil = false;
@@ -184,7 +181,7 @@ namespace Cocoa::Graphics {
         GPUTextureUsage usage = GPUTextureUsage::Unknown;
         GPUMemoryAccess access = GPUMemoryAccess::CPUToGPU;
         std::variant<GPUColorFormat, GPUDepthStencilFormat> format;
-        GPUTextureLayout initialLayout = GPUTextureLayout::Unknown;
+        GPUTextureState initialLayout = GPUTextureState::Unknown;
         GPUSamplingCount samples = GPUSamplingCount::None;
         Scale3D scale = {};
         u32 levels = 1;

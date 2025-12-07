@@ -26,6 +26,14 @@ add_executable(Cocoa
 
         src/vulkan/core/render_device_impl.cpp
         src/vulkan/utils/common.cpp
+        src/vulkan/core/render_encoder_impl.cpp
+        src/vulkan/core/render_encoder_impl.h
+        src/vulkan/resources/texture.h
+        src/vulkan/resources/texture_view.h
+        src/vulkan/resources/buffer.h
+        src/vulkan/resources/pipeline.h
+        src/vulkan/resources/pipeline_layout.h
+        src/vulkan/resources/bind_group.h
 )
 
 target_include_directories(Cocoa

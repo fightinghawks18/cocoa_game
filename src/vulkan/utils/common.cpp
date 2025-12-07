@@ -3,8 +3,4 @@
 //
 
 #define VMA_IMPLEMENTATION
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wall"
-#pragma clang diagnostic ignored "-Weverything"
 #include "common.h"
-#pragma clang diagnostic pop

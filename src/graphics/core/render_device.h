@@ -6,7 +6,7 @@
 
 #include "../utils/descriptors.h"
 
-#include "encoder.h"
+#include "render_encoder.h"
 #include "resource_manager.h"
 
 namespace Cocoa::Graphics {

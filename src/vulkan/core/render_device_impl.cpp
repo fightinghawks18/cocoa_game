@@ -11,6 +11,13 @@
 namespace Cocoa::Vulkan {
     RenderDeviceImpl::RenderDeviceImpl(const Graphics::RenderDeviceDesc& desc)
     {
+        AddManager<Buffer>();
+        AddManager<Texture>();
+        AddManager<TextureView>();
+        AddManager<BindGroup>();
+        AddManager<Pipeline>();
+        AddManager<PipelineLayout>();
+
         CreateInstance();
         GetPhysicalDevice(desc);
         DiscoverQueues(desc);
@@ -70,23 +77,65 @@ namespace Cocoa::Vulkan {
 
     void RenderDeviceImpl::DisconnectWindow(Graphics::RenderWindowHandle& handle) {}
 
-    void RenderDeviceImpl::DestroyBuffer(Graphics::GPUBufferHandle& handle) {}
+    void RenderDeviceImpl::DestroyBuffer(Graphics::GPUBufferHandle& handle) { GetManager<Buffer>()->Destroy(handle); }
 
-    void RenderDeviceImpl::DestroyTexture(Graphics::GPUTextureHandle& handle) {}
+    void RenderDeviceImpl::DestroyTexture(Graphics::GPUTextureHandle& handle)
+    {
+        GetManager<Texture>()->Destroy(handle);
+    }
 
-    void RenderDeviceImpl::DestroyTextureView(Graphics::GPUTextureViewHandle& handle) {}
+    void RenderDeviceImpl::DestroyTextureView(Graphics::GPUTextureViewHandle& handle)
+    {
+        GetManager<TextureView>()->Destroy(handle);
+    }
 
     void RenderDeviceImpl::DestroySampler(Graphics::GPUSamplerHandle& handle) {}
 
-    void RenderDeviceImpl::DestroyBindGroup(Graphics::GPUBindGroupHandle& handle) {}
+    void RenderDeviceImpl::DestroyBindGroup(Graphics::GPUBindGroupHandle& handle)
+    {
+        GetManager<BindGroup>()->Destroy(handle);
+    }
 
     void RenderDeviceImpl::DestroyBindGroupLayout(Graphics::GPUBindGroupLayoutHandle& handle) {}
 
-    void RenderDeviceImpl::DestroyRenderPipeline(Graphics::GFXRenderPipelineHandle& handle) {}
+    void RenderDeviceImpl::DestroyRenderPipeline(Graphics::GFXRenderPipelineHandle& handle)
+    {
+        GetManager<Pipeline>()->Destroy(handle);
+    }
 
-    void RenderDeviceImpl::DestroyPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle) {}
+    void RenderDeviceImpl::DestroyPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle)
+    {
+        GetManager<PipelineLayout>()->Destroy(handle);
+    }
 
     void RenderDeviceImpl::DestroyShaderModule(Graphics::GFXShaderModuleHandle& handle) {}
+
+    Buffer* RenderDeviceImpl::GetBuffer(Graphics::GPUBufferHandle& handle) { return GetManager<Buffer>()->Get(handle); }
+
+    Texture* RenderDeviceImpl::GetTexture(Graphics::GPUTextureHandle& handle)
+    {
+        return GetManager<Texture>()->Get(handle);
+    }
+
+    TextureView* RenderDeviceImpl::GetTextureView(Graphics::GPUTextureViewHandle& handle)
+    {
+        return GetManager<TextureView>()->Get(handle);
+    }
+
+    BindGroup* RenderDeviceImpl::GetBindGroup(Graphics::GPUBindGroupHandle& handle)
+    {
+        return GetManager<BindGroup>()->Get(handle);
+    }
+
+    Pipeline* RenderDeviceImpl::GetPipeline(Graphics::GFXRenderPipelineHandle& handle)
+    {
+        return GetManager<Pipeline>()->Get(handle);
+    }
+
+    PipelineLayout* RenderDeviceImpl::GetPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle)
+    {
+        return GetManager<PipelineLayout>()->Get(handle);
+    }
 
     void RenderDeviceImpl::WaitForIdle() { _device->waitIdle(); }
 

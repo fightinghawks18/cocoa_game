@@ -5,6 +5,12 @@
 #pragma once
 
 #include "../../graphics/core/render_device.h"
+#include "../resources/bind_group.h"
+#include "../resources/buffer.h"
+#include "../resources/pipeline.h"
+#include "../resources/pipeline_layout.h"
+#include "../resources/texture.h"
+#include "../resources/texture_view.h"
 #include "../utils/common.h"
 
 namespace Cocoa::Vulkan {
@@ -59,6 +65,18 @@ namespace Cocoa::Vulkan {
         void DestroyPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle) override;
 
         void DestroyShaderModule(Graphics::GFXShaderModuleHandle& handle) override;
+
+        Buffer* GetBuffer(Graphics::GPUBufferHandle& handle);
+
+        Texture* GetTexture(Graphics::GPUTextureHandle& handle);
+
+        TextureView* GetTextureView(Graphics::GPUTextureViewHandle& handle);
+
+        BindGroup* GetBindGroup(Graphics::GPUBindGroupHandle& handle);
+
+        Pipeline* GetPipeline(Graphics::GFXRenderPipelineHandle& handle);
+
+        PipelineLayout* GetPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle);
 
         void WaitForIdle() override;
 

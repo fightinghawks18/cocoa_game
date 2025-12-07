@@ -88,7 +88,7 @@ namespace Cocoa::Graphics {
         Three
     };
 
-    enum class GPUTextureLayout
+    enum class GPUTextureState
     {
         Unknown = 0,
         General,
