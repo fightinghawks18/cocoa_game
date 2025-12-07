@@ -2,20 +2,17 @@
 
 #include <numbers>
 
-#include "vector3.h"
-#include "quaternion.h"
 #include "matrix4x4.h"
+#include "quaternion.h"
+#include "vector3.h"
 
 namespace Cocoa::Math {
-    inline float Radians(float deg) {
-        return deg * (std::numbers::pi / 180.0);
-    }
+    inline float Radians(float deg) { return deg * (std::numbers::pi / 180.0); }
 
-    inline float Degrees(float rad) {
-        return rad * (180.0 / std::numbers::pi);
-    }
+    inline float Degrees(float rad) { return rad * (180.0 / std::numbers::pi); }
 
-    inline Matrix4x4 CreateModelMatrix(Vector3 position, Quaternion rotation, Vector3 scale) {
+    inline Matrix4x4 CreateModelMatrix(Vector3 position, Quaternion rotation, Vector3 scale)
+    {
         Matrix4x4 scaleMatrix;
         scaleMatrix(0, 0) = scale.x;
         scaleMatrix(1, 1) = scale.y;
@@ -37,31 +34,33 @@ namespace Cocoa::Math {
         return translationMatrix * rotationMatrix * scaleMatrix;
     }
 
-    inline Matrix4x4 CreatePerspectiveMatrix(float fovY, float aspectRatio, float nearZ, float farZ) {
+    inline Matrix4x4 CreatePerspectiveMatrix(float fovY, float aspectRatio, float nearZ, float farZ)
+    {
         float tanHalfFov = tan(fovY / 2.0f);
 
         Matrix4x4 projectionMatrix;
-        projectionMatrix(0,0) = 1.0f / (aspectRatio * tanHalfFov);
-        projectionMatrix(1,1) = -1.0f / tanHalfFov;
-        projectionMatrix(2,2) = farZ / (nearZ - farZ);
-        projectionMatrix(2,3) = (farZ * nearZ) / (nearZ - farZ);
-        projectionMatrix(3,2) = -1.0f;
-        projectionMatrix(3,3) = 0.0f;
+        projectionMatrix(0, 0) = 1.0f / (aspectRatio * tanHalfFov);
+        projectionMatrix(1, 1) = -1.0f / tanHalfFov;
+        projectionMatrix(2, 2) = farZ / (nearZ - farZ);
+        projectionMatrix(2, 3) = (farZ * nearZ) / (nearZ - farZ);
+        projectionMatrix(3, 2) = -1.0f;
+        projectionMatrix(3, 3) = 0.0f;
 
         return projectionMatrix;
     }
 
-    inline Matrix4x4 CreateOrthographicMatrix(float left, float right, float bottom, float top, float nearZ, float farZ) {
+    inline Matrix4x4 CreateOrthographicMatrix(float left, float right, float bottom, float top, float nearZ, float farZ)
+    {
         Matrix4x4 orthographicMatrix;
-    
-        orthographicMatrix(0,0) = 2.0f / (right - left);
-        orthographicMatrix(1,1) = -2.0f / (top - bottom);
-        orthographicMatrix(2,2) = 1.0f / (nearZ - farZ);
-        
-        orthographicMatrix(0,3) = -(right + left) / (right - left);
-        orthographicMatrix(1,3) = -(top + bottom) / (top - bottom);
-        orthographicMatrix(2,3) = nearZ / (nearZ - farZ);
-        
+
+        orthographicMatrix(0, 0) = 2.0f / (right - left);
+        orthographicMatrix(1, 1) = -2.0f / (top - bottom);
+        orthographicMatrix(2, 2) = 1.0f / (nearZ - farZ);
+
+        orthographicMatrix(0, 3) = -(right + left) / (right - left);
+        orthographicMatrix(1, 3) = -(top + bottom) / (top - bottom);
+        orthographicMatrix(2, 3) = nearZ / (nearZ - farZ);
+
         return orthographicMatrix;
     }
-}
+} // namespace Cocoa::Math

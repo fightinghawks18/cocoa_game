@@ -4,112 +4,65 @@
 
 #include "render_device_impl.h"
 
-namespace Cocoa::Vulkan
-{
-    RenderDeviceImpl::RenderDeviceImpl(const Graphics::RenderDeviceDesc& desc)
+namespace Cocoa::Vulkan {
+    RenderDeviceImpl::RenderDeviceImpl(const Graphics::RenderDeviceDesc& desc) {}
+
+    RenderDeviceImpl::~RenderDeviceImpl() {}
+
+    Graphics::RenderWindowHandle RenderDeviceImpl::ConnectWindow(const Graphics::RenderWindowDesc& desc) {}
+
+    Graphics::GPUBufferHandle RenderDeviceImpl::CreateBuffer(const Graphics::GPUBufferDesc& desc) {}
+
+    Graphics::GPUTextureHandle RenderDeviceImpl::CreateTexture(const Graphics::GPUTextureDesc& desc) {}
+
+    Graphics::GPUTextureViewHandle RenderDeviceImpl::CreateTextureView(const Graphics::GPUTextureViewDesc& desc) {}
+
+    Graphics::GPUSamplerHandle RenderDeviceImpl::CreateSampler(const Graphics::GPUSamplerDesc& desc) {}
+
+    Graphics::GPUBindGroupHandle RenderDeviceImpl::CreateBindGroup(const Graphics::GPUBindGroupDesc& desc) {}
+
+    Graphics::GPUBindGroupLayoutHandle
+    RenderDeviceImpl::CreateBindGroupLayout(const Graphics::GPUBindGroupLayoutDesc& desc)
     {
     }
 
-    RenderDeviceImpl::~RenderDeviceImpl()
+    Graphics::GFXRenderPipelineHandle RenderDeviceImpl::CreateRenderPipeline(const Graphics::GFXPipelineDesc& desc) {}
+
+    Graphics::GFXPipelineLayoutHandle
+    RenderDeviceImpl::CreatePipelineLayout(const Graphics::GFXPipelineLayoutDesc& desc)
     {
     }
 
-    Graphics::RenderWindowHandle RenderDeviceImpl::ConnectWindow(const Graphics::RenderWindowDesc& desc)
-    {
-    }
+    Graphics::GFXShaderModuleHandle RenderDeviceImpl::CreateShaderModule(const Graphics::GFXShaderModuleDesc& desc) {}
 
-    Graphics::GPUBufferHandle RenderDeviceImpl::CreateBuffer(const Graphics::GPUBufferDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DisconnectWindow(Graphics::RenderWindowHandle& handle) {}
 
-    Graphics::GPUTextureHandle RenderDeviceImpl::CreateTexture(const Graphics::GPUTextureDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyBuffer(Graphics::GPUBufferHandle& handle) {}
 
-    Graphics::GPUTextureViewHandle RenderDeviceImpl::CreateTextureView(const Graphics::GPUTextureViewDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyTexture(Graphics::GPUTextureHandle& handle) {}
 
-    Graphics::GPUSamplerHandle RenderDeviceImpl::CreateSampler(const Graphics::GPUSamplerDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyTextureView(Graphics::GPUTextureViewHandle& handle) {}
 
-    Graphics::GPUBindGroupHandle RenderDeviceImpl::CreateBindGroup(const Graphics::GPUBindGroupDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroySampler(Graphics::GPUSamplerHandle& handle) {}
 
-    Graphics::GPUBindGroupLayoutHandle RenderDeviceImpl::CreateBindGroupLayout(
-        const Graphics::GPUBindGroupLayoutDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyBindGroup(Graphics::GPUBindGroupHandle& handle) {}
 
-    Graphics::GFXRenderPipelineHandle RenderDeviceImpl::CreateRenderPipeline(const Graphics::GFXPipelineDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyBindGroupLayout(Graphics::GPUBindGroupLayoutHandle& handle) {}
 
-    Graphics::GFXPipelineLayoutHandle RenderDeviceImpl::CreatePipelineLayout(
-        const Graphics::GFXPipelineLayoutDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyRenderPipeline(Graphics::GFXRenderPipelineHandle& handle) {}
 
-    Graphics::GFXShaderModuleHandle RenderDeviceImpl::CreateShaderModule(const Graphics::GFXShaderModuleDesc& desc)
-    {
-    }
+    void RenderDeviceImpl::DestroyPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle) {}
 
-    void RenderDeviceImpl::DisconnectWindow(Graphics::RenderWindowHandle& handle)
-    {
-    }
+    void RenderDeviceImpl::DestroyShaderModule(Graphics::GFXShaderModuleHandle& handle) {}
 
-    void RenderDeviceImpl::DestroyBuffer(Graphics::GPUBufferHandle& handle)
-    {
-    }
+    void RenderDeviceImpl::WaitForIdle() {}
 
-    void RenderDeviceImpl::DestroyTexture(Graphics::GPUTextureHandle& handle)
-    {
-    }
+    std::unique_ptr<Graphics::RenderEncoder> RenderDeviceImpl::Encode(const Graphics::RenderEncoderDesc& encoderDesc) {}
 
-    void RenderDeviceImpl::DestroyTextureView(Graphics::GPUTextureViewHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::DestroySampler(Graphics::GPUSamplerHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::DestroyBindGroup(Graphics::GPUBindGroupHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::DestroyBindGroupLayout(Graphics::GPUBindGroupLayoutHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::DestroyRenderPipeline(Graphics::GFXRenderPipelineHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::DestroyPipelineLayout(Graphics::GFXPipelineLayoutHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::DestroyShaderModule(Graphics::GFXShaderModuleHandle& handle)
-    {
-    }
-
-    void RenderDeviceImpl::WaitForIdle()
-    {
-    }
-
-    std::unique_ptr<Graphics::RenderEncoder> RenderDeviceImpl::Encode(const Graphics::RenderEncoderDesc& encoderDesc)
-    {
-    }
-
-    void RenderDeviceImpl::EndEncoding(std::unique_ptr<Graphics::RenderEncoder> encoder)
-    {
-    }
+    void RenderDeviceImpl::EndEncoding(std::unique_ptr<Graphics::RenderEncoder> encoder) {}
 
     void RenderDeviceImpl::EncodeImmediateCommands(Graphics::EncodeImmediateFun encodeFun,
-        const Graphics::RenderEncoderDesc& encoderDesc)
+                                                   const Graphics::RenderEncoderDesc& encoderDesc)
     {
     }
-}
+} // namespace Cocoa::Vulkan

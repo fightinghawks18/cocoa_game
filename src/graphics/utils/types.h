@@ -3,11 +3,10 @@
 #include <array>
 #include <vector>
 
-#include "../../math/matrix4x4.h"
 #include "../../common.h"
+#include "../../math/matrix4x4.h"
 
-namespace Cocoa::Graphics
-{
+namespace Cocoa::Graphics {
     struct MVP
     {
         Math::Matrix4x4 model;
@@ -17,9 +16,9 @@ namespace Cocoa::Graphics
 
     struct Vertex
     {
-        std::array<f32 ,3> pos;
-        std::array<f32 ,4> col;
-        std::array<f32 ,2> uv;
+        std::array<f32, 3> pos;
+        std::array<f32, 4> col;
+        std::array<f32, 2> uv;
     };
 
     struct MeshData
@@ -59,4 +58,4 @@ namespace Cocoa::Graphics
     };
 
     using RenderArea = Rect;
-}
+} // namespace Cocoa::Graphics

@@ -1,7 +1,6 @@
 #pragma once
 
-namespace Cocoa::Graphics
-{
+namespace Cocoa::Graphics {
     enum class GPUPowerPreference
     {
         HighPerformance,
@@ -161,4 +160,4 @@ namespace Cocoa::Graphics
         IncrementAndWrap,
         DecrementAndWrap
     };
-}
+} // namespace Cocoa::Graphics

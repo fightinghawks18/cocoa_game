@@ -25,6 +25,7 @@ add_executable(Cocoa
         src/tools/stb.cpp
 
         src/vulkan/core/render_device_impl.cpp
+        src/vulkan/utils/common.cpp
 )
 
 target_include_directories(Cocoa

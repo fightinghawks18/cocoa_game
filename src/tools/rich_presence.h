@@ -2,17 +2,19 @@
 
 #undef small
 
-#include <string>
 #include <discord_rpc.h>
+#include <string>
 
 namespace Cocoa::Tools {
-    struct RichPresenceDesc {
+    struct RichPresenceDesc
+    {
         std::string appID;
     };
 
     /// @brief Integrates Discord's rich presence feature
-    class RichPresence { 
-    public:
+    class RichPresence
+    {
+      public:
         RichPresence(RichPresenceDesc desc);
         ~RichPresence();
 
@@ -51,7 +53,8 @@ namespace Cocoa::Tools {
         /// @brief Sets the text that appears when hovering over the small image
         /// @param tip The message to display
         void SetSmallImageTip(const std::string& tip);
-    private:
+
+      private:
         DiscordRichPresence p_RichPresence;
     };
-}
+} // namespace Cocoa::Tools

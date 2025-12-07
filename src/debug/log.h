@@ -4,25 +4,23 @@
 #include <string>
 
 namespace Cocoa::Debug {
-    enum class LogType {
+    enum class LogType
+    {
         Info,
         Warning,
         Error
     };
 
-    class Log {
-    public:
-        template <typename... A>
-        static inline void Push(LogType type, const std::string& message, A&&... args) {
+    class Log
+    {
+      public:
+        template <typename... A> static inline void Push(LogType type, const std::string& message, A&&... args)
+        {
             FILE* stream;
             switch (type) {
-                case LogType::Info:
-                    stream = stdout;
-                    break;
-                case LogType::Warning:
-                case LogType::Error:
-                    stream = stderr;
-                    break;
+            case LogType::Info:    stream = stdout; break;
+            case LogType::Warning:
+            case LogType::Error:   stream = stderr; break;
             }
 
             fprintf(stream, "[Cocoa]:");
@@ -34,4 +32,4 @@ namespace Cocoa::Debug {
             fprintf(stream, "\n");
         }
     };
-}
+} // namespace Cocoa::Debug
